@@ -126,6 +126,12 @@ require_once 'config.php';
             background-color: #f3f3f3;
         }
 
+        #btn-myapplications.active {
+            background: #b23b3b;
+            color: #fff;
+            font-weight: bold;
+        }
+
         #btn-savedjobs.active {
             background: #b23b3b;
             color: #fff;
@@ -170,7 +176,7 @@ require_once 'config.php';
             <button id="btn-myapplications">My applications</button>
             <button id="btn-savedjobs">Saved jobs</button>
             <button>My profile</button>
-            <button>Change person information</button>
+            <button id="btn-changeinfo">Change person information</button>
 
             <h3>Applied jobs</h3>
 

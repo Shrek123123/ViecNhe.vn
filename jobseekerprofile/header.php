@@ -109,8 +109,8 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
     <div style="display: flex; gap: 15px; margin-left: 50px;">
         <a href="#" style="text-decoration: none; color: #333;">Create CV</a>
-        <a href="contactus.php" style="text-decoration: none; color: #333;">Contact Us</a>
-        <a href="feedback.php" style="text-decoration: none; color: #333;">Feedback</a>
+        <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">Contact Us</a>
+        <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">Feedback</a>
     </div>
     <div style="display: flex; gap: 15px; margin-left: auto">
         <?php if (isset($_SESSION['username'])): ?>

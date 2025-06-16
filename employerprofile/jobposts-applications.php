@@ -83,8 +83,9 @@ if (isset($_POST['action']) && $_POST['action'] === 'updateViewedStatus' && isse
                                 $status_color = '#6c757d'; // Grey
                                 break;
                         }
-            ?>
-                        <div style="display: flex; flex-direction: column; background: #f9f9f9; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        ?>
+                        <div
+                            style="display: flex; flex-direction: column; background: #f9f9f9; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <div style="font-weight: bold; font-size: 18px; color: #333;"><?php echo $fullname; ?></div>
                                 <div style="font-size: 13px; color: #777;">Applied: <?php echo $formatted_created_at; ?></div>
@@ -97,22 +98,22 @@ if (isset($_POST['action']) && $_POST['action'] === 'updateViewedStatus' && isse
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    Status: <span style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo ucfirst($status); ?></span>
+                                    Status: <span
+                                        style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo ucfirst($status); ?></span>
                                 </div>
                                 <div>
                                     <?php if (!empty($cv_file)): ?>
-<a href="<?php echo htmlspecialchars($cv_file); ?>"
-   class="view-cv-button"
-   data-application-id="<?php echo $application_id; ?>"
-   style="background: #b23b3b; color: #fff; border: none; border-radius: 5px; padding: 6px 12px; font-size: 13px; text-decoration: none; margin-right: 8px;">
-    View CV
-</a>                                    <?php endif; ?>
+                                        <a href="<?php echo htmlspecialchars($cv_file); ?>" class="view-cv-button"
+                                            data-application-id="<?php echo $application_id; ?>"
+                                            style="background: #b23b3b; color: #fff; border: none; border-radius: 5px; padding: 6px 12px; font-size: 13px; text-decoration: none; margin-right: 8px;">
+                                            View CV
+                                        </a> <?php endif; ?>
                                     <button data-application-id="<?php echo $application_id; ?>" class="btn-manage-application"
                                         style="background: #007bff; color: #fff; border: none; border-radius: 5px; padding: 6px 12px; font-size: 13px; cursor: pointer;">Manage</button>
                                 </div>
                             </div>
                         </div>
-            <?php
+                        <?php
                     endwhile;
                 }
             } else {
@@ -121,6 +122,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'updateViewedStatus' && isse
             ?>
         </div>
     <?php else: ?>
-        <div style="color: #888; text-align: center; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">No Job ID provided.</div>
+        <div
+            style="color: #888; text-align: center; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            No Job ID provided.</div>
     <?php endif; ?>
 </div>

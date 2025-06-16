@@ -80,6 +80,7 @@ $stmt = $sql->query("CREATE TABLE IF NOT EXISTS job (
     job_experience VARCHAR(100),
     company_logo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status ENUM('pending_review', 'approved', 'rejected') DEFAULT 'pending_review',
     FOREIGN KEY (posted_by_employer_id) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
 )");
@@ -148,8 +149,8 @@ $stmt = $sql->query("CREATE TABLE IF NOT EXISTS job_interest_count (
     job_id INT(6) UNSIGNED NOT NULL,
     interest_count INT(6) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (job_id) REFERENCES job(id)
-)");
+    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE
+");
 if ($stmt === TRUE) {
     echo "Table job_interest_count created successfully <br>";
 } else {

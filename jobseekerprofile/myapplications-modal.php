@@ -91,7 +91,7 @@ if ($jobseeker_id <= 0) {
                                 break;
                         }
                     ?>
-                        <div class="application-card" style="background: #fdfdfd; border: 1px solid #eee; border-left: 5px solid #b23b3b; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <div class="application-card" style="background: #fff; border: 1px solid #eee; border-left: 5px solid #b23b3b; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                             <div style="font-size: 1.1em; font-weight: bold; color: #b23b3b; margin-bottom: 10px;">
                                 📝 Application #<?php echo $counter; ?> (at <?php echo $submitted_time_full; ?>)
                             </div>

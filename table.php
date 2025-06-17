@@ -150,7 +150,7 @@ $stmt = $sql->query("CREATE TABLE IF NOT EXISTS job_interest_count (
     interest_count INT(6) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE
-");
+)");
 if ($stmt === TRUE) {
     echo "Table job_interest_count created successfully <br>";
 } else {

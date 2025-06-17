@@ -106,7 +106,7 @@
                 Haven't had an account yet? <a href="jobseekerregister.php">Register here</a>
             </div>
             <div style="margin-top: 20px; text-align: center;">
-                <p>Are you an employer? <a href="register.php">Click here to redirect</a></p>
+                <p>Are you an employer? <a href="employerpage.php">Click here to redirect</a></p>
             </div>
         </div>
         <div class="right">

@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "jobhive");
+$conn = new mysqli("localhost", "root", "", "jobhive2");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }

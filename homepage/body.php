@@ -33,7 +33,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
   }
 
   .section-1 {
-    background: linear-gradient(to right, #c31432, #240b36);
+    background: linear-gradient(to right, #c31432, rgb(84, 37, 117));
   }
 
   .container {
@@ -349,12 +349,16 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
 <section class="section-1">
   <div class="container">
-    <div class="title">Find jobs fast 24/7, the latest jobs nationwide.</div>
-    <div class="subtitle">Access 40,000+ new job postings every day from thousands of reputable companies in Vietnam.
-    </div>
 
+    <!-- Tiêu đề & mô tả -->
+    <div class="title"><?= $lang['job_search']; ?></div>
+    <div class="subtitle"><?= $lang['job_search_subtitle']; ?></div>
+
+    <!-- Hộp tìm kiếm -->
     <div class="search-box">
       <form action="searchpage.php" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
+
+        <!-- GIỮ NGUYÊN HTML TĨNH CHO DANH MỤC NGÀNH -->
         <select name="category">
           <option value="">Job Category</option>
           <option value="IT & Software">IT & Software</option>
@@ -363,21 +367,24 @@ $savedJobIdsJson = json_encode($savedJobIds);
           <option value="Healthcare">Healthcare</option>
           <option value="Government & Public Sector">Government & Public Sector</option>
         </select>
-        <input type="text" name="q" placeholder="Job title, company name">
-        <input type="text" name="location" placeholder="Location">
-        <button type="submit">Search</button>
+
+        <input type="text" name="q" placeholder="<?= $lang['job_title']; ?>">
+        <input type="text" name="location" placeholder="<?= $lang['location']; ?>">
+        <button type="submit"><?= $lang['search']; ?></button>
       </form>
     </div>
 
+    <!-- Bộ lọc loại công việc -->
     <div class="main-content">
       <div class="left-menu">
         <ul>
-          <li id="filter-fulltime" class="job-type-filter">Full-time</li>
-          <li id="filter-parttime" class="job-type-filter">Part-time</li>
-          <li id="filter-internship" class="job-type-filter">Internship</li>
-          <li id="filter-freelance" class="job-type-filter">Freelance</li>
-          <li id="filter-remote" class="job-type-filter">Remote</li>
+          <li id="filter-fulltime" class="job-type-filter"><?= $lang['job_type_filters']['full_time']; ?></li>
+          <li id="filter-parttime" class="job-type-filter"><?= $lang['job_type_filters']['part_time']; ?></li>
+          <li id="filter-internship" class="job-type-filter"><?= $lang['job_type_filters']['internship']; ?></li>
+          <li id="filter-freelance" class="job-type-filter"><?= $lang['job_type_filters']['freelance']; ?></li>
+          <li id="filter-remote" class="job-type-filter"><?= $lang['job_type_filters']['remote']; ?></li>
         </ul>
+
 
         <style>
           .job-type-filter.active {
@@ -438,19 +445,33 @@ $savedJobIdsJson = json_encode($savedJobIds);
   <section class="section-2">
     <div class="job-section">
       <div class="job-header">
-        <h2>🔥 Urgent Job Openings</h2>
-        <div class="sort-dropdown">
-        </div>
-      </div>
+        <h2><?= $lang['urgent_job_openings']; ?></h2>
+      </div> <!-- giữ nguyên thẻ đóng của khối bên ngoài nếu có -->
 
       <div class="job-filters">
-        <button class="job-category-filter active" data-category="">All</button>
-        <button class="job-category-filter" data-category="IT & Software">IT & Software</button>
-        <button class="job-category-filter" data-category="Marketing">Marketing</button>
-        <button class="job-category-filter" data-category="Finance">Finance</button>
-        <button class="job-category-filter" data-category="Healthcare">Healthcare</button>
-        <button class="job-category-filter" data-category="Government & Public Sector">Government & Public
-          Sector</button>
+        <button class="job-category-filter active" data-category="">
+          <?= $lang['all_jobs']; ?>
+        </button>
+
+        <button class="job-category-filter" data-category="IT & Software">
+          <?= $lang['it_software']; ?>
+        </button>
+
+        <button class="job-category-filter" data-category="Marketing">
+          <?= $lang['marketing']; ?>
+        </button>
+
+        <button class="job-category-filter" data-category="Finance">
+          <?= $lang['finance']; ?>
+        </button>
+
+        <button class="job-category-filter" data-category="Healthcare">
+          <?= $lang['healthcare']; ?>
+        </button>
+
+        <button class="job-category-filter" data-category="Government & Public Sector">
+          <?= $lang['government_public_sector']; ?>
+        </button>
       </div>
       <script>
         document.querySelectorAll('.job-category-filter').forEach(function (btn) {
@@ -671,7 +692,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
           endwhile;
         else:
           ?>
-          <div>No jobs found.</div>
+          <div><?= $lang['no_jobs_found']; ?></div>
         <?php endif; ?>
       </div>
 
@@ -690,9 +711,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
         <?php endfor; ?>
         <a href="<?php echo $page < $total_pages ? '?page=' . ($page + 1) : 'javascript:void(0);'; ?>" class="arrow<?php if ($page >= $total_pages)
                        echo ' disabled'; ?>" <?php if ($page >= $total_pages)
-                           echo 'tabindex="-1" aria-disabled="true"'; ?>
-          data-scroll="1">
-          &rarr;
+                           echo 'tabindex="-1" aria-disabled="true"'; ?> data-scroll="1">&rarr;
         </a>
       </div>
       <script>
@@ -768,39 +787,48 @@ $savedJobIdsJson = json_encode($savedJobIds);
   </section>
 
 
-  <section class="section-3">
-    <div class="container">
-      <div class="header">
-        <h2>🌟 Featured Companies</h2>
-        <a href="#" class="view-all">View all →</a>
-      </div>
-      <div class="logos">
-        <img src="image/logo1.png" alt="Tabtab.me" />
-        <img src="image/logo2.png" alt="DIC" />
-        <img src="image/logo3.png" alt="NhanHoa" />
-        <img src="image/logo4.png" alt="EY" />
-        <img src="image/logo5.png" alt="Karofi" />
-      </div>
+ <section class="section-3">
+  <div class="container">
+    <div class="header">
+      <h2><?= $lang['featured_companies']; ?></h2>
+      <a href="#" class="view-all"><?= $lang['view_all']; ?></a>
     </div>
-  </section>
 
-  <section class="section-4">
-    <div class="container">
-      <h3>Opportunities to apply for attractive jobs at top companies</h3>
-      <p>With the rapid development of the economy... professional environment.</p>
-
-      <h3>Why should you look for jobs at JobHive?</h3>
-      <ul>
-        <li><strong>Quality Jobs</strong><br />
-          Thousands of high-quality job postings... to your CV.</li>
-        <li><strong>Free Beautiful CV Builder</strong><br />
-          Many beautiful CV templates... in just 5 minutes.</li>
-        <li><strong>Job Seeker Support</strong><br />
-          Employers... view your CV and send invitations.</li>
-      </ul>
-
-      <p>At JobHive, you can find... the best salary!</p>
+    <div class="logos">
+      <img src="image/logo1.png" alt="Tabtab.me" />
+      <img src="image/logo2.png" alt="DIC" />
+      <img src="image/logo3.png" alt="NhanHoa" />
+      <img src="image/logo4.png" alt="EY" />
+      <img src="image/logo5.png" alt="Karofi" />
     </div>
-  </section>
+  </div>
+</section>
+
+<section class="section-4">
+  <div class="container">
+    <h3><?= $lang['opportunities_at_top_companies']; ?></h3>
+    <p><?= $lang['opportunities_at_top_companies_desc']; ?></p>
+
+    <h3><?= $lang['why_jobhive']; ?></h3>
+    <ul>
+      <li>
+        <strong><?= $lang['quality_jobs']; ?></strong><br />
+        <?= $lang['quality_jobs_desc']; ?>
+      </li>
+
+      <li>
+        <strong><?= $lang['free_cv_builder']; ?></strong><br />
+        <?= $lang['free_cv_builder_desc']; ?>
+      </li>
+
+      <li>
+        <strong><?= $lang['job_seeker_support']; ?></strong><br />
+        <?= $lang['job_seeker_support_desc']; ?>
+      </li>
+    </ul>
+
+    <p><?= $lang['find_best_salary']; ?></p>
+  </div>
+</section>
 
 </div>

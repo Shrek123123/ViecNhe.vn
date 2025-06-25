@@ -166,81 +166,103 @@
 </body>
 
 <footer class="footer-new">
+
+    <!-- Hotline -->
     <div class="hotline-section">
+
+        <!-- Box 1 – Người tìm việc -->
         <div class="hotline-box">
-            <h3>Hotline for Job Seekers</h3>
+            <h3><?= $lang['hotline_job_seekers_title']; ?></h3>
+
             <div class="hotline-item">
                 <i class="fas fa-headset"></i>
                 <div>
-                    <strong>Southern Support Hotline</strong><br>
+                    <strong><?= $lang['hotline_southern_support']; ?></strong><br>
                     HCM: (028) 7109 440
                 </div>
             </div>
+
             <div class="hotline-item">
                 <i class="fas fa-headset"></i>
                 <div>
-                    <strong>Northern Support Hotline</strong><br>
+                    <strong><?= $lang['hotline_northern_support']; ?></strong><br>
                     HN: (028) 7109 424
                 </div>
             </div>
-            <button class="hotline-btn">Consultation for Job Seekers</button>
+
+            <button class="hotline-btn">
+                <?= $lang['hotline_job_seekers_consult_btn']; ?>
+            </button>
         </div>
 
+        <!-- Box 2 – Nhà tuyển dụng -->
         <div class="hotline-box">
-            <h3>Hotline for Employers</h3>
+            <h3><?= $lang['hotline_employers_title']; ?></h3>
+
             <div class="hotline-item">
                 <i class="fas fa-headset"></i>
                 <div>
-                    <strong>Southern Support Hotline</strong><br>
+                    <strong><?= $lang['hotline_southern_support']; ?></strong><br>
                     HCM: (029) 7109 440
                 </div>
             </div>
+
             <div class="hotline-item">
                 <i class="fas fa-headset"></i>
                 <div>
-                    <strong>Northern Support Hotline</strong><br>
+                    <strong><?= $lang['hotline_northern_support']; ?></strong><br>
                     HN: (029) 7109 424
                 </div>
             </div>
-            <button class="hotline-btn">Consultation for Employers</button>
+
+            <button class="hotline-btn">
+                <?= $lang['hotline_employers_consult_btn']; ?>
+            </button>
         </div>
     </div>
 
+    <!-- Thông tin & liên kết -->
     <div class="footer-container">
+
+        <!-- Cột 1: About -->
         <div class="footer-column">
-            <h4>About Us</h4>
-            <p><strong>JobHive.vn - 24h Job Search Joint Stock Company</strong><br>
-                Room 102, Building 20–208 Tran Cao Van, Da Kao Ward, District 1, Ho Chi Minh City<br>
-                Branch: 4th Floor, Times Tower, 35 Le Van Luong, Thanh Xuan, Hanoi.<br>
-                Employment service license No.: 2893/2022/S8LĐTBXH-VLATLĐ issued by the Department of Labor, Invalids and Social Affairs on 18/11/2024<br>
-                Phone: (028) 7109 424 | (024) 7109 440<br>
-                Job seeker support email: ntv@jobhive.vn<br>
-                Employer support email: ntd@jobhive.vn
+            <h4><?= $lang['footer_about_us']; ?></h4>
+            <p>
+                <strong><?= $lang['footer_company_full']; ?></strong><br>
+                <?= $lang['footer_address_hcm']; ?><br>
+                <?= $lang['footer_address_hn']; ?><br>
+                <?= $lang['footer_license']; ?><br>
+                <?= $lang['footer_phone']; ?><br>
+                <?= $lang['footer_email_job_seeker']; ?><br>
+                <?= $lang['footer_email_employer']; ?>
             </p>
         </div>
 
+        <!-- Cột 2: Information -->
         <div class="footer-column">
-            <h4>Information</h4>
+            <h4><?= $lang['footer_information']; ?></h4>
             <ul>
-                <li>Career Handbook</li>
-                <li>Service Pricing</li>
-                <li>Terms of Use</li>
-                <li>Privacy Policy</li>
-                <li>Site Map</li>
-                <li>Personal Data Policy</li>
-                <li>Compliance and Customer Consent</li>
+                <li><?= $lang['footer_career_handbook']; ?></li>
+                <li><?= $lang['footer_service_pricing']; ?></li>
+                <li><?= $lang['footer_terms_of_use']; ?></li>
+                <li><?= $lang['footer_privacy_policy']; ?></li>
+                <li><?= $lang['footer_site_map']; ?></li>
+                <li><?= $lang['footer_personal_data_policy']; ?></li>
+                <li><?= $lang['footer_compliance_consent']; ?></li>
             </ul>
         </div>
 
+        <!-- Cột 3: Kết nối & App -->
         <div class="footer-column">
-            <h4>Connect with Us</h4>
+            <h4><?= $lang['footer_connect_with_us']; ?></h4>
             <div class="social-icons">
                 <a href=""><i class="fab fa-facebook-f facebook"></i></a>
                 <a href=""><i class="fab fa-tiktok tiktok"></i></a>
                 <a href=""><i class="fab fa-telegram telegram"></i></a>
                 <a href=""><i class="fab fa-instagram instagram"></i></a>
             </div>
-            <h4>Download the App</h4>
+
+            <h4><?= $lang['footer_download_app']; ?></h4>
             <div class="qr-and-apps">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://jobhive.vn&size=100x100"
                     alt="QR Code">
@@ -252,8 +274,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </footer>
-
-
 </html>

@@ -260,15 +260,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </style>
 <section class="hero" style="background: url('image/employerpagebackground.png') no-repeat center center/cover;">
   <div class="hero-overlay">
-    <h1>Post Jobs & Find Candidates Effectively</h1>
+    <h1><?php echo $lang['hero_section']; ?></h1>
     <ul>
-      <li>Post jobs for free, easily and quickly</li>
-      <li>Huge candidate pool from various industries and fields</li>
-      <li>Toppy AI recommends potential candidates, filters top profiles, and ranks them by relevance</li>
+      <li><?php echo $lang['hero_section_desc']['post_jobs_free']; ?></li>
+      <li><?php echo $lang['hero_section_desc']['candidate_pool']; ?></li>
+      <li><?php echo $lang['hero_section_desc']['toppy_ai']; ?></li>
     </ul>
     <div class="hero-buttons">
-      <button class="consult-btn">Recruitment Consulting</button>
-      <button class="post-now-btn" id="openModalBtn">Post a Job Now →</button>
+      <button class="consult-btn"><?php echo $lang['recruitment_consulting']; ?></button>
+      <button class="post-now-btn" id="openModalBtn"><?php echo $lang['post_job_now']; ?></button>
     </div>
   </div>
 </section>
@@ -281,89 +281,100 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <div id="myModal" class="modal">
   <div class="modal-content">
     <span class="closeBtn">&times;</span>
-    <h2>Post job form</h2>
+    <h2><?= $lang['post_job_form_title']; ?></h2>
     <form method="POST" enctype="multipart/form-data">
       <input type="hidden" name="MAX_FILE_SIZE" value="1000000">
       <table class="form-table">
         <tr>
-          <td><label for="companyName">Company Name:</label></td>
-          <td><input type="text" id="companyName" name="companyName" placeholder="Company Name" required></td>
+          <td><label for="companyName"><?= $lang['post_job_form_company_name']; ?>:</label></td>
+          <td><input type="text" id="companyName" name="companyName" placeholder="<?= $lang['required']; ?>" required>
+          </td>
         </tr>
         <tr>
-          <td><label for="company_size_select">Company Size:</label></td>
+          <td><label for="company_size_select"><?= $lang['post_job_form_company_size']; ?>:</label></td>
           <td>
             <select id="company_size_select" onchange="toggleCustomInput()" required>
-              <option value="">-- Select Company Size --</option>
-              <option value="1-10">1–10 employees</option>
-              <option value="11-50">11–50 employees</option>
-              <option value="51-200">51–200 employees</option>
-              <option value="201-500">201–500 employees</option>
-              <option value="501-1000">501–1000 employees</option>
-              <option value="1001-5000">1001–5000 employees</option>
-              <option value="5000+">5000+ employees</option>
-              <option value="other">Other</option>
+              <option value=""><?= $lang['post_job_form_company_size_select']; ?></option>
+              <option value="1-10"><?= $lang['post_job_form_company_size_options']['1-10']; ?></option>
+              <option value="11-50"><?= $lang['post_job_form_company_size_options']['11-50']; ?></option>
+              <option value="51-200"><?= $lang['post_job_form_company_size_options']['51-200']; ?></option>
+              <option value="201-500"><?= $lang['post_job_form_company_size_options']['201-500']; ?></option>
+              <option value="501-1000"><?= $lang['post_job_form_company_size_options']['501-1000']; ?></option>
+              <option value="1001-5000"><?= $lang['post_job_form_company_size_options']['1001-5000']; ?></option>
+              <option value="5000+"><?= $lang['post_job_form_company_size_options']['5000+']; ?></option>
+              <option value="unknown"><?= $lang['post_job_form_company_size_options']['unknown']; ?></option>
+              <option value="other"><?= $lang['post_job_form_company_size_options']['other']; ?></option>
             </select>
             <input type="hidden" name="company_size" id="company_size">
             <div id="custom_input_wrapper" style="display: none; margin-top: 8px;">
-              <input type="text" id="custom_company_size" name="custom_company_size" placeholder="e.g. 10-150 or 5000+"
-                title="Enter like 10-150 or 5000+">
+              <input type="text" id="custom_company_size" name="custom_company_size"
+                placeholder="<?= $lang['custom_companysize_placeholder']; ?>" title="Enter like 10-150 or 5000+">
             </div>
           </td>
         </tr>
         <tr>
-          <td><label for="jobTitle">Job Title:</label></td>
-          <td><input type="text" id="jobTitle" name="jobTitle" placeholder="Job Title" required></td>
-        </tr>
-        <tr>
-          <td><label for="jobDescription">Job Description:</label></td>
-          <td><textarea id="jobDescription" name="jobDescription" placeholder="Job Description" required></textarea>
-          </td>
-        </tr>
-        <tr>
-          <td><label for="jobLocation">Job Location:</label></td>
-          <td><input type="text" id="jobLocation" name="jobLocation" placeholder="Job Location" required></td>
-        </tr>
-        <tr>
-          <td><label for="salary">Salary:</label></td>
-          <td><input type="text" id="salary" name="salary" placeholder="Eg: 1000 USD, 20 million VND, negotiable..."
+          <td><label for="jobTitle"><?= $lang['post_job_form_job_title']; ?>:</label></td>
+          <td><input type="text" id="jobTitle" name="jobTitle" placeholder="<?= $lang['job_title_placeholder']; ?>"
               required></td>
         </tr>
         <tr>
-          <td><label for="post_duration">Duration of the post:</label></td>
-          <td><input type="number" id="post_duration" name="post_duration"
-              placeholder="Expiry duration (eg: 30 (days))"></td>
-        </tr>
-        <tr>
-          <td><label for="contactEmail">Contact Email:</label></td>
-          <td><input type="email" id="contactEmail" name="contactEmail" placeholder="Contact Email" required></td>
-        </tr>
-        <tr>
-          <td><label for="contactPhone">Contact Phone:</label></td>
-          <td><input type="text" id="contactPhone" name="contactPhone" placeholder="Contact Phone" required></td>
-        </tr>
-        <tr>
-          <td><label for="noEmplpoyeeNeeded">Number of Employees Needed:</label></td>
-          <td>
-            <input type="number" id="noEmplpoyeeNeeded" name="noEmplpoyeeNeeded"
-              placeholder="Number of Employees Needed (optional)" min="0" oninput="this.value = Math.abs(this.value)">
+          <td><label for="jobDescription"><?= $lang['post_job_form_job_description']; ?>:</label></td>
+          <td><textarea id="jobDescription" name="jobDescription"
+              placeholder="<?= $lang['job_description_placeholder']; ?>" required></textarea>
           </td>
         </tr>
         <tr>
-          <td><label for="jobDetailedLocation">Job Detailed Location:</label></td>
+          <td><label for="jobLocation"><?= $lang['post_job_form_job_location']; ?>:</label></td>
+          <td><input type="text" id="jobLocation" name="jobLocation" placeholder="<?= $lang['job_city_placeholder']; ?>"
+              required></td>
+        </tr>
+        <tr>
+          <td><label for="salary"><?= $lang['post_job_form_salary']; ?>:</label></td>
+          <td><input type="text" id="salary" name="salary" placeholder="<?= $lang['required']; ?>" required></td>
+        </tr>
+        <tr>
+          <td><label for="employee_gender"><?= $lang['employee_gender']; ?></label></td>
+          <td>
+            <select id="employee_gender" required>
+              <option value="Nam"><?= $lang['employee_gender_male']; ?></option>
+              <option value="Nữ"><?= $lang['employee_gender_female']; ?></option>
+              <option value="Not_required"><?= $lang['employee_gender_not_required']; ?></option>
+            </select>
+        </tr>
+        <tr>
+          <td><label for="post_duration"><?= $lang['post_job_form_post_duration']; ?>:</label></td>
+          <td><input type="number" id="post_duration" name="post_duration"
+              placeholder="<?= $lang['job_expiration_placeholder']; ?>"></td>
+        </tr>
+        <tr>
+          <td><label for="contactEmail"><?= $lang['post_job_form_contact_email']; ?>:</label></td>
+          <td><input type="email" id="contactEmail" name="contactEmail" placeholder="<?= $lang['required']; ?>"
+              required></td>
+        </tr>
+        <tr>
+          <td><label for="contactPhone"><?= $lang['post_job_form_contact_phone']; ?>:</label></td>
+          <td><input type="text" id="contactPhone" name="contactPhone" placeholder="<?= $lang['required']; ?>" required>
+          </td>
+        </tr>
+        <tr>
+          <td><label for="noEmplpoyeeNeeded"><?= $lang['post_job_form_no_employee_needed']; ?>:</label></td>
+          <td>
+            <input type="number" id="noEmplpoyeeNeeded" name="noEmplpoyeeNeeded" placeholder="<?= $lang['required']; ?>"
+              min="0" oninput="this.value = Math.abs(this.value)">
+          </td>
+        </tr>
+        <tr>
+          <td><label for="jobDetailedLocation"><?= $lang['post_job_form_job_detailed_location']; ?>:</label></td>
           <td><input type="text" id="jobDetailedLocation" name="jobDetailedLocation"
-              placeholder="Eg: 123 Main St, City, Country"></td>
+              placeholder="<?= $lang['job_detailedlocation_placeholder']; ?>"></td>
         </tr>
         <tr>
-          <td><label for="jobLocationDistrict">District:</label></td>
-          <td><input type="text" id="jobLocationDistrict" name="jobLocationDistrict" placeholder="Eg: District 1"></td>
+          <td><label for="jobLocationDistrict"><?= $lang['post_job_form_job_location_district']; ?>:</label></td>
+          <td><input type="text" id="jobLocationDistrict" name="jobLocationDistrict"
+              placeholder="<?= $lang['optional']; ?>"></td>
         </tr>
         <tr>
-          <td><label for="jobPosition">Job Position:</label></td>
-          <td><input type="text" id="jobPosition" name="jobPosition"
-              placeholder="Eg: Software Engineer, Marketing Manager..."></td>
-        </tr>
-        <tr>
-          <td><label for="jobType">Job Type:</label></td>
+          <td><label for="jobType"><?= $lang['post_job_form_job_type']; ?>:</label></td>
           <td>
             <select id="jobType" name="jobType" required>
               <option value="full-time">Full-time</option>
@@ -375,47 +386,71 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           </td>
         </tr>
         <tr>
-          <td><label for="jobCategory">Job Category:</label></td>
+          <td><label for="jobCategory"><?= $lang['post_job_form_job_category']; ?>:</label></td>
           <td>
-            <select id="jobCategory" name="jobCategory" required>
-              <option value="IT & Software">IT & Software</option>
-              <option value="Marketing">Marketing</option>
-              <option value="Finance">Finance</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Government & Public Sector">Government & Public Sector</option>
+            <select id="jobCategory" name="jobCategory" onchange="toggleCustomInput2()" required>
+              <option value=""><?= $lang['chon_nganh_nghe'] ?></option>
+              <option value="kinh_doanh_ban_hang"><?= $lang['kinh_doanh_ban_hang'] ?></option>
+              <option value="marketing_truyen_thong"><?= $lang['marketing_truyen_thong'] ?></option>
+              <option value="tai_chinh_ke_toan_ngan_hang"><?= $lang['tai_chinh_ke_toan_ngan_hang'] ?></option>
+              <option value="cong_nghe_thong_tin"><?= $lang['cong_nghe_thong_tin'] ?></option>
+              <option value="nhan_su"><?= $lang['nhan_su'] ?></option>
+              <option value="hanh_chinh_van_phong"><?= $lang['hanh_chinh_van_phong'] ?></option>
+              <option value="ky_thuat"><?= $lang['ky_thuat'] ?></option>
+              <option value="san_xuat_van_hanh_day_chuyen"><?= $lang['san_xuat_van_hanh_day_chuyen'] ?></option>
+              <option value="van_tai_logistics"><?= $lang['van_tai_logistics'] ?></option>
+              <option value="bat_dong_san"><?= $lang['bat_dong_san'] ?></option>
+              <option value="bao_hiem"><?= $lang['bao_hiem'] ?></option>
+              <option value="xay_dung_kien_truc"><?= $lang['xay_dung_kien_truc'] ?></option>
+              <option value="y_te_duoc_pham"><?= $lang['y_te_duoc_pham'] ?></option>
+              <option value="giao_duc_dao_tao"><?= $lang['giao_duc_dao_tao'] ?></option>
+              <option value="du_lich_khach_san_nha_hang"><?= $lang['du_lich_khach_san_nha_hang'] ?></option>
+              <option value="luat"><?= $lang['luat'] ?></option>
+              <option value="thiet_ke_nghe_thuat"><?= $lang['thiet_ke_nghe_thuat'] ?></option>
+              <option value="lao_dong_pho_thong"><?= $lang['lao_dong_pho_thong'] ?></option>
+              <option value="nong_nghiep"><?= $lang['nong_nghiep'] ?></option>
+              <option value="food_beverage"><?= $lang['food_beverage'] ?></option>
+              <option value="nha_nuoc_cong_vu"><?= $lang['nha_nuoc_cong_vu'] ?></option>
+              <option value="khac"><?= $lang['khac'] ?></option>
             </select>
+            <input type="hidden" name="jobCategoryHidden" id="jobCategoryHidden">
+            <div id="custom_input_wrapper2" style="display: none; margin-top: 8px;">
+              <input type="text" id="custom_job_category" name="custom_job_category"
+                placeholder="<?= $lang['custom_jobcategory_placeholder']; ?>">
+            </div>
           </td>
         </tr>
         <tr>
-          <td><label for="requiredcertification">Require certification:</label></td>
+          <td><label for="requiredcertification"><?= $lang['post_job_form_required_certification']; ?>:</label></td>
           <td><input type="text" id="requiredcertification" name="requiredcertification"
-              placeholder="Eg: Bachelor of finance, none..." required></td>
+              placeholder="<?= $lang['optional']; ?>" required></td>
         </tr>
         <tr>
-          <td><label for="jobExperience">Job experience required:</label></td>
-          <td><input type="text" id="jobExperience" name="jobExperience" placeholder="Eg: 1 year, 6 months, none..."
+          <td><label for="jobExperience"><?= $lang['post_job_form_job_experience']; ?>:</label></td>
+          <td><input type="text" id="jobExperience" name="jobExperience" placeholder="<?= $lang['optional']; ?>"
               required></td>
         </tr>
         <tr>
-          <td><label for="jobRequirementText">Job Requirement:</label></td>
+          <td><label for="jobRequirementText"><?= $lang['post_job_form_job_requirement']; ?>:</label></td>
           <td>
-            <textarea id="jobRequirementText" name="jobRequirementText" placeholder="Describe the job requirement"
-              required></textarea>
+            <textarea id="jobRequirementText" name="jobRequirementText"
+              placeholder="<?= $lang['job_requirement_placeholder']; ?>" required></textarea>
           </td>
         </tr>
         <tr>
-          <td><label for="jobBenefit">Job Benefit:</label></td>
+          <td><label for="jobBenefit"><?= $lang['post_job_form_job_benefit']; ?>:</label></td>
           <td>
-            <textarea id="jobBenefit" name="jobBenefit" placeholder="Describe the job benefit (optional)"></textarea>
+            <textarea id="jobBenefit" name="jobBenefit"
+              placeholder="<?= $lang['job_benefit_placeholder']; ?>"></textarea>
           </td>
         </tr>
         <tr>
-          <td><label for="companylogo">Company Logo:</label></td>
+          <td><label for="companylogo"><?= $lang['post_job_form_company_logo']; ?>:</label></td>
           <td><input type="file" id="companylogo" name="companylogo" accept="image/*"></td>
         </tr>
         <tr>
           <td colspan="2" style="text-align:center;">
-            <button type="submit">Submit</button>
+            <button type="submit"><?= $lang['post_job_form_submit']; ?></button>
           </td>
         </tr>
       </table>
@@ -499,6 +534,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     const hiddenInput = document.getElementById('company_size');
 
     if (select.value === 'other') {
+      customWrapper.style.display = 'block';
+      hiddenInput.value = ''; // chờ người dùng gõ
+    } else {
+      customWrapper.style.display = 'none';
+      hiddenInput.value = select.value;
+    }
+  }
+
+  function toggleCustomInput2() {
+    const select = document.getElementById('jobCategory');
+    const customWrapper = document.getElementById('custom_input_wrapper2');
+    const hiddenInput = document.getElementById('jobCategoryHidden');
+
+    if (select.value === 'khac') {
       customWrapper.style.display = 'block';
       hiddenInput.value = ''; // chờ người dùng gõ
     } else {

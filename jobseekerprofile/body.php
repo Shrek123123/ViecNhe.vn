@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once './config.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -137,6 +137,12 @@ require_once 'config.php';
             color: #fff;
             font-weight: bold;
         }
+
+        #btn-myprofile.active {
+            background: #b23b3b;
+            color: #fff;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -148,8 +154,8 @@ require_once 'config.php';
         <div class="company">
             <img src="https://via.placeholder.com/34" alt="jobseeker logo">
             <?php
-            // Lấy jobseeker_id từ URL
-            $jobseeker_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+            // Lấy jobseeker_id từ session hoặc từ URL
+            $jobseeker_id = $_SESSION['jobseeker_id'] ?? 0;
 
             // Lấy ảnh đại diện jobseeker
             $sql = "SELECT profile_pic FROM jobseeker_profile WHERE id = $jobseeker_id LIMIT 1";
@@ -173,9 +179,9 @@ require_once 'config.php';
     <div class="main">
         <!-- Sidebar -->
         <div class="sidebar">
+            <button id="btn-myprofile" class="active">My profile</button>
             <button id="btn-myapplications">My applications</button>
             <button id="btn-savedjobs">Saved jobs</button>
-            <button>My profile</button>
             <button id="btn-changeinfo">Change person information</button>
 
             <h3>Applied jobs</h3>
@@ -235,36 +241,50 @@ require_once 'config.php';
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $('#btn-savedjobs').on('click', function () {
-            // Remove active class from all buttons
-            $('.sidebar button').removeClass('active');
-            // Add active class to the clicked button
-            $(this).addClass('active');
-            // Show loading
-            $('.content-area').html('<div style="padding:30px;text-align:center;">Loading...</div>');
-            // Lấy jobseeker_id từ URL PHP và truyền vào Ajax
-            var jobseeker_id = <?php echo isset($_GET['id']) ? intval($_GET['id']) : 0; ?>;
-            $.get('jobseekerprofile/savedjobs-modal.php', { id: jobseeker_id }, function (data) {
-                $('.content-area').html(data);
+        $(document).ready(function() {
+            var currentJobseekerId = <?php echo $jobseeker_id; ?>;
+
+            // Xử lý click cho nút "Saved Jobs"
+            $('#btn-savedjobs').on('click', function () {
+                $('.sidebar button').removeClass('active');
+                $(this).addClass('active');
+                $('.content-area').html('<div style="padding:30px;text-align:center;">Đang tải việc làm đã lưu...</div>');
+
+                // Sửa đường dẫn: SỬ DỤNG ĐƯỜNG DẪN TUYỆT ĐỐI TỪ GỐC WEB APP
+                // Giả định /JobHive-main/ là gốc của ứng dụng trên server
+                $.get('/JobHive-main/jobseekerprofile/savedjobs-modal.php', function (data) { 
+                    $('.content-area').html(data);
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error("AJAX Error for savedjobs-modal.php:", textStatus, errorThrown, jqXHR.status);
+                    $('.content-area').html('<div style="padding:30px;text-align:center;color:red;">Không thể tải việc làm đã lưu. Lỗi: ' + jqXHR.status + ' (' + errorThrown + ')</div>');
+                });
             });
-        });
 
-      
+            // Xử lý click cho nút "My Applications"
+            $('#btn-myapplications').on('click', function () {
+                $('.sidebar button').removeClass('active');
+                $(this).addClass('active');
+                $('.content-area').html('<div style="padding:30px;text-align:center;">Đang tải đơn ứng tuyển...</div>');
 
-        // Khi click vào nút "My applications"
-        $('#btn-myapplications').on('click', function () {
-            $('.sidebar button').removeClass('active');
-            $(this).addClass('active');
-            $('.content-area').html('<div style="padding:30px;text-align:center;">Loading applications...</div>');
-
-            var jobseeker_id = <?php echo isset($_GET['id']) ? intval($_GET['id']) : 0; ?>;
-            $.get('jobseekerprofile/myapplications-modal.php', { id: jobseeker_id }, function (data) {
-                $('.content-area').html(data); F
+                // Sửa đường dẫn: SỬ DỤNG ĐƯỜNG DẪN TUYỆT ĐỐI TỪ GỐC WEB APP
+                $.get('/JobHive-main/jobseekerprofile/myapplications-modal.php', function (data) { 
+                    $('.content-area').html(data);
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error("AJAX Error for myapplications-modal.php:", textStatus, errorThrown, jqXHR.status);
+                    $('.content-area').html('<div style="padding:30px;text-align:center;color:red;">Không thể tải đơn ứng tuyển. Lỗi: ' + jqXHR.status + ' (' + errorThrown + ')</div>');
+                });
             });
-        });
 
+            // Script riêng removejob.js
+            // Nếu removejob.js cũng gọi các file PHP, hãy kiểm tra lại đường dẫn trong đó
+            // và áp dụng quy tắc đường dẫn tuyệt đối nếu cần.
+        });
     </script>
     <script src="jobseekerprofile/removejob.js"></script>
+    <script src="jobseekerprofile/myprofile-btn.js"></script>
+
 
 </body>
 

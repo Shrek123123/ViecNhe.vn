@@ -1,12 +1,13 @@
 <?php
 require_once '../config.php';
+session_start(); // Bắt đầu phiên làm việc nếu chưa được bắt đầu
 ?>
 <div style="padding: 30px;">
     <h2 style="color: #b23b3b; margin-bottom: 20px;">Saved Jobs</h2>
     <div style="display: flex; flex-direction: column; gap: 18px;">
         <?php
         // Lấy jobseeker id từ URL (?jobseekerid=...)
-        $jobseekerid = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $jobseekerid = $_SESSION['jobseeker_id'] ?? 0;
 
         if ($jobseekerid > 0) {
             // Lấy danh sách job_id đã lưu của user này

@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 // Nếu người dùng bấm đổi ngôn ngữ
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
@@ -152,7 +151,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
         <?php else: ?>
             <div class="guest-options">
                 <a href="jobseekerlogin.php" class="btn-login">
-                    <?= $lang['login/register']; ?>
+                    <?= $lang['login/register_jobseeker']; ?>
                 </a>
                 <a href="employerpage.php" class="btn-register">
                     <?= $lang['employer_redirect']; ?>

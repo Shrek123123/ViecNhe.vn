@@ -51,127 +51,176 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JobSeeker Login - JobHive</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
+ <style>
+   body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
-            height: 100vh;
+            flex-direction: column; /* Changed to column to stack header and content */
+            min-height: 100vh; /* Use min-height to allow content to push height */
+            background-color: #f3f3f3; /* Optional: A default background for the whole page */
         }
 
-        .container {
+        /* --- Header Styling (adjust as needed for your actual header.php) --- */
+        /* If your header takes up space, you might want to give it a background or fixed height */
+        header { /* Assuming header.php will render inside a <header> tag or similar */
+            width: 100%;
+            /* background-color: #ffffff; */ /* Example header background */
+            /* padding: 10px 20px; */ /* Example header padding */
+            /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */ /* Example header shadow */
+        }
+
+        /* --- Main Content Area for Login Form --- */
+        .main-content {
+            flex: 1; /* Allows this area to take up remaining vertical space */
             display: flex;
-            flex: 1;
+            justify-content: center; /* Horizontally center the login wrapper */
+            align-items: center; /* Vertically center the login wrapper */
+            padding: 20px; /* Add some padding around the form */
+            box-sizing: border-box; /* Include padding in element's total width and height */
         }
 
-        .left {
-            flex: 1;
-            background: #f3f3f3;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .right {
-            flex: 1;
-            background: white;
+        .login-form-container {
+            background: #ffffff;
             color: #8B0000;
             padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px; /* Max width for the form block */
             text-align: center;
+            box-sizing: border-box;
         }
 
         h2 {
             color: #d90000;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #555;
         }
 
         .form-group {
             margin-bottom: 20px;
+            text-align: left; /* Align labels and inputs to the left within their group */
+        }
+
+        label {
+            display: block; /* Make label take full width and stack above input */
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
         }
 
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            box-sizing: border-box; /* Include padding and border in the element's total width */
         }
 
         .btn-login {
             width: 100%;
             padding: 12px;
             background-color: #d90000;
-            color: white;
+            color: #ffffff;
             font-size: 18px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 20px; /* More space above the button */
+            transition: background-color 0.3s ease;
         }
 
-        .forgot,
-        .signup {
+        .btn-login:hover {
+            background-color: #a60000; /* Darker red on hover */
+        }
+
+        .forgot {
             text-align: right;
             margin-top: 10px;
             font-size: 14px;
         }
 
-        .signup {
-            text-align: center;
-            margin-top: 30px;
-        }
-
+        .forgot a,
         .signup a {
             color: #d90000;
             text-decoration: none;
             font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .forgot a:hover,
+        .signup a:hover {
+            color: #a60000;
+        }
+
+        .signup {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 15px;
+            color: #555;
+        }
+
+        /* --- Responsive adjustments (optional but recommended) --- */
+        @media (max-width: 600px) {
+            .login-form-container {
+                padding: 25px;
+                margin: 0 15px; /* Add some margin on smaller screens */
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="left">
-            <h2>We are glad to see our fellow employers back!</h2>
-            <p>Let's find the perfect employee with JobHive</p>
-            <form accept="jobseekerlogin.php" method="POST">
-                <div class="form-group">
-                    <label>Email</label><br>
-                    <input type="email" placeholder="Email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label><br>
-                    <input type="password" placeholder="Password" name="password" required>
-                    <div class="forgot"><a href="employerforgetpassword.php">Forget password</a></div>
-                </div>
-                <button class="btn-login">Login</button>
-            </form>
-            <div class="signup">
-                Don't have an account? <a href="employerregister.php">Register here</a>
-            </div>
-            <div style="margin-top: 20px; text-align: center;">
-                <p>Are you a jobseeker? <a href="index.php">Click here to redirect</a></p>
-            </div>
-        </div>
-        <div class="right">
-            <a href="employerpage.php">
-                <img src="image/logo.png" alt="JobHive Logo" style="height: 70px; margin-bottom: 20px;">
-            </a>
-            <h2>Your Job<br>Is our Hive</h2>
-            <p>JobHive - The pionnering job portal destination for foreigners in Vietnam</p>
-            <div class="support">
-                <p>Having trouble logging in?</p>
-                <p>Call us at: <strong>012 345 6789</strong></p>
-                <p>Email us at: <a href="mailto:support@jobhive.com">support@jobhive.com</a></p>
-            </div>
-        </div>
+      <?php include_once(__DIR__ . '/header_loginlogout/employer.php'); ?>
 
+        <div class="main-content">
+            <div class="login-form-container">
+                <h2><?= $lang['employer_login_subtitle_h2']; ?></h2>
+                <p><?= $lang['employer_login_subtitle_p']; ?></p>
+
+                <form action="employerlogin.php" method="POST">
+                    <div class="form-group">
+                        <label for="emailInput"><?= $lang['employer_login_email']; ?></label>
+                        <input type="email"
+                               id="emailInput"
+                               name="email"
+                               placeholder="<?= $lang['employer_login_email_placeholder']; ?>"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passwordInput"><?= $lang['employer_login_password']; ?></label>
+                        <input type="password"
+                               id="passwordInput"
+                               name="password"
+                               placeholder="<?= $lang['employer_login_password_placeholder']; ?>"
+                               required>
+                        <div class="forgot">
+                            <a href="employerforgetpassword.php"><?= $lang['employer_login_forgot_password']; ?></a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login"><?= $lang['employer_login_button']; ?></button>
+                </form>
+
+                <div class="signup">
+                    <?= $lang['employer_login_signup']; ?>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <p><?= $lang['employer_login_redirect_jobseeker']; ?></p>
+                </div>
+            </div>
     </div>
+
 </body>
 
 </html>

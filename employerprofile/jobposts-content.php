@@ -6,7 +6,9 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
     <div style="display: flex; flex-direction: column; gap: 18px;">
         <?php
         // Get employer id from URL (?id=...)
-        $employer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        // Get employer id from session
+        session_start();
+        $employer_id = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
 
         // If no employer id, do not query
         if ($employer_id > 0) {
@@ -37,31 +39,45 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
                     $job_title = htmlspecialchars($row['job_title']);
                     $job_location = htmlspecialchars($row['job_location']);
                     $job_status = htmlspecialchars($row['status']); // Get the job status
+                    // Use created_at if last_updated_at is empty or null
+                    $updated_at_str = !empty($row['last_updated_at']) ? $row['last_updated_at'] : $row['created_at'];
+                    $updated_at = new DateTime($updated_at_str);
 
-                    $updated = $created_at->diff($now);
+                    $updated = $updated_at->diff($now);
                     if ($updated->days > 0) {
                         $updated_str = "Updated {$updated->days} days ago";
                     } elseif ($updated->h > 0) {
                         $updated_str = "Updated {$updated->h} hours ago";
+                    } elseif ($updated->i > 0) {
+                        $updated_str = "Updated {$updated->i} minutes ago";
                     } else {
-                        $updated_str = "Just updated";
+                        $updated_str = "Updated just now";
                     }
 
                     // Determine status color for display
                     $status_color = '#6c757d'; // Default grey
                     switch ($job_status) {
-                        case 'pending_review': $status_color = '#ffc107'; break; // Yellow
-                        case 'approved':       $status_color = '#28a745'; break; // Green
-                        case 'rejected':       $status_color = '#dc3545'; break; // Red
+                        case 'pending_review':
+                            $status_color = '#ffc107';
+                            break; // Yellow
+                        case 'approved':
+                            $status_color = '#28a745';
+                            break; // Green
+                        case 'rejected':
+                            $status_color = '#dc3545';
+                            break; // Red
                     }
-                ?>
+                    ?>
                     <div
                         style="background: #fff; border: 1px solid black; border-radius: 10px; padding: 18px 18px 18px 0; display: flex; align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                        <img src="<?php echo $logo; ?>"
-                            alt="job"
+                        <img src="<?php echo $logo; ?>" alt="job"
                             style="width: 120px; height: 70px; border-radius: 8px; object-fit: cover; margin-right: 18px;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; font-size: 18px;"><?php echo $job_title; ?></div>
+                            <div style="font-weight: bold; font-size: 18px;">
+                                <a href="jobdetail.php?id=<?php echo $job_id; ?>" style="color: inherit; text-decoration: none;">
+                                    <?php echo $job_title; ?>
+                                </a>
+                            </div>
                             <div style="color: #888; font-size: 13px; margin-bottom: 6px;"><?php echo $company_name; ?></div>
                             <div style="display: flex; gap: 10px; margin-bottom: 8px;">
                                 <span
@@ -73,31 +89,32 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
                                 <span
                                     style="background: #eee; color: #888; border-radius: 6px; padding: 2px 10px; font-size: 12px;"><?php echo $updated_str; ?></span>
                             </div>
-                            <div style="color: #b23b3b; font-weight: bold; font-size: 15px; margin-bottom: 5px;"><?php echo $salary; ?></div>
+                            <div style="color: #b23b3b; font-weight: bold; font-size: 15px; margin-bottom: 5px;">
+                                <?php echo $salary; ?>
+                            </div>
                             <div style="font-size: 14px;">
                                 Status: <span style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo $job_status; ?></span>
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-left: 18px; align-items: flex-end;">
-                            <button class="edit-job-button"
-                                data-jobid="<?php echo $job_id; ?>"
+                            <button class="edit-job-button" data-jobid="<?php echo $job_id; ?>"
                                 style="background: #d90000; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">Edit</button>
-                            <button class="delete-job-button"
-                                data-jobid="<?php echo $job_id; ?>"
+                            <button class="delete-job-button" data-jobid="<?php echo $job_id; ?>"
                                 style="background: #fff; color: #d90000; border: 1px solid #d90000; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">Delete</button>
-                            <button id="btn-jobpostsapplications"
-                                data-jobid="<?php echo $job_id; ?>" style="background: #b23b3b; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">Check submitted applications</button>
+                            <button id="btn-jobpostsapplications" data-jobid="<?php echo $job_id; ?>"
+                                style="background: #b23b3b; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">Check
+                                submitted applications</button>
                         </div>
                     </div>
                 <?php endwhile;
-                } else {
-                    echo '<div style="color: #888; text-align: center; padding: 20px;">Database connection error or no employer ID.</div>';
-                }
             } else {
-                echo '<div style="color: #888; text-align: center; padding: 20px;">No employer selected.</div>';
+                echo '<div style="color: #888; text-align: center; padding: 20px;">Database connection error or no employer ID.</div>';
             }
-            // Không đóng kết nối $conn ở đây nếu nó được dùng lại trong body.php
-            // $conn->close();
+        } else {
+            echo '<div style="color: #888; text-align: center; padding: 20px;">No employer selected.</div>';
+        }
+        // Không đóng kết nối $conn ở đây nếu nó được dùng lại trong body.php
+        // $conn->close();
         ?>
     </div>
 </div>

@@ -1,4 +1,16 @@
 <?php
+// Nếu người dùng bấm đổi ngôn ngữ
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+
+// Load file ngôn ngữ tương ứng
+include 'lang/' . $_SESSION['lang'] . '.php';
 ?>
 <style>
     .user-info {
@@ -105,30 +117,63 @@
         </a>
     </div>
     <div style="display: flex; gap: 15px; margin-left: 50px;">
-        <a href="#" style="text-decoration: none; color: #333;">Create CV</a>
-        <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">Contact Us</a>
-        <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">Feedback</a>
+        <a href="#" style="text-decoration: none; color: #333;">
+            <?= $lang['create_cv']; ?>
+        </a>
+        <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
+            <?= $lang['contact_us']; ?>
+        </a>
+        <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">
+            <?= $lang['feedback']; ?>
+        </a>
     </div>
+
     <div style="display: flex; gap: 15px; margin-left: auto">
         <?php if (isset($_SESSION['username'])): ?>
             <div class="user-dropdown">
                 <div class="user-info">
                     <img src="image/defaultavatar.jpg" alt="User Avatar">
-                    <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    <span><?= htmlspecialchars($_SESSION['username']); ?></span>
                 </div>
                 <div class="dropdown-menu">
-                    <a href="jobseekerlogout.php">Logout</a>
+                    <?php
+                    $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
+                    ?>
+                    <a href="jobseekerlogout.php">
+                        <?= $lang['logout']; ?>
+                    </a>
                 </div>
             </div>
-
-
+            <button id="lang-switch-btn"
+                style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
+                <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+            </button>
         <?php else: ?>
             <div class="guest-options">
-                <a href="jobseekerlogin.php" class="btn-login">Login/Register for Job Seekers</a>
-                <a href="employerpage.php" class="btn-register">Are you an employer? <br><span>Click here to redirect</span></a>
-                <a href="admin/adminlogin.php" class="btn-register">Admin login</a>
+                <a href="jobseekerlogin.php" class="btn-login">
+                    <?= $lang['login/register_jobseeker']; ?>
+                </a>
+                <a href="employerpage.php" class="btn-register">
+                    <?= $lang['employer_redirect']; ?>
+                </a>
+                <a href="admin/adminlogin.php" class="btn-register">
+                    <?= $lang['admin_login']; ?>
+                </a>
+                <button id="lang-switch-btn"
+                    style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
+                    <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+                </button>
             </div>
         <?php endif; ?>
     </div>
-
 </div>
+<script>
+    document.getElementById('lang-switch-btn').onclick = function () {
+        var currentLang = '<?php echo $_SESSION['lang']; ?>';
+        if (currentLang === 'vi') {
+            window.location.href = '?lang=en';
+        } else {
+            window.location.href = '?lang=vi';
+        }
+    };
+</script>

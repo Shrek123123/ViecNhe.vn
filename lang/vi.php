@@ -48,7 +48,8 @@ $lang = [
     "job_seeker_support" => "Hỗ trợ người tìm việc",
     "job_seeker_support_desc" => "Nhà tuyển dụng... xem CV của bạn và gửi lời mời.",
     "find_best_salary" => "Tại JobHive, bạn có thể tìm... mức lương tốt nhất!",
-
+    "dayleft" => " Còn :d ngày",
+    "expired" => "Đã hết hạn",
 
     //footer
     // Hotline section
@@ -170,12 +171,14 @@ $lang = [
     "job_benefit_placeholder" => "Khuyến khích viết dạng gạch đầu dòng.",
     "custom_jobcategory_placeholder" => "Nhập ngành nghề của bạn tại đây",
 
+    //error messages
+    "login_invalid_password" => "Tài khoản đúng nhưng mật khẩu sai.",
     //jobseekerlogin
+    "email" => "Email",
+    "password" => "Mật khẩu",
     "jobseeker_login_title" => "Đăng nhập Ứng viên",
     "jobseeker_login_subtitle_h2" => "Chào mừng các ứng viên quay trở lại!",
-    "jobseeker_login_subtitle_p" => "Hãy khởi động lại hồ sơ của bạn cùng JobHive",
-    "jobseeker_login_email" => "Email",
-    "jobseeker_login_password" => "Mật khẩu",
+    "jobseeker_login_subtitle_p" => "Hãy tìm những việc 'nhẹ' phù hợp với bạn nhất",
     "jobseeker_login_email_placeholder" => "Nhập email",
     "jobseeker_login_password_placeholder" => "Nhập mật khẩu",
     "jobseeker_login_forgot_password" => "Quên mật khẩu",
@@ -195,9 +198,7 @@ $lang = [
     //employerlogin
     "employer_login_title" => "Đăng nhập Nhà tuyển dụng",
     "employer_login_subtitle_h2" => "Chào mừng nhà tuyển dụng quay trở lại!",
-    "employer_login_subtitle_p" => "Hãy tiếp tục tìm kiếm ứng viên phù hợp nhất cho công ty của bạn",
-    "employer_login_email" => "Email",
-    "employer_login_password" => "Mật khẩu",
+    "employer_login_subtitle_p" => "Hãy cùng ViệcNhẹ tìm kiếm ứng viên phù hợp nhất cho công ty của bạn",
     "employer_login_email_placeholder" => "Nhập địa chỉ email",
     "employer_login_password_placeholder" => "Nhập mật khẩu",
     "employer_login_forgot_password" => "Quên mật khẩu",
@@ -205,4 +206,52 @@ $lang = [
     "employer_login_signup" => "Chưa có tài khoản? <a href='employerregister.php'>Đăng ký tại đây</a>",
     "employer_login_redirect_jobseeker" => "Bạn là ứng viên? <a href='index.php'>Bấm vào đây để chuyển hướng</a>",
     "employer_login_logo_alt" => "Logo ViệcNhẹ",
+
+    //jobdetail
+    "job_detail_title" => "Chi tiết công việc",
+    'jobdetail_interested' => 'Đã có %d người quan tâm đến công việc này, ứng tuyển ngay để không bỏ lỡ!',
+    'jobdetail_salary' => 'Mức lương:',
+    'jobdetail_location' => 'Địa điểm:',
+    'jobdetail_experience' => 'Kinh nghiệm:',
+    'jobdetail_deadline' => 'Hạn nộp hồ sơ:',
+    'jobdetail_apply_now' => 'Ứng tuyển ngay',
+    'jobdetail_like_job' => 'Tôi thích việc này',
+    'jobdetail_job_description' => 'Mô tả công việc',
+    'jobdetail_employee_requirement' => 'Yêu cầu ứng viên',
+    'jobdetail_job_benefit' => 'Quyền lợi',
+    'jobdetail_loading' => 'Đang tải...',
+    'jobdetail_related_jobs' => 'Công việc liên quan',
+    'jobdetail_company_size' => 'Quy mô công ty:',
+    'jobdetail_industry' => 'Ngành nghề:',
+    'jobdetail_address' => 'Địa chỉ:',
+    'jobdetail_general_info' => 'Thông tin chung',
+    'jobdetail_position_level' => 'Cấp bậc:',
+    'jobdetail_education' => 'Trình độ học vấn:',
+    'jobdetail_quantity' => 'Số lượng tuyển:',
+    'jobdetail_type' => 'Loại hình:',
+    'jobdetail_contact_info' => 'Thông tin liên hệ',
+    'jobdetail_email' => 'Email:',
+    'jobdetail_phone' => 'Số điện thoại:',
+    'jobdetail_location_title' => 'Địa điểm',
+    'jobdetail_no_data' => 'Không có dữ liệu',
+    'jobdetail_unknown' => 'Không rõ',
+    'jobdetail_person' => ' người',
+
+    //jobseekerregister
+    'jobseekerregister_title' => 'Chào mừng tới ViệcNhẹ!<br>(Cổng dành cho ứng viên)',
+    'jobseekerregister_subtitle' => 'Hãy tạo tài khoản ứng viên ngay hôm nay!',
+    'username' => 'Tên tài khoản',
+    'placeholder_username' => 'Gợi ý: nên điền đầy đủ họ tên bạn',
+    'placeholder_email' => 'Email',
+    'placeholder_password' => 'Mật khẩu',
+    'reenter_password' => 'Nhập lại mật khẩu',
+    'placeholder_reenter_password' => 'Nhập lại mật khẩu tại đây',
+    'terms_agreement_text' => 'Tôi đã đọc và đồng ý với',
+    'terms_of_use_link_text' => 'Điều khoản sử dụng',
+    'terms_of_use_after_link_text' => 'của ViệcNhẹ', // Dùng nếu muốn có chữ "của JobHive" sau link
+    'button_register' => 'Đăng ký',
+    'login_link_text_prefix' => 'Đã có tài khoản?',
+    'login_link_text' => 'Đăng nhập',
+    'employer_redirect_text_prefix' => 'Bạn là nhà tuyển dụng?',
+    'employer_redirect_link_text' => 'Bấm vào đây để chuyển hướng'
 ];

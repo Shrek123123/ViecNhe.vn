@@ -1,5 +1,7 @@
 <?php
 require_once 'config.php';
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,8 +50,7 @@ require_once 'config.php';
             font-family: Arial, sans-serif !important;
             color: #fff !important;
             font-weight: bold !important;
-            margin-top: 21.28px !important;
-            margin-bottom: 30px !important;
+            margin-bottom: 25px !important;
             line-height: 1.15 !important;
         }
 
@@ -59,6 +60,13 @@ require_once 'config.php';
             color: #D91616 !important;
             font-weight: bold !important;
             margin: 18.72px 0px 20px 0px !important;
+        }
+        .demucjob {
+            font-size: 18.72px !important;
+            color: #D90000;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
     </style>
     <!-- Bootstrap Bundle JS -->
@@ -155,38 +163,38 @@ require_once 'config.php';
                     ?>
                     <div class="bg-white p-3 mb-4 shadow rounded ">
                         <h5 class="fw-bold"><?= htmlspecialchars($job['job_title'] ?? 'Không có mô tả') ?></h5>
-                        <small class="text-muted">There have been <?= $interest_count ?> people interested in this job,
-                            apply now to not miss it!</small>
+                        <small class="text-muted"><?= sprintf($lang['jobdetail_interested'], $interest_count) ?></small>
                         <hr>
                         <div class="row mb-3">
                             <div class="col-md-4 d-flex align-items-center">
-                                <i class="bi bi-currency-dollar me-2"></i> <strong>Salary:</strong>
+                                <i class="bi bi-currency-dollar me-2"></i>
+                                <strong><?= $lang['jobdetail_salary'] ?></strong>
                             </div>
                             <div class="col-md-8 text-danger fw-bold">
-                                <?= htmlspecialchars($job['salary'] ?? 'Negotiable') ?>
+                                <?= htmlspecialchars($job['salary'] ?? $lang['jobdetail_no_data']) ?>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-4 d-flex align-items-center">
-                                <i class="bi bi-geo-alt me-2"></i> <strong>Location:</strong>
+                                <i class="bi bi-geo-alt me-2"></i> <strong><?= $lang['jobdetail_location'] ?></strong>
                             </div>
-                            <div class="col-md-8"><?= htmlspecialchars($job['job_location'] ?? 'No data') ?></div>
+                            <div class="col-md-8"><?= htmlspecialchars($job['job_location'] ?? $lang['jobdetail_no_data']) ?></div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-4 d-flex align-items-center">
-                                <i class="bi bi-person-workspace me-2"></i> <strong>Experience:</strong>
+                                <i class="bi bi-person-workspace me-2"></i>
+                                <strong><?= $lang['jobdetail_experience'] ?></strong>
                             </div>
-                            <div class="col-md-8"><?= htmlspecialchars($job['job_experience'] ?? 'No requirement') ?>
+                            <div class="col-md-8"><?= htmlspecialchars($job['job_experience'] ?? $lang['jobdetail_no_data']) ?>
                             </div>
                         </div>
                         <div class="text-muted mb-3">
-                            <i class="bi bi-calendar-event me-2"></i>Application deadline: <?= $job_deadline ?>
+                            <i class="bi bi-calendar-event me-2"></i><?= $lang['jobdetail_deadline'] ?>
+                            <?= $job_deadline ?>
                         </div>
                         <?php
                         $is_logged_in = isset($_SESSION['username']) && $_SESSION['role'] === 'jobseeker';
                         $job_detail_id = isset($job['id']) ? intval($job['id']) : 0;
-
-                        // Chuẩn bị URL gốc để quay lại sau login
                         $current_url = "jobdetail.php?id=" . urlencode($job_detail_id);
                         $login_url = "jobseekerlogin.php?redirect=" . urlencode($current_url);
                         ?>
@@ -195,49 +203,42 @@ require_once 'config.php';
                             <button class="btn btn-danger apply-btn" type="button"
                                 data-logged-in="<?= $is_logged_in ? '1' : '0' ?>" data-login-url="<?= $login_url ?>"
                                 data-job-id="<?= $job['id'] ?>">
-                                Apply now
+                                <?= $lang['jobdetail_apply_now'] ?>
                             </button>
 
                             <button class="btn btn-secondary" type="button" id="save-job-btn"
                                 data-job-id="<?= $job_detail_id ?>" <?php if (!$is_logged_in): ?>
                                     onclick="window.location.href='<?= $login_url ?>'; return false;" <?php endif; ?>>
-                                <span id="save-job-icon">&#9734;</span> Like job
+                                <span id="save-job-icon">&#9734;</span> <?= $lang['jobdetail_like_job'] ?>
                             </button>
-
                         </div>
 
                     </div>
 
-                    <h2 class="text-danger mt-4">Job description</h2>
-                    <p><?= nl2br(htmlspecialchars($job['job_description'] ?? 'No description available')) ?></p>
+                    <p class="demucjob"><?= $lang['jobdetail_job_description'] ?></p>
+                    <p><?= nl2br(htmlspecialchars($job['job_description'] ?? $lang['jobdetail_no_data'])) ?></p>
 
+                    <p class="demucjob"><?= $lang['jobdetail_employee_requirement'] ?></p>
+                    <p><?= nl2br(htmlspecialchars($job['job_requirement'] ?? $lang['jobdetail_no_data'])) ?></p>
 
-                    <h2 class="text-danger mt-4">Employee requirement</h2>
-                    <p><?= nl2br(htmlspecialchars($job['job_requirement'] ?? 'No requirement specified')) ?></p>
+                    <p class="demucjob"><?= $lang['jobdetail_job_benefit'] ?></p>
+                    <p><?= nl2br(htmlspecialchars($job['job_benefit'] ?? $lang['jobdetail_no_data'])) ?></p>
 
-                    <h2 class="text-danger mt-4">Job benefits</h2>
-                    <p><?= nl2br(htmlspecialchars($job['job_benefit'] ?? 'No benefits specified')) ?></p>
-
-
-                    <!-- Modal xử lý nút Apply-->
+                    <!-- Modal xử lý nút Apply -->
                     <div class="modal fade " id="applyModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content" id="applyFormContent">
-                                <!-- Nội dung form sẽ được load ở đây -->
                                 <div class="modal-body text-center p-10">
                                     <div class="spinner-border" role="status"></div>
-                                    <p>Loading...</p>
+                                    <p><?= $lang['jobdetail_loading'] ?></p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-
-
                 <!-- Việc làm liên quan -->
                 <?php
-                // Lấy các việc làm liên quan cùng job_category (trừ chính job hiện tại)
                 $related_jobs = [];
                 if ($job && !empty($job['job_category'])) {
                     $stmt_related = $conn->prepare("SELECT id, job_title, salary FROM job WHERE job_category = ? AND id != ? LIMIT 5");
@@ -253,7 +254,7 @@ require_once 'config.php';
 
                 <?php if (!empty($related_jobs)): ?>
                     <div class="bg-white p-4 shadow rounded mt-5">
-                        <h4 class="text-danger">Related Jobs</h4>
+                        <h4 class="text-danger"><?= $lang['jobdetail_related_jobs'] ?></h4>
                         <div class="list-group">
                             <?php foreach ($related_jobs as $rjob): ?>
                                 <a href="jobdetail.php?id=<?= htmlspecialchars($rjob['id']) ?>"
@@ -266,7 +267,6 @@ require_once 'config.php';
                 <?php endif; ?>
             </div>
 
-
             <!-- Right Column -->
             <div class="col-lg-4">
                 <div class="bg-white p-3 mb-4 shadow rounded">
@@ -275,35 +275,42 @@ require_once 'config.php';
                             <img src="<?= htmlspecialchars($job['company_logo'] ?? 'image/logo1.png') ?>" alt="Company Logo"
                                 class="me-3 rounded" style="width: 80px; height: 80px;">
                             <div class="sidebar-title mb-0">
-                                <h4 style="color: #000 !important;"><?= htmlspecialchars($job['company_name'] ?? 'Company Name') ?></h4>
-                                <p><strong>Company size:</strong> <?= htmlspecialchars($job['company_size'] ?? 'Unknown') ?>
-                                </p>
-                                <p><strong>Industry:</strong> <?= htmlspecialchars($job['job_category'] ?? 'Unknown') ?></p>
-                                <p><strong>Address:</strong>
-                                    <?= htmlspecialchars($job['job_detailed_location'] ?? 'Unknown') ?></p>
+                                <h4 style="color: #000 !important;">
+                                    <?= htmlspecialchars($job['company_name'] ?? 'Company Name') ?>
+                                </h4>
+                                <p><strong><?= $lang['jobdetail_company_size'] ?></strong>
+                                    <?= htmlspecialchars($job['company_size'] ?? $lang['jobdetail_unknown']) ?></p>
+                                <p><strong><?= $lang['jobdetail_industry'] ?></strong>
+                                    <?= htmlspecialchars($job['job_category'] ?? $lang['jobdetail_unknown']) ?></p>
+                                <p><strong><?= $lang['jobdetail_address'] ?></strong>
+                                    <?= htmlspecialchars($job['job_detailed_location'] ?? $lang['jobdetail_unknown']) ?></p>
                             </div>
                         </div>
                     <?php endif; ?>
-
                 </div>
 
                 <div class="bg-white p-3 mb-4 shadow rounded">
-                    <div class="sidebar-title">General Information</div>
-                    <p><strong>Position level:</strong> <?= htmlspecialchars($job['job_position'] ?? 'N/A') ?></p>
-                    <p><strong>Education:</strong> <?= htmlspecialchars($job['required_certification'] ?? 'N/A') ?></p>
-                    <p><strong>Quantity:</strong> <?= htmlspecialchars($job['no_employee_needed'] ?? 'N/A') ?> person(s)
-                    </p>
-                    <p><strong>Type:</strong> <?= htmlspecialchars($job['job_type'] ?? 'N/A') ?></p>
+                    <div class="sidebar-title"><?= $lang['jobdetail_general_info'] ?></div>
+                    <p><strong><?= $lang['jobdetail_position_level'] ?></strong>
+                        <?= htmlspecialchars($job['job_position'] ?? 'N/A') ?></p>
+                    <p><strong><?= $lang['jobdetail_education'] ?></strong>
+                        <?= htmlspecialchars($job['required_certification'] ?? 'N/A') ?></p>
+                    <p><strong><?= $lang['jobdetail_quantity'] ?></strong>
+                        <?= sprintf('%s', htmlspecialchars($job['no_employee_needed'] ?? 'N/A')) ?><?= $lang['jobdetail_person'] ?></p>
+                    <p><strong><?= $lang['jobdetail_type'] ?></strong>
+                        <?= htmlspecialchars($job['job_type'] ?? 'N/A') ?></p>
                 </div>
 
                 <div class="bg-white p-3 mb-4 shadow rounded">
-                    <div class="sidebar-title">Contact Information</div>
-                    <p><strong>Email:</strong> <?= htmlspecialchars($job['contact_email'] ?? 'N/A') ?></p>
-                    <p><strong>Phone:</strong> <?= htmlspecialchars($job['contact_phone'] ?? 'N/A') ?></p>
+                    <div class="sidebar-title"><?= $lang['jobdetail_contact_info'] ?></div>
+                    <p><strong><?= $lang['jobdetail_email'] ?></strong>
+                        <?= htmlspecialchars($job['contact_email'] ?? 'N/A') ?></p>
+                    <p><strong><?= $lang['jobdetail_phone'] ?></strong>
+                        <?= htmlspecialchars($job['contact_phone'] ?? 'N/A') ?></p>
                 </div>
 
                 <div class="bg-white p-3 shadow rounded">
-                    <div class="sidebar-title">Location</div>
+                    <div class="sidebar-title"><?= $lang['jobdetail_location_title'] ?></div>
                     <?php if ($job): ?>
                         <?php if (!empty($job['job_location'])): ?>
                             <span class="skill-tag"><?= htmlspecialchars($job['job_location']) ?></span>

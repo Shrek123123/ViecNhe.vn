@@ -14,7 +14,7 @@ if (!isset($_SESSION['lang'])) {
 
 // Load file ngôn ngữ tương ứng
 include 'lang/' . $_SESSION['lang'] . '.php';
-
+$invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. Please try again.';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 errorDiv.style.color = 'red';
                 errorDiv.style.textAlign = 'center';
                 errorDiv.style.marginTop = '10px';
-                errorDiv.innerText = 'Invalid password. Please try again.';
+                errorDiv.innerText = " . json_encode($invalidPasswordMessage) . ";
                 document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
             });
             </script>";
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <form action="jobseekerlogin.php" method="POST">
                 <div class="form-group">
-                    <label for="emailInput"><?= $lang['jobseeker_login_email']; ?></label>
+                    <label for="emailInput"><?= $lang['email']; ?></label>
                     <input type="email"
                            id="emailInput"
                            name="email"
@@ -220,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="passwordInput"><?= $lang['jobseeker_login_password']; ?></label>
+                    <label for="passwordInput"><?= $lang['password']; ?></label>
                     <input type="password"
                            id="passwordInput"
                            name="password"

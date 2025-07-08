@@ -18,15 +18,7 @@
     }
 
     // Kiểm tra quyền truy cập jobseekerprofile.php?id=...
-    if (isset($_GET['id'])) {
-        $profileId = intval($_GET['id']);
-        if (!isset($_SESSION['jobseeker_id']) || $_SESSION['jobseeker_id'] != $profileId) {
-            // Không cho phép truy cập nếu id không khớp
-            header("Location: index.php");
-            exit();
-        }
-    } else {
-        // Nếu không có id trên URL, chuyển hướng về trang chính
+    if (!isset($_SESSION['jobseeker_id'])) {
         header("Location: index.php");
         exit();
     }

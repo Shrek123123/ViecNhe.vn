@@ -1,5 +1,17 @@
 <?php require_once 'config.php';
 session_start();
+if (!isset($_SESSION['username'])) {
+    $redirect = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php';
+    header("Location: $redirect");
+    exit();
+}
+
+// Kiểm tra quyền truy cập jobseekerprofile.php?id=...
+if (!isset($_SESSION['jobseeker_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
@@ -337,15 +349,15 @@ $stmt->close();
                             </div>
 
                             <div style="flex: 1 1 45%;">
-                                <div style="display: flex; align-items: center; margin-bottom: 5px;">      
+                                <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <?php echo !empty($profile_data['address']) ? htmlspecialchars($profile_data['address']) : 'Add current address'; ?>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    
+
                                     <?php echo !empty($profile_data['gender']) ? htmlspecialchars($profile_data['gender']) : 'Add gender'; ?>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                  
+
                                     <?php echo !empty($profile_data['marital_status']) ? htmlspecialchars($profile_data['marital_status']) : 'Add marital status'; ?>
                                 </div>
                             </div>

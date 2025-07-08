@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 errorDiv.style.color = 'red';
                 errorDiv.style.textAlign = 'center';
                 errorDiv.style.marginTop = '10px';
-                errorDiv.innerText = 'Invalid password. Please try again.';
+                errorDiv.innerText = " . json_encode($invalidPasswordMessage) . ";
                 document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
             });
             </script>";
@@ -42,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
     $conn->close();
 }
+$invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. Please try again.';
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -188,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <form action="employerlogin.php" method="POST">
                     <div class="form-group">
-                        <label for="emailInput"><?= $lang['employer_login_email']; ?></label>
+                        <label for="emailInput"><?= $lang['email']; ?></label>
                         <input type="email"
                                id="emailInput"
                                name="email"
@@ -197,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
 
                     <div class="form-group">
-                        <label for="passwordInput"><?= $lang['employer_login_password']; ?></label>
+                        <label for="passwordInput"><?= $lang['password']; ?></label>
                         <input type="password"
                                id="passwordInput"
                                name="password"

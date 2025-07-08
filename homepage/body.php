@@ -2,6 +2,15 @@
 <?php
 // Đặt ở ĐẦU file jobs.php (hoặc index.php)
 require_once('config.php'); // Đảm bảo file này chứa kết nối $conn
+function t($key, $replace = [])
+{
+  global $lang;
+  $text = $lang[$key] ?? $key;
+  foreach ($replace as $k => $v) {
+    $text = str_replace(":$k", $v, $text);
+  }
+  return $text;
+}
 
 $isLoggedIn = isset($_SESSION['jobseeker_id']) && $_SESSION['jobseeker_id'] > 0;
 $userId = $isLoggedIn ? (int) $_SESSION['jobseeker_id'] : 0;
@@ -529,7 +538,9 @@ $savedJobIdsJson = json_encode($savedJobIds);
             $now = new DateTime();
             $interval = $now->diff($expire_at);
             $days_left = (int) $interval->format('%r%a');
-            $days_left_text = $days_left > 0 ? $days_left . ' days left' : 'Expired';
+            $days_left_text = $days_left > 0
+              ? t('dayleft', ['d' => $days_left])
+              : t('expired');
             $job_id = (int) $row['id'];
             $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds);
             if ($isJobAlreadySaved) {
@@ -787,48 +798,48 @@ $savedJobIdsJson = json_encode($savedJobIds);
   </section>
 
 
- <section class="section-3">
-  <div class="container">
-    <div class="header">
-      <h2><?= $lang['featured_companies']; ?></h2>
-      <a href="#" class="view-all"><?= $lang['view_all']; ?></a>
+  <section class="section-3">
+    <div class="container">
+      <div class="header">
+        <h2><?= $lang['featured_companies']; ?></h2>
+        <a href="#" class="view-all"><?= $lang['view_all']; ?></a>
+      </div>
+
+      <div class="logos">
+        <img src="image/logo1.png" alt="Tabtab.me" />
+        <img src="image/logo2.png" alt="DIC" />
+        <img src="image/logo3.png" alt="NhanHoa" />
+        <img src="image/logo4.png" alt="EY" />
+        <img src="image/logo5.png" alt="Karofi" />
+      </div>
     </div>
+  </section>
 
-    <div class="logos">
-      <img src="image/logo1.png" alt="Tabtab.me" />
-      <img src="image/logo2.png" alt="DIC" />
-      <img src="image/logo3.png" alt="NhanHoa" />
-      <img src="image/logo4.png" alt="EY" />
-      <img src="image/logo5.png" alt="Karofi" />
+  <section class="section-4">
+    <div class="container">
+      <h3><?= $lang['opportunities_at_top_companies']; ?></h3>
+      <p><?= $lang['opportunities_at_top_companies_desc']; ?></p>
+
+      <h3><?= $lang['why_jobhive']; ?></h3>
+      <ul>
+        <li>
+          <strong><?= $lang['quality_jobs']; ?></strong><br />
+          <?= $lang['quality_jobs_desc']; ?>
+        </li>
+
+        <li>
+          <strong><?= $lang['free_cv_builder']; ?></strong><br />
+          <?= $lang['free_cv_builder_desc']; ?>
+        </li>
+
+        <li>
+          <strong><?= $lang['job_seeker_support']; ?></strong><br />
+          <?= $lang['job_seeker_support_desc']; ?>
+        </li>
+      </ul>
+
+      <p><?= $lang['find_best_salary']; ?></p>
     </div>
-  </div>
-</section>
-
-<section class="section-4">
-  <div class="container">
-    <h3><?= $lang['opportunities_at_top_companies']; ?></h3>
-    <p><?= $lang['opportunities_at_top_companies_desc']; ?></p>
-
-    <h3><?= $lang['why_jobhive']; ?></h3>
-    <ul>
-      <li>
-        <strong><?= $lang['quality_jobs']; ?></strong><br />
-        <?= $lang['quality_jobs_desc']; ?>
-      </li>
-
-      <li>
-        <strong><?= $lang['free_cv_builder']; ?></strong><br />
-        <?= $lang['free_cv_builder_desc']; ?>
-      </li>
-
-      <li>
-        <strong><?= $lang['job_seeker_support']; ?></strong><br />
-        <?= $lang['job_seeker_support_desc']; ?>
-      </li>
-    </ul>
-
-    <p><?= $lang['find_best_salary']; ?></p>
-  </div>
-</section>
+  </section>
 
 </div>

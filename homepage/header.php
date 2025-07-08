@@ -93,9 +93,11 @@ include 'lang/' . $_SESSION['lang'] . '.php';
         width: 100%;
     }
 
-    .navbar {
-        display: flex;
-        align-items: center;
+    .header a:hover,
+    .header .guest-options a:hover,
+    .header .dropdown-menu a:hover {
+        color: #d70018 !important;
+        transition: color 0.1s;
     }
 
     .guest-options {
@@ -117,7 +119,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
             <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
-    <div style="display: flex; gap: 15px; margin-left: 50px;">
+    <div style="display: flex; gap: 30px; margin-left: 50px;">
         <a href="#" style="text-decoration: none; color: #333;">
             <?= $lang['create_cv']; ?>
         </a>
@@ -140,7 +142,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
                     <?php
                     $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
                     ?>
-                    <a href="jobseekerprofile.php?id=<?= $jobseekerId; ?>">
+                    <a href="ho_so_ung_vien.php">
                         <?= $lang['profile']; ?>
                     </a>
                     <a href="jobseekerlogout.php">
@@ -148,6 +150,10 @@ include 'lang/' . $_SESSION['lang'] . '.php';
                     </a>
                 </div>
             </div>
+            <button id="lang-switch-btn"
+                style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
+                <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+            </button>
         <?php else: ?>
             <div class="guest-options">
                 <a href="jobseekerlogin.php" class="btn-login">
@@ -163,18 +169,25 @@ include 'lang/' . $_SESSION['lang'] . '.php';
                     style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
                     <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
                 </button>
-                <script>
-                    document.getElementById('lang-switch-btn').onclick = function () {
-                        var currentLang = '<?php echo $_SESSION['lang']; ?>';
-                        if (currentLang === 'vi') {
-                            window.location.href = '?lang=en';
-                        } else {
-                            window.location.href = '?lang=vi';
-                        }
-                    };
-                </script>
             </div>
         <?php endif; ?>
     </div>
-
 </div>
+<script>
+    document.getElementById('lang-switch-btn').onclick = function () {
+        // Lấy URL hiện tại
+        const url = new URL(window.location.href);
+        
+        // Lấy ngôn ngữ hiện tại từ PHP
+        const currentLang = '<?php echo $_SESSION['lang']; ?>';
+
+        // Chuyển đổi ngôn ngữ
+        const newLang = currentLang === 'vi' ? 'en' : 'vi';
+
+        // Set lại tham số lang trên URL
+        url.searchParams.set('lang', newLang);
+
+        // Chuyển hướng tới URL mới
+        window.location.href = url.toString();
+    };
+</script>

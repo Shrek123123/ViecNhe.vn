@@ -92,6 +92,13 @@ include 'lang/' . $_SESSION['lang'] . '.php';
         width: 100%;
     }
 
+    .header a:hover,
+    .header .guest-options a:hover,
+    .header .dropdown-menu a:hover {
+        color: #d70018 !important;
+        transition: color 0.1s;
+    }
+
     .navbar {
         display: flex;
         align-items: center;
@@ -118,7 +125,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
             <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
-    <div style="display: flex; gap: 15px; margin-left: 50px;">
+    <div style="display: flex; gap: 30px; margin-left: 50px;">
         <a href="#" style="text-decoration: none; color: #333;"><?php echo $lang['create_cv']; ?></a>
         <a href="contactus_employer.php"
             style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a>
@@ -135,7 +142,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
                     <?php
                     $employerId = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
                     ?>
-                    <a href="employerprofile.php?id=<?php echo $employerId; ?>"><?php echo $lang['profile']; ?></a>
+                    <a href="employerprofile.php"><?php echo $lang['profile']; ?></a>
                     <a href="employerlogout.php"><?php echo $lang['logout']; ?></a>
                 </div>
             </div>

@@ -46,6 +46,8 @@ $lang = [
     "job_seeker_support" => "Job Seeker Support",
     "job_seeker_support_desc" => "Employers... view your CV and send invitations.",
     "find_best_salary" => "At JobHive, you can find... the best salary!",
+    "dayleft" => " :d days left",
+    "expired" => "Expired",
 
     //footer
     // Hotline section
@@ -167,13 +169,14 @@ $lang = [
     "job_benefit_placeholder" => "It is recommended to write in bullet points.",
     "custom_jobcategory_placeholder" => "Type your job category here",
 
-
+    //error messages
+    "login_invalid_password" => "Invalid password. Please try again.",
     //jobseekerlogin
+    "email" => "Email",
+    "password" => "Password",
     "jobseeker_login_title" => "Job Seeker Login",
     "jobseeker_login_subtitle_h2" => "We are glad to see our fellow jobseekers back!",
-    "jobseeker_login_subtitle_p" => "Let's kickstart your profile to new heights with JobHive",
-    "jobseeker_login_email" => "Email",
-    "jobseeker_login_password" => "Password",
+    "jobseeker_login_subtitle_p" => "Let's kickstart your profile to new heights with ViecNhe",
     "jobseeker_login_email_placeholder" => "Enter your email address",
     "jobseeker_login_password_placeholder" => "Enter your password",
     "jobseeker_login_forgot_password" => "Forget password",
@@ -194,8 +197,6 @@ $lang = [
     "employer_login_title" => "Employer Login",
     "employer_login_subtitle_h2" => "Welcome back, Employers!",
     "employer_login_subtitle_p" => "Let's continue to find the best candidates for your company",
-    "employer_login_email" => "Email",
-    "employer_login_password" => "Password",
     "employer_login_email_placeholder" => "Enter your email address",
     "employer_login_password_placeholder" => "Enter your password",
     "employer_login_forgot_password" => "Forget password",
@@ -203,4 +204,52 @@ $lang = [
     "employer_login_signup" => "Don't have an account? <a href='employerregister.php'>Register here</a>",
     "employer_login_redirect_jobseeker" => "Are you a job seeker? <a href='index.php'>Click here to redirect</a>",
     "employer_login_logo_alt" => "ViecNhe Logo",
+
+    //jobdetail
+    "job_detail_title" => "Job Detail",
+    'jobdetail_interested' => 'There have been %d people interested in this job, apply now to not miss it!',
+    'jobdetail_salary' => 'Salary:',
+    'jobdetail_location' => 'Location:',
+    'jobdetail_experience' => 'Experience:',
+    'jobdetail_deadline' => 'Application deadline:',
+    'jobdetail_apply_now' => 'Apply now',
+    'jobdetail_like_job' => 'Like job',
+    'jobdetail_job_description' => 'Job description',
+    'jobdetail_employee_requirement' => 'Employee requirement',
+    'jobdetail_job_benefit' => 'Job benefits',
+    'jobdetail_loading' => 'Loading...',
+    'jobdetail_related_jobs' => 'Related Jobs',
+    'jobdetail_company_size' => 'Company size:',
+    'jobdetail_industry' => 'Industry:',
+    'jobdetail_address' => 'Address:',
+    'jobdetail_general_info' => 'General Information',
+    'jobdetail_position_level' => 'Position level:',
+    'jobdetail_education' => 'Education:',
+    'jobdetail_quantity' => 'Number of openings:',
+    'jobdetail_type' => 'Type:',
+    'jobdetail_contact_info' => 'Contact Information',
+    'jobdetail_email' => 'Email:',
+    'jobdetail_phone' => 'Phone:',
+    'jobdetail_location_title' => 'Location',
+    'jobdetail_no_data' => 'No data available',
+    'jobdetail_unknown' => 'Unknown',
+    'jobdetail_person' => ' person(s)',
+
+    //jobseekerregister
+    'jobseekerregister_title' => 'Welcome to ViecNhe!<br>(Jobseeker portal)',
+    'jobseekerregister_subtitle' => "Let's create an account to start your employment journey!",
+    'username' => 'Username',
+    'placeholder_username' => 'Using your full name is recommended',
+    'placeholder_email' => 'Email',
+    'placeholder_password' => 'Password',
+    'reenter_password' => 'Re-enter password',
+    'placeholder_reenter_password' => 'Re-enter password here',
+    'terms_agreement_text' => 'I have read and agree to the',
+    'terms_of_use_link_text' => 'Terms of Use',
+    'terms_of_use_after_link_text' => 'of ViecNhe', // Dùng nếu muốn có chữ "of JobHive" sau link
+    'button_register' => 'Register',
+    'login_link_text_prefix' => 'Already have an account?',
+    'login_link_text' => 'Login',
+    'employer_redirect_text_prefix' => 'Are you an employer?',
+    'employer_redirect_link_text' => 'Click here to redirect'
 ];

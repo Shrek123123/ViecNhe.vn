@@ -204,7 +204,7 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
         <div class="company">
             <?php
             // Lấy employer_id từ URL
-            $employer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+            $employer_id = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
 
             // Lấy ảnh đại diện employer
             $sql = "SELECT profile_pic FROM employer_profile WHERE id = $employer_id LIMIT 1";
@@ -217,9 +217,24 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
                 $result = false;
             }
 
+            // Lấy thông tin user từ bảng user dựa trên $employer_id
+            $row = null;
+            if (isset($conn) && $conn->ping()) {
+                $user_sql = "SELECT * FROM user WHERE id = $employer_id LIMIT 1";
+                $user_result = $conn->query($user_sql);
+                if ($user_result && $user_result->num_rows > 0) {
+                    $row = $user_result->fetch_assoc();
+                }
+            }
+
             $profile_pic = "https://via.placeholder.com/34"; // Default placeholder
-            if ($result && $row = $result->fetch_assoc()) {
-                $profile_pic = !empty($row['profile_pic']) ? htmlspecialchars($row['profile_pic']) : $profile_pic;
+            if ($result && $profile_row = $result->fetch_assoc()) {
+                $profile_pic = !empty($profile_row['profile_pic']) ? htmlspecialchars($profile_row['profile_pic']) : $profile_pic;
+            }
+            // Gán tên employer từ cột username nếu có
+            $employername = "";
+            if ($row && isset($row['username'])) {
+                $employername = htmlspecialchars($row['username']);
             }
             // Close connection after use if it's not needed for the rest of the page
             // If config.php creates a global $conn that is used elsewhere, don't close it here.
@@ -227,11 +242,10 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
             if (isset($conn) && $conn->ping()) {
                 $conn->close();
             }
-            $company_name = "Tên công ty";
             ?>
             <img src="<?php echo $profile_pic; ?>" alt="company logo">
             <div class="company-info">
-                <div><strong><?php echo $company_name; ?></strong></div>
+                <div><strong><?php echo $employername; ?></strong></div>
                 <div class="status">● Online</div>
             </div>
         </div>

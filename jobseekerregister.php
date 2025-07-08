@@ -12,61 +12,74 @@
       margin: 0;
       padding: 0;
       display: flex;
-    }
-
-    .container {
-      display: flex;
-      flex: 1;
-    }
-
-    .left {
-      flex: 1;
-      background: #f3f3f3;
-      padding: 40px;
-      display: flex;
       flex-direction: column;
+      min-height: 100vh;
+      background-color: #f3f3f3;
     }
 
-    .right {
+    .main-content {
       flex: 1;
-      background: white;
-      color: #8B0000;
-      padding: 40px;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .register-form-container {
+      background: #ffffff;
+      color: #8B0000;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
       text-align: center;
+      box-sizing: border-box;
     }
 
     h2 {
       color: #d90000;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 25px;
+      color: #555;
     }
 
     .form-group {
       margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
     }
 
     input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
 
     input[type="checkbox"] {
       width: auto;
-      padding: 0;
-      border-radius: 0;
-      border: none;
+      margin-right: 5px;
     }
 
     .btn-register {
       width: 100%;
       padding: 12px;
       background-color: #d90000;
-      color: white;
+      color: #ffffff;
       font-size: 18px;
       border: none;
       border-radius: 5px;
@@ -74,71 +87,74 @@
       margin-top: 10px;
     }
 
-    .login-link {
+    .login-link,
+    .redirect-employer {
       text-align: center;
-      margin-top: 30px;
+      margin-top: 20px;
       font-size: 14px;
     }
 
-    .login-link a {
+    .login-link a,
+    .redirect-employer a {
       color: #d90000;
       text-decoration: none;
       font-weight: bold;
+    }
+
+    .terms-container {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+    }
+
+    #terms-error {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="left">
-      <h2>Welcome to JobHive! (Job Seeker portal)</h2>
-      <p>Let's create an account to start your employment journey together!</p>
-      <form action="jobseekerregister.php" method="post">
-        <div class="form-group">
-          <label>Username</label><br>
-          <input type="text" placeholder="Username" name="username" required>
-        </div>
-        <div class="form-group">
-          <label>Email</label><br>
-          <input type="email" placeholder="Email" name="email" required>
-        </div>
-        <div class="form-group">
-          <label>Password</label><br>
-          <input type="password" placeholder="Password" name="password" required>
-        </div>
-        <div class="form-group">
-          <label>Re-enter password</label><br>
-          <input type="password" placeholder="Re-enter password here" name="retypepass" required>
-        </div>
-        <button class="btn-register">Register</button>
-      </form>
-      <div class="login-link">
-        Already have an account? <a href="jobseekerlogin.php">Login</a>
-      </div>
-      <div style="text-align: center; margin-top: 20px;">
-        <p>Are you an employer? <a href="employerpage.php">Click here to redirect</a></p>
-      </div>
-      <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
-        <div style="display: flex; align-items: center;">
-          <input type="checkbox" name="terms" value="accepted" style="margin-right: 5px;" required>
-          <small>I have read and agree to the <a href="term.html">Terms of Use</a> of JobHive</small>
-        </div>
-        <span id="terms-error" style="color: red; font-size: 0.9em; margin-top: 5px; display: none;"></span>
-      </div>
-    </div>
-    <div class="right">
-      <a href="index.php">
-        <img src="image/logo.png" alt="JobHive Logo" style="height: 70px; margin-bottom: 20px;">
-      </a>
-      <h2>Your Job<br>Is our Hive</h2>
-      <p>JobHive - The pionnering job portal destination for foreigners in Vietnam</p>
-      <div class="support">
-        <p>Having trouble registering?</p>
-        <p>Call us at: <strong>012 345 6789</strong></p>
-        <p>Email us at: <a href="mailto:support@jobhive.com">support@jobhive.com</a></p>
-      </div>
-    </div>
-  </div>
+  <?php include_once(__DIR__ . '/header_loginlogout/jobseeker.php'); ?>
+ <div class="main-content">
+   <div class="register-form-container">
+     <h2><?php echo $lang['jobseekerregister_title']; ?></h2>
+     <p><?php echo $lang['jobseekerregister_subtitle']; ?></p>
+     <form action="jobseekerregister.php" method="post">
+       <div class="form-group">
+         <label><?php echo $lang['username']; ?></label>
+         <input type="text" placeholder="<?php echo $lang['placeholder_username']; ?>" name="username" required>
+       </div>
+       <div class="form-group">
+         <label><?php echo $lang['email']; ?></label>
+         <input type="email" placeholder="<?php echo $lang['placeholder_email']; ?>" name="email" required>
+       </div>
+       <div class="form-group">
+         <label><?php echo $lang['password']; ?></label>
+         <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password" required>
+       </div>
+       <div class="form-group">
+         <label><?php echo $lang['reenter_password']; ?></label>
+         <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>" name="retypepass" required>
+       </div>
+       <div class="terms-container">
+         <label><input type="checkbox" name="terms" value="accepted" required> <?php echo $lang['terms_agreement_text']; ?> <a
+               href="term.html"><?php echo $lang['terms_of_use_link_text']; ?></a> <?php echo $lang['terms_of_use_after_link_text']; ?></label>
+         <span id="terms-error"></span>
+       </div>
+       <button class="btn-register"><?php echo $lang['button_register']; ?></button>
+     </form>
+     <div class="login-link">
+       <?php echo $lang['login_link_text_prefix']; ?> <a href="jobseekerlogin.php"><?php echo $lang['login_link_text']; ?></a>
+     </div>
+     <div class="redirect-employer">
+       <p><?php echo $lang['employer_redirect_text_prefix']; ?> <a href="employerpage.php"><?php echo $lang['employer_redirect_link_text']; ?></a></p>
+     </div>
+   </div>
+ </div>
 </body>
 
 </html>
@@ -152,12 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $password = $_POST['password'];
   $retypepass = $_POST['retypepass'];
 
-  // Validate input
   if (empty($username) || empty($email) || empty($password) || empty($retypepass)) {
-    echo "<script>
-      alert('All fields are required.');
-      window.history.back();
-      </script>";
+    echo "<script>alert('All fields are required.'); window.history.back();</script>";
     exit;
   }
 
@@ -176,15 +188,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       errorTooltip.style.fontSize = '12px';
       passwordField.parentNode.appendChild(errorTooltip);
       passwordField.focus();
-
-      setTimeout(() => {
-        errorTooltip.remove();
-      }, 3000);
-      </script>";
+      setTimeout(() => { errorTooltip.remove(); }, 3000);
+    </script>";
     exit;
   }
 
-  // Check if email already exists
   $stmt = $conn->prepare("SELECT * FROM user WHERE email = ?");
   $stmt->bind_param("s", $email);
   $stmt->execute();
@@ -205,37 +213,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       errorTooltip.style.fontSize = '12px';
       emailField.parentNode.appendChild(errorTooltip);
       emailField.focus();
-
-      setTimeout(() => {
-        errorTooltip.remove();
-      }, 3000);
-      </script>";
+      setTimeout(() => { errorTooltip.remove(); }, 3000);
+    </script>";
     exit;
   }
 
-  // Insert new user into the database
   $stmt = $conn->prepare("INSERT INTO user (username, user_type, email, password) VALUES (?, 'jobseeker', ?, ?)");
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
   $stmt->bind_param("sss", $username, $email, $hashed_password);
 
   if ($stmt->execute()) {
-    // Sử dụng JavaScript để hiển thị thông báo và chuyển hướng
-    echo "<script>
-        alert('Registration successful!');
-        window.location.href = 'jobseekerlogin.php';
-    </script>";
+    echo "<script>alert('Registration successful!'); window.location.href = 'jobseekerlogin.php';</script>";
     exit;
   } else {
-    echo "<script>
-        alert('Error: " . $stmt->error . "');
-    </script>";
+    echo "<script>alert('Error: " . $stmt->error . "');</script>";
     exit;
   }
 }
 
 $conn->close();
-
 ?>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
@@ -244,17 +242,15 @@ $conn->close();
 
     form.addEventListener('submit', function (event) {
       if (!termsCheckbox.checked) {
-        event.preventDefault(); // Ngăn chặn form submit
+        event.preventDefault();
         termsError.textContent = 'Please read the terms and check the box';
-        termsError.style.display = 'block'; // Hiển thị thông báo lỗi
-
-        // Thiết lập thời gian chờ 3 giây (3000 milliseconds) để ẩn thông báo
+        termsError.style.display = 'block';
         setTimeout(function () {
           termsError.style.display = 'none';
-          termsError.textContent = ''; // Xóa nội dung thông báo (tùy chọn)
+          termsError.textContent = '';
         }, 3000);
       } else {
-        termsError.style.display = 'none'; // Ẩn thông báo lỗi nếu checkbox được chọn
+        termsError.style.display = 'none';
       }
     });
   });

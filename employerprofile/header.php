@@ -1,12 +1,21 @@
 <?php
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
 
+// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+
+// Load file ngôn ngữ tương ứng
+include 'lang/' . $_SESSION['lang'] . '.php';
 ?>
 <style>
     .user-info {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-right: 50px;
     }
 
     .user-info img {
@@ -25,6 +34,7 @@
         position: relative;
         display: inline-block;
         cursor: pointer;
+        margin-right: 50px;
     }
 
     .dropdown-menu {
@@ -38,7 +48,7 @@
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         border-radius: 5px;
         flex-direction: column;
-        min-width: 120px;
+        min-width: 100px;
         z-index: 1000;
     }
 
@@ -81,6 +91,13 @@
         width: 100%;
     }
 
+    .header a:hover,
+    .header .guest-options a:hover,
+    .header .dropdown-menu a:hover {
+        color: #d70018 !important;
+        transition: color 0.1s;
+    }
+
     .navbar {
         display: flex;
         align-items: center;
@@ -107,20 +124,51 @@
             <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
-    <div style="display: flex; gap: 15px; margin-left: 50px;">
-        <a href="#" style="text-decoration: none; color: #333;">Tools</a>
-        <a href="contactus_employer.php" style="text-decoration: none; color: #333;">Contact Us</a>
-        <a href="feedback_employer.php" style="text-decoration: none; color: #333;">Feedback</a>
+    <div style="display: flex; gap: 50px; margin-left: 50px;">
+        <a href="#" style="text-decoration: none; color: #333;"><?php echo $lang['create_cv']; ?></a>
+        <a href="contactus_employer.php"
+            style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a>
+        <a href="feedback_employer.php" style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
     </div>
     <div style="display: flex; gap: 15px; margin-left: auto;">
-        <div class="user-dropdown">
-            <div class="user-info">
-                <img src="image/defaultavatar.jpg" alt="User Avatar">
-                <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
+        <?php if (isset($_SESSION['usernameemployer'])): ?>
+            <div class="user-dropdown">
+                <div class="user-info">
+                    <img src="image/defaultavatar.jpg" alt="User Avatar">
+                    <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
+                </div>
+                <div class="dropdown-menu">
+                    <?php
+                    $employerId = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
+                    ?>
+                    <a href="employerlogout.php"><?php echo $lang['logout']; ?></a>
+                </div>
             </div>
-            <div class="dropdown-menu">
-                <a href="employerlogout.php">Logout</a>
+            <button id="lang-switch-btn"
+                style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
+                <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+            </button>
+        <?php else: ?>
+            <div class="guest-options">
+                <a href="employerlogin.php" class="btn-login"><?php echo $lang['login/register_employer']; ?></a>
+                <a href="index.php" class="btn-register"><?php echo $lang['jobseeker_redirect']; ?></a>
+                <a href="admin/adminlogin.php" class="btn-register"><?php echo $lang['admin_login']; ?></a>
+                <button id="lang-switch-btn"
+                    style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
+                    <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+                </button>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
+
+    <script>
+        document.getElementById('lang-switch-btn').onclick = function () {
+            var currentLang = '<?php echo $_SESSION['lang']; ?>';
+            if (currentLang === 'vi') {
+                window.location.href = '?lang=en';
+            } else {
+                window.location.href = '?lang=vi';
+            }
+        };
+    </script>
 </div>

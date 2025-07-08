@@ -60,7 +60,7 @@
         border-color: #007bff;
         outline: none;
     }
-    button {
+    .btn-submit {
         background-color: #007bff;
         color: #fff;
         font-weight: bold;
@@ -110,7 +110,7 @@
         <label>Note (optional):</label>
         <textarea name="note" rows="4" placeholder="Enter your feedback..."></textarea>
 
-        <button type="submit">Submit Feedback</button>
+        <button class="btn-submit" type="submit">Submit Feedback</button>
     </form>
 
     <?php

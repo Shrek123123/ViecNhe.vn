@@ -567,6 +567,8 @@ $savedJobIdsJson = json_encode($savedJobIds);
                     </svg>
                   </button>
                   <script>
+                    // Lưu trữ biến lang trong window để sử dụng trong các script khác
+                    window.lang = <?= json_encode($lang) ?>;
                     // Các biến PHP truyền sang JavaScript
                     window.isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
                     window.currentUserId = <?php echo $userId; ?>;
@@ -598,7 +600,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
                           // Kiểm tra đăng nhập
                           if (!window.isLoggedIn) {
-                            showPopup('Please login to save jobs to your account.');
+                            showPopup(window.lang.login_to_save_jobs);
                             return;
                           }
 

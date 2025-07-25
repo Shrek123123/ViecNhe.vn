@@ -377,11 +377,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           <td><label for="jobType"><?= $lang['post_job_form_job_type']; ?>:</label></td>
           <td>
             <select id="jobType" name="jobType" required>
-              <option value="full-time">Full-time</option>
-              <option value="part-time">Part-time</option>
-              <option value="internship">Internship</option>
-              <option value="freelance">Freelance</option>
-              <option value="remote">Remote</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Internship">Internship</option>
+              <option value="Freelance">Freelance</option>
+              <option value="Remote">Remote</option>
             </select>
           </td>
         </tr>

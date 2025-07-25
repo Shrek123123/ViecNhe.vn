@@ -15,7 +15,7 @@ if (!isset($_SESSION['lang'])) {
 // Load file ngôn ngữ tương ứng
 include 'lang/' . $_SESSION['lang'] . '.php';
 $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. Please try again.';
-
+$invalidEmailMessage = $lang['login_invalid_email'] ?? 'Invalid email. Please try again.';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -55,7 +55,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     } else {
         // Email not found
-        echo "<script>alert('Invalid email. Please try again.');</script>";
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var errorDiv = document.createElement('div');
+                errorDiv.style.color = 'red';
+                errorDiv.style.textAlign = 'center';
+                errorDiv.style.marginTop = '10px';
+                errorDiv.innerText = " . json_encode($invalidEmailMessage) . ";
+                document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+            });
+            </script>";
     }
 
     // Close the statement and connection
@@ -69,39 +78,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title><?= $lang['jobseeker_login_title']; ?> - JobHive</title>
+    <title><?= $lang['jobseeker_login_title']; ?> - JobHive</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-   body {
+        body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* Changed to column to stack header and content */
-            min-height: 100vh; /* Use min-height to allow content to push height */
-            background-color: #f3f3f3; /* Optional: A default background for the whole page */
+            flex-direction: column;
+            /* Changed to column to stack header and content */
+            min-height: 100vh;
+            /* Use min-height to allow content to push height */
+            background-color: #f3f3f3;
+            /* Optional: A default background for the whole page */
         }
 
         /* --- Header Styling (adjust as needed for your actual header.php) --- */
         /* If your header takes up space, you might want to give it a background or fixed height */
-        header { /* Assuming header.php will render inside a <header> tag or similar */
+        header {
+            /* Assuming header.php will render inside a <header> tag or similar */
             width: 100%;
-            /* background-color: #ffffff; */ /* Example header background */
-            /* padding: 10px 20px; */ /* Example header padding */
-            /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */ /* Example header shadow */
+            /* background-color: #ffffff; */
+            /* Example header background */
+            /* padding: 10px 20px; */
+            /* Example header padding */
+            /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
+            /* Example header shadow */
         }
 
         /* --- Main Content Area for Login Form --- */
         .main-content {
-            flex: 1; /* Allows this area to take up remaining vertical space */
+            flex: 1;
+            /* Allows this area to take up remaining vertical space */
             display: flex;
-            justify-content: center; /* Horizontally center the login wrapper */
-            align-items: center; /* Vertically center the login wrapper */
-            padding: 20px; /* Add some padding around the form */
-            box-sizing: border-box; /* Include padding in element's total width and height */
+            justify-content: center;
+            /* Horizontally center the login wrapper */
+            align-items: center;
+            /* Vertically center the login wrapper */
+            padding: 20px;
+            /* Add some padding around the form */
+            box-sizing: border-box;
+            /* Include padding in element's total width and height */
         }
 
         .login-form-container {
@@ -111,7 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px; /* Max width for the form block */
+            max-width: 400px;
+            /* Max width for the form block */
             text-align: center;
             box-sizing: border-box;
         }
@@ -129,11 +151,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .form-group {
             margin-bottom: 20px;
-            text-align: left; /* Align labels and inputs to the left within their group */
+            text-align: left;
+            /* Align labels and inputs to the left within their group */
         }
 
         label {
-            display: block; /* Make label take full width and stack above input */
+            display: block;
+            /* Make label take full width and stack above input */
             margin-bottom: 8px;
             font-weight: bold;
             color: #333;
@@ -145,7 +169,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
-            box-sizing: border-box; /* Include padding and border in the element's total width */
+            box-sizing: border-box;
+            /* Include padding and border in the element's total width */
         }
 
         .btn-login {
@@ -157,12 +182,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px; /* More space above the button */
+            margin-top: 20px;
+            /* More space above the button */
             transition: background-color 0.3s ease;
         }
 
         .btn-login:hover {
-            background-color: #a60000; /* Darker red on hover */
+            background-color: #a60000;
+            /* Darker red on hover */
         }
 
         .forgot {
@@ -195,16 +222,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         @media (max-width: 600px) {
             .login-form-container {
                 padding: 25px;
-                margin: 0 15px; /* Add some margin on smaller screens */
+                margin: 0 15px;
+                /* Add some margin on smaller screens */
             }
         }
     </style>
 </head>
 
 <body>
-      <?php include_once(__DIR__ . '/header_loginlogout/jobseeker.php'); ?>
+    <?php include_once(__DIR__ . '/header_loginlogout/jobseeker.php'); ?>
 
-         <div class="main-content">
+    <div class="main-content">
         <div class="login-form-container">
             <h2><?= $lang['jobseeker_login_subtitle_h2']; ?></h2>
             <p><?= $lang['jobseeker_login_subtitle_p']; ?></p>
@@ -212,20 +240,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <form action="jobseekerlogin.php" method="POST">
                 <div class="form-group">
                     <label for="emailInput"><?= $lang['email']; ?></label>
-                    <input type="email"
-                           id="emailInput"
-                           name="email"
-                           placeholder="<?= $lang['jobseeker_login_email_placeholder']; ?>"
-                           required>
+                    <input type="email" id="emailInput" name="email"
+                        placeholder="<?= $lang['jobseeker_login_email_placeholder']; ?>" required>
                 </div>
 
                 <div class="form-group">
                     <label for="passwordInput"><?= $lang['password']; ?></label>
-                    <input type="password"
-                           id="passwordInput"
-                           name="password"
-                           placeholder="<?= $lang['jobseeker_login_password_placeholder']; ?>"
-                           required>
+                    <input type="password" id="passwordInput" name="password"
+                        placeholder="<?= $lang['jobseeker_login_password_placeholder']; ?>" required>
                     <div class="forgot">
                         <a href="jobseekerforgetpassword.php"><?= $lang['jobseeker_login_forgot_password']; ?></a>
                     </div>

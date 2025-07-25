@@ -5,7 +5,7 @@ session_start(); // Bắt đầu phiên làm việc nếu chưa được bắt �
 // Đảm bảo đường dẫn đến config.php là đúng
 // và config.php phải chứa session_start();
 require_once '../config.php';
-
+include '../lang/' . $_SESSION['lang'] . '.php';
 // Lấy jobseeker_id trực tiếp từ SESSION
 // Cần đảm bảo session_start() đã được gọi và $_SESSION['jobseeker_id'] đã được set
 $jobseeker_id = $_SESSION['jobseeker_id'] ?? 0; // Sử dụng toán tử null coalescing để gán 0 nếu không tồn tại
@@ -17,7 +17,7 @@ if ($jobseeker_id <= 0) {
 ?>
 
 <div style="padding: 30px;">
-    <h2 style="color: #b23b3b; margin-bottom: 20px;">My Applications</h2>
+    <h2 style="color: #b23b3b; margin-bottom: 20px;"><?php echo $lang['my_applications'] ?></h2>
     <div style="display: flex; flex-direction: column; gap: 20px;">
         <?php
         // Kiểm tra kết nối database
@@ -50,7 +50,7 @@ if ($jobseeker_id <= 0) {
                 $result = $stmt->get_result();
 
                 if ($result->num_rows === 0) {
-                    echo '<div style="color: #888; text-align: center; padding: 20px;">Bạn chưa nộp đơn ứng tuyển nào.</div>';
+                    echo '<div style="color: #888; text-align: center; padding: 20px;">' . $lang['no_applications'] . '</div>';
                 } else {
                     $counter = 0; // Để đếm số thứ tự ứng tuyển
                     while ($row = $result->fetch_assoc()):
@@ -72,56 +72,62 @@ if ($jobseeker_id <= 0) {
 
                         $display_status = '';
                         $status_color = '#6c757d';
+
                         switch ($app_status) {
                             case 'pending':
-                                $display_status = '⏳ Đang chờ phản hồi';
-                                $status_color = '#ffc107'; // Yellow
+                                $display_status = $lang['pending'];
+                                $status_color = '#ffc107';
                                 break;
                             case 'interviewed':
-                                $display_status = '✅ Đã phỏng vấn';
-                                $status_color = '#007bff'; // Blue
+                                $display_status = $lang['interviewed'];
+                                $status_color = '#007bff';
                                 break;
                             case 'hired':
-                                $display_status = '🎉 Đã được tuyển';
-                                $status_color = '#28a745'; // Green
+                                $display_status = $lang['hired'];
+                                $status_color = '#28a745';
                                 break;
                             case 'rejected':
-                                $display_status = '❌ Đã bị từ chối';
-                                $status_color = '#dc3545'; // Red
+                                $display_status = $lang['rejected'];
+                                $status_color = '#dc3545';
                                 break;
                             default:
-                                $display_status = '❓ Trạng thái không xác định';
+                                $display_status = $lang['unknown_status'];
                                 $status_color = '#6c757d';
                                 break;
                         }
-                    ?>
-                        <div class="application-card" style="background: #fff; border: 1px solid #eee; border-left: 5px solid #b23b3b; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        ?>
+                        <div class="application-card"
+                            style="background: #fff; border: 1px solid #eee; border-left: 5px solid #b23b3b; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                             <div style="font-size: 1.1em; font-weight: bold; color: #b23b3b; margin-bottom: 10px;">
-                                📝 Đơn ứng tuyển #<?php echo $counter; ?> (lúc <?php echo $submitted_time_full; ?>)
+                                <?= $lang['don_ung_tuyen'] ?>                <?php echo $counter; ?> (<?= $lang['at'] ?>
+                                <?php echo $submitted_time_full; ?>)
                             </div>
                             <div style="margin-bottom: 5px;">
-                                💼 Vị trí:
-                                <a href="jobdetail.php?id=<?php echo $job_id; ?>" style="color: #007bff; text-decoration: none; font-weight: bold;">
-                                    <?php echo $job_title; ?> tại <?php echo $company_name; ?> ở <?php echo $job_location; ?>
+                                <?= $lang['vi_tri'] ?>:
+                                <a href="jobdetail.php?id=<?php echo $job_id; ?>"
+                                    style="color: #007bff; text-decoration: none; font-weight: bold;">
+                                    <?php echo $job_title; ?>                 <?= $lang['tai'] ?>                 <?php echo $job_location; ?>
                                 </a>
                             </div>
-                            <div style="margin-bottom: 5px;">📅 Đã nộp vào: <?php echo $submitted_date_only; ?></div>
+                            <div style="margin-bottom: 5px;"><?= $lang['submitted_on'] ?><?php echo $submitted_date_only; ?></div>
                             <div style="margin-bottom: 5px;">
-                                📄 CV đã nộp:
+                                <?= $lang['submitted_cv'] ?>
                                 <?php if ($cv_file != '#'): ?>
-                                    <a href="<?php echo $cv_file; ?>" target="_blank" style="color: #007bff; text-decoration: none;">[Xem chi tiết]</a>
+                                    <a href="<?php echo $cv_file; ?>" target="_blank"
+                                        style="color: #007bff; text-decoration: none;"><?= $lang['xem_chi_tiet'] ?></a>
                                 <?php else: ?>
-                                    <span>[Không có]</span>
+                                    <span><?= $lang['khong_co'] ?></span>
                                 <?php endif; ?>
                             </div>
                             <div style="margin-bottom: 5px;">
-                                📌 Trạng thái: <span style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo $display_status; ?></span>
+                                <?= $lang['trang_thai_application'] ?><span
+                                    style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo $display_status; ?></span>
                             </div>
-                            <div style="margin-bottom: 5px;">👤 Tên: <?php echo $fullname; ?></div>
+                            <div style="margin-bottom: 5px;"><?= $lang['ten_jobseekerprofile'] ?><?php echo $fullname; ?></div>
                             <div style="margin-bottom: 5px;">✉️ Email: <?php echo $email; ?></div>
-                            <div>📞 Số điện thoại: <?php echo $phonenumber; ?></div>
+                            <div><?= $lang['so_dien_thoai_jobseekerprofile'] ?><?php echo $phonenumber; ?></div>
                         </div>
-                    <?php
+                        <?php
                     endwhile;
                 }
                 $stmt->close();

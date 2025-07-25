@@ -30,27 +30,32 @@ $jobseeker_id = $_SESSION['jobseeker_id'] ?? ''; // Ví dụ: jobseeker_id của
 $profile_data = null; // Khởi tạo biến profile_data
 $user_email = "Email not available"; // Giá trị mặc định
 $is_email_verified = false; // Giá trị mặc định
-$user_display_name = "My Profile"; // Giá trị mặc định cho tên người dùng
 
-// Truy vấn dữ liệu từ cả hai bảng jobseeker_profile và user
-// Sử dụng JOIN để lấy dữ liệu liên quan
-$sql = "SELECT jp.*, u.email, u.verify_email, u.username 
-        FROM jobseeker_profile jp 
-        JOIN user u ON jp.jobseeker_id = u.id 
-        WHERE jp.jobseeker_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $jobseeker_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$sql_user = "SELECT email, verify_email, username FROM user WHERE id = ?";
+$stmt_user = $conn->prepare($sql_user);
+$stmt_user->bind_param("i", $jobseeker_id);
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
 
-if ($result->num_rows > 0) {
-    $profile_data = $result->fetch_assoc();
-    $user_email = $profile_data['email'];
-    $is_email_verified = (bool) $profile_data['verify_email']; // Ép kiểu sang boolean
-    $user_display_name = htmlspecialchars($profile_data['username']); // Lấy username từ bảng user
+if ($result_user->num_rows > 0) {
+    $user_data = $result_user->fetch_assoc();
+    $user_email = $user_data['email'];
+    $is_email_verified = (bool) $user_data['verify_email'];
+    $user_display_name = htmlspecialchars($user_data['username']);
 }
 
-$stmt->close();
+$stmt_user->close();
+
+// $profiledata của bảng jobseeker_profile
+$sql_profile = "SELECT * FROM jobseeker_profile WHERE jobseeker_id = ?";
+$stmt_profile = $conn->prepare($sql_profile);
+$stmt_profile->bind_param("i", $jobseeker_id);
+$stmt_profile->execute();
+$result_profile = $stmt_profile->get_result();
+
+if ($result_profile->num_rows > 0) {
+    $profile_data = $result_profile->fetch_assoc();
+}
 // KẾT THÚC: KHỐI MÃ PHP XỬ LÝ DỮ LIỆU
 ?>
 <!DOCTYPE html>
@@ -101,6 +106,12 @@ $stmt->close();
         .top-bar .status {
             font-size: 11px;
             color: #ffdddd;
+        }
+
+        .main_profile_pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
         }
 
         .main {
@@ -196,50 +207,83 @@ $stmt->close();
             color: #fff;
             font-weight: bold;
         }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 100px;
+            /* hoặc tuỳ bạn */
+            height: 100px;
+            cursor: pointer;
+        }
+
+        .avatar-circle img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .camera-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 24px;
+            /* tuỳ chỉnh kích cỡ */
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            padding: 2px;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 
 <body>
     <?php
-    require_once 'jobseekerprofile/header.php';
+    include 'jobseekerprofile/header.php';
     ?>
     <!-- Top bar -->
     <div class="top-bar">
-        <div class="title">Jobseeker profile</div>
+        <div class="title"><?= $lang['jobseekerprofile'] ?></div>
         <div class="company">
-            <img src="https://via.placeholder.com/34" alt="jobseeker logo">
             <?php
             // Lấy jobseeker_id từ session hoặc từ URL
             $jobseeker_id = $_SESSION['jobseeker_id'] ?? 0;
 
             // Lấy ảnh đại diện jobseeker
-            $sql = "SELECT profile_pic FROM jobseeker_profile WHERE id = $jobseeker_id LIMIT 1";
+            $sql = "SELECT profile_pic FROM jobseeker_profile WHERE jobseeker_id = $jobseeker_id LIMIT 1";
             $result = $conn->query($sql);
-            $profile_pic = "https://via.placeholder.com/34";
+            $profile_pic = "";
             if ($result && $row = $result->fetch_assoc()) {
-                $profile_pic = !empty($row['profile_pic']) ? htmlspecialchars($row['profile_pic']) : $profile_pic;
+                // Nếu có ảnh thì lấy đường dẫn uploads/
+                if (!empty($row['profile_pic'])) {
+                    // Kiểm tra nếu đã có đường dẫn uploads/ thì không thêm lại
+                    if (strpos($row['profile_pic'], 'uploads/') === 0) {
+                        $profile_pic = $row['profile_pic'];
+                    } else {
+                        $profile_pic = 'uploads/' . basename($row['profile_pic']);
+                    }
+                }
             }
-            $conn->close();
-            $jobseeker_name = "Tên ứng viên";
+
+            // KHÔNG đóng kết nối ở đây nếu còn dùng $conn ở dưới
             ?>
-            <img src="<?php echo $profile_pic; ?>" alt="jobseeker logo">
+            <img src="<?php echo htmlspecialchars($profile_pic); ?>" alt="jobseeker logo">
             <div class="company-info">
-                <div><strong><?php echo $jobseeker_name; ?></strong></div>
+                <div><strong><?php echo $user_display_name; ?></strong></div>
                 <div class="status">● Online</div>
             </div>
         </div>
     </div>
-
     <!-- Main layout -->
     <div class="main">
         <!-- Sidebar -->
         <div class="sidebar">
-            <button id="btn-myprofile" class="active">My profile</button>
-            <button id="btn-myapplications">My applications</button>
-            <button id="btn-savedjobs">Saved jobs</button>
-            <button id="btn-changeinfo">Change person information</button>
+            <button id="btn-myprofile" class="active"><?= $lang['btn_myprofile'] ?></button>
+            <button id="btn-myapplications"><?= $lang['btn_myapplications'] ?></button>
+            <button id="btn-savedjobs"><?= $lang['btn_savedjobs'] ?></button>
+            <button id="btn-changeinfo"><?= $lang['btn_changeinfo'] ?></button>
 
-            <h3>Applied jobs</h3>
+            <h3><?= $lang['jobseekerprofile_appliedjobs'] ?></h3>
 
             <!-- Applicants -->
             <div class="applicant-card">
@@ -284,37 +328,37 @@ $stmt->close();
 
             <div class="view-more">View more</div>
         </div>
-
         <!-- Right side content -->
         <div class="content-area">
             <div style="padding: 20px; text-align: center;">
                 <div
                     style="background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 20px; max-width: 800px; margin-left: auto; margin-right: auto;">
                     <div style="flex-shrink: 0; text-align: center;">
-                        <?php if (!empty($profile_data['profile_pic'])): ?>
-                            <div
-                                style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; margin: 0 auto 10px;">
-                                <img src="<?php echo htmlspecialchars($profile_data['profile_pic']); ?>"
-                                    alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover;">
+                        <form id="uploadAvatarForm" action="jobseekerprofile/upload-avatar.php" method="POST"
+                            enctype="multipart/form-data">
+                            <input type="file" name="avatar" id="avatarInput" accept=".jpg,.jpeg,.png,.svg,.pdf"
+                                style="display: none;" onchange="handleAvatarChange(event)">
+                            <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click();">
+                                <?php
+                                // Xác định đường dẫn ảnh đại diện
+                                $avatar_src = "https://via.placeholder.com/80?text=Avatar";
+                                if (!empty($profile_data['profile_pic'])) {
+                                    if (strpos($profile_data['profile_pic'], 'uploads/') === 0) {
+                                        $avatar_src = $profile_data['profile_pic'];
+                                    } else {
+                                        $avatar_src = 'uploads/' . basename($profile_data['profile_pic']);
+                                    }
+                                }
+                                ?>
+                                <div class="avatar-circle">
+                                    <img src="<?= htmlspecialchars($avatar_src); ?>" alt="Avatar">
+                                </div>
+                                <img src="image/camera.svg" class="camera-icon" alt="camera icon">
                             </div>
-                        <?php else: ?>
-                            <div
-                                style="width: 80px; height: 80px; background-color: #f0f0f0; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#cccccc"
-                                    viewBox="0 0 16 16">
-                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-                                    <path fill-rule="evenodd"
-                                        d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
-                                </svg>
-                            </div>
-                        <?php endif; ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#6c757d"
-                            viewBox="0 0 16 16" style="margin-top: -30px; margin-left: 50px;">
-                            <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
-                            <path
-                                d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v9.5l-1.074-.742A2 2 0 0 0 13 12c-.729 0-1.4.407-1.757 1.058L9.798 16H2.002a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" />
-                        </svg>
+                        </form>
+
                     </div>
+
 
                     <div style="flex-grow: 1; text-align: left;">
                         <div
@@ -334,6 +378,8 @@ $stmt->close();
                         <div style="display: flex; flex-wrap: wrap; gap: 15px;">
                             <div style="flex: 1 1 45%;">
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                    <img src="image/email.svg" alt="email icon"
+                                        style="width: 16px; height: 16px; margin-right: 5px;">
                                     <?php echo htmlspecialchars($user_email); ?>
                                     <?php if ($is_email_verified): ?>
                                         <img src="image/greentick.png" alt="green tich icon"
@@ -341,32 +387,40 @@ $stmt->close();
                                     <?php endif; ?>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <?php echo !empty($profile_data['phone_number']) ? htmlspecialchars($profile_data['phone_number']) : 'Add mobile phone'; ?>
+                                    <img src="image/phone.svg" alt="phone icon"
+                                        style="width: 16px; height: 16px; margin-right: 5px;">
+                                    <?php echo !empty($profile_data['phone_number']) ? htmlspecialchars($profile_data['phone_number']) : $lang['addmobilephone']; ?>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <?php echo !empty($profile_data['date_of_birth']) ? htmlspecialchars($profile_data['date_of_birth']) : 'Add date of birth'; ?>
+                                    <img src="image/birthday.svg" alt="birthday icon"
+                                        style="width: 16px; height: 16px; margin-right: 5px;">
+                                    <?php echo !empty($profile_data['date_of_birth']) ? htmlspecialchars($profile_data['date_of_birth']) : $lang['adddateofbirth']; ?>
                                 </div>
                             </div>
 
                             <div style="flex: 1 1 45%;">
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <?php echo !empty($profile_data['address']) ? htmlspecialchars($profile_data['address']) : 'Add current address'; ?>
+                                    <img src="image/address.svg" alt="address icon"
+                                        style="width: 16px; height: 16px; margin-right: 5px;">
+                                    <?php echo !empty($profile_data['address']) ? htmlspecialchars($profile_data['address']) : $lang['addcurrentaddress']; ?>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-
-                                    <?php echo !empty($profile_data['gender']) ? htmlspecialchars($profile_data['gender']) : 'Add gender'; ?>
+                                    <img src="image/gender.svg" alt="gender icon"
+                                        style="width: 16px; height: 16px; margin-right: 5px;">
+                                    <?php echo !empty($profile_data['gender']) ? htmlspecialchars($profile_data['gender']) : $lang['addgender']; ?>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-
-                                    <?php echo !empty($profile_data['marital_status']) ? htmlspecialchars($profile_data['marital_status']) : 'Add marital status'; ?>
+                                    <img src="image/marriage.svg" alt="marital status icon"
+                                        style="width: 16px; margin-right: 5px;">
+                                    <?php echo !empty($profile_data['marital_status']) ? htmlspecialchars($profile_data['marital_status']) : $lang['addmaritalstatus']; ?>
                                 </div>
                             </div>
                         </div>
 
                         <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 15px;">
-                            <div style="font-size: 1.2em; font-weight: bold;">Nội dung description</div>
+                            <div style="font-size: 1.2em; font-weight: bold;"><?= $lang['profile_description'] ?></div>
                             <p style="margin-top: 10px; color: #6c757d;">
-                                <?php echo !empty($profile_data['profile_description']) ? htmlspecialchars($profile_data['profile_description']) : 'Đây là nơi bạn có thể thêm mô tả chi tiết về bản thân hoặc hồ sơ của mình.'; ?>
+                                <?php echo !empty($profile_data['profile_description']) ? htmlspecialchars($profile_data['profile_description']) : $lang['profile_description_default']; ?>
                             </p>
                         </div>
                     </div>
@@ -374,17 +428,14 @@ $stmt->close();
 
                 <div
                     style="background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
-                    <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">My CV</div>
+                    <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 15px;"><?php echo $lang['my_cv']; ?>
+                    </div>
                     <div style="border: 2px dashed #e0e0e0; border-radius: 8px; padding: 40px 20px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#8a2be2"
-                            viewBox="0 0 16 16" style="margin-bottom: 10px;">
-                            <path fill-rule="evenodd"
-                                d="M7.646 5.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L5.354 8.854a.5.5 0 1 1-.708-.708z" />
-                            <path fill-rule="evenodd"
-                                d="M1.5 14.5A1.5 1.5 0 0 0 3 16h10a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 13 4h-3.5a.5.5 0 0 1-.5-.5v-3A1.5 1.5 0 0 0 8.5 0h-7A1.5 1.5 0 0 0 0 1.5v13zm9-13V2A1.5 1.5 0 0 0 11.5 3h2A1.5 1.5 0 0 0 15 1.5v-1A.5.5 0 0 0 14.5 0h-7A.5.5 0 0 0 7 0zM7 0h1.5A1.5 1.5 0 0 1 10 1.5V3h-.5a.5.5 0 0 0-.5.5v2A1.5 1.5 0 0 1 7 7h-2A1.5 1.5 0 0 1 3.5 5.5v-2A.5.5 0 0 0 3 3V1.5A1.5 1.5 0 0 1 4.5 0H7z" />
-                        </svg>
-                        <div style="color: #8a2be2; font-weight: bold; margin-bottom: 5px;">Upload existing CV</div>
-                        <div style="font-size: 0.9em; color: #6c757d;">Supported formats: doc, docx, pdf, maximum 5MB
+                        <img src="image/Uploadlogo2.svg" alt="Upload Icon" width="20" height="20">
+                        <div style="color: #ff0000ff; font-weight: bold; margin-bottom: 5px;">
+                            <?php echo $lang['upload_existing_CV'] ?>
+                        </div>
+                        <div style="font-size: 0.9em; color: #6c757d;"><?php echo $lang['supported_format_file'] ?>
                         </div>
                     </div>
                 </div>
@@ -440,11 +491,71 @@ $stmt->close();
     </script>
     <script src="jobseekerprofile/removejob.js"></script>
     <script src="jobseekerprofile/myprofile-btn.js"></script>
+    <script>
+        var lang = {
+            upload_success: "<?= $lang['upload_success'] ?>"
+        };
+    </script>
+    <script>
+        function handleAvatarChange(event) {
+            const file = event.target.files[0];
+            const validTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+            const maxSize = 5 * 1024 * 1024;
+
+            if (!file) return;
+
+            if (!validTypes.includes(file.type)) {
+                alert("Chỉ cho phép JPG, PNG, SVG.");
+                return;
+            }
+
+            if (file.size > maxSize) {
+                alert("File phải nhỏ hơn 5MB.");
+                return;
+            }
+
+            // Hiển thị ảnh preview trước khi upload
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imgContainer = event.target.closest("form").querySelector("div[onclick]");
+                imgContainer.innerHTML = '<img src="' + e.target.result + '" style="width: 100%; height: 100%; object-fit: cover;">';
+            };
+            reader.readAsDataURL(file);
+
+            // Tạo FormData từ form upload
+            const form = document.getElementById("uploadAvatarForm");
+            const formData = new FormData(form);
+
+            // Gửi ảnh qua fetch đến PHP
+            fetch('jobseekerprofile/upload-avatar.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message || lang.upload_success);
+                        location.reload(); // Tải lại trang để cập nhật ảnh
+                        // Nếu muốn cập nhật ảnh avatar ở chỗ khác nữa (ví dụ topbar), thì làm tiếp ở đây
+                        // document.querySelector('.top-bar .company img').src = data.path;
+                    } else {
+                        alert("Lỗi khi tải ảnh: " + (data.message || "Không rõ lỗi."));
+                    }
+                })
+                .catch(err => {
+                    console.error("Lỗi kết nối:", err);
+                    alert("Lỗi kết nối khi tải ảnh.");
+                });
+        }
+    </script>
+
+
 
 </body>
 <footer>
     <?php
     require_once 'jobseekerprofile/footer.php';
     ?>
+</footer>
 
 </html>

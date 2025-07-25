@@ -1,13 +1,18 @@
 <?php
 require_once '../config.php'; // Đảm bảo config.php được bao gồm
+// Check for ?lang=vi or ?lang=en in URL and update session
+session_start();
+include '../lang/' . $_SESSION['lang'] . '.php';
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
+// Load file ngôn ngữ tương ứng
 ?>
 <div style="padding: 30px; border-radius: 8px;">
-    <h2 style="color: #b23b3b; margin-bottom: 20px;">My Job Posts</h2>
+    <h2 style="color: #b23b3b; margin-bottom: 20px;"><?= $lang['my_job_post'] ?></h2>
     <div style="display: flex; flex-direction: column; gap: 18px;">
         <?php
         // Get employer id from URL (?id=...)
         // Get employer id from session
-        session_start();
         $employer_id = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
 
         // If no employer id, do not query
@@ -40,33 +45,59 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
                     $job_location = htmlspecialchars($row['job_location']);
                     $job_status = htmlspecialchars($row['status']); // Get the job status
                     // Use created_at if last_updated_at is empty or null
-                    $updated_at_str = !empty($row['last_updated_at']) ? $row['last_updated_at'] : $row['created_at'];
-                    $updated_at = new DateTime($updated_at_str);
-
-                    $updated = $updated_at->diff($now);
-                    if ($updated->days > 0) {
-                        $updated_str = "Updated {$updated->days} days ago";
-                    } elseif ($updated->h > 0) {
-                        $updated_str = "Updated {$updated->h} hours ago";
-                    } elseif ($updated->i > 0) {
-                        $updated_str = "Updated {$updated->i} minutes ago";
+                    $last_updated = strtotime($row['last_updated_at']);
+                    $now = time();
+                    $diff = $now - $last_updated;
+                    if ($diff < 60) {
+                        $updated_str = sprintf($lang['updated_now'], $diff);
+                    } elseif ($diff < 3600) {
+                        $minutes = floor($diff / 60);
+                        $updated_str = sprintf($lang['updated_minutes'], $minutes);
+                    } elseif ($diff < 86400) {
+                        $hours = floor($diff / 3600);
+                        $updated_str = sprintf($lang['updated_hours'], $hours);
                     } else {
-                        $updated_str = "Updated just now";
+                        $days = floor($diff / 86400);
+                        $updated_str = sprintf($lang['updated_days'], $days);
                     }
+                    // $updated_at_str = !empty($row['last_updated_at']) ? $row['last_updated_at'] : $row['created_at'];
+                    // $updated_at = new DateTime($updated_at_str);
+                    // $updated = $updated_at->diff($now);
+                    // if ($updated->days > 0) {
+                    //     $updated_str = "Updated {$updated->days} days ago";
+                    // } elseif ($updated->h > 0) {
+                    //     $updated_str = "Updated {$updated->h} hours ago";
+                    // } elseif ($updated->i > 0) {
+                    //     $updated_str = "Updated {$updated->i} minutes ago";
+                    // } else {
+                    //     $updated_str = "Updated just now";
+                    // }
 
                     // Determine status color for display
-                    $status_color = '#6c757d'; // Default grey
-                    switch ($job_status) {
+                    $job_status_raw = htmlspecialchars($row['status']); // Trạng thái gốc từ DB
+                    $status_color = '#6c757d'; // Default màu xám
+        
+                    // Mảng ánh xạ status trong DB sang key trong file ngôn ngữ
+                    $status_lang_keys = [
+                        'pending_review' => 'pending_review',
+                        'approved' => 'approved',
+                        'rejected' => 'rejected',
+                    ];
+
+                    // Đặt màu dựa trên status gốc
+                    switch ($job_status_raw) {
                         case 'pending_review':
-                            $status_color = '#ffc107';
-                            break; // Yellow
+                            $status_color = '#ffc107'; // Vàng
+                            break;
                         case 'approved':
-                            $status_color = '#28a745';
-                            break; // Green
+                            $status_color = '#28a745'; // Xanh lá
+                            break;
                         case 'rejected':
-                            $status_color = '#dc3545';
-                            break; // Red
+                            $status_color = '#dc3545'; // Đỏ
+                            break;
                     }
+                    // Lấy bản dịch từ file ngôn ngữ
+                    $job_status = isset($status_lang_keys[$job_status_raw]) ? $lang[$status_lang_keys[$job_status_raw]] : $job_status_raw;
                     ?>
                     <div
                         style="background: #fff; border: 1px solid black; border-radius: 10px; padding: 18px 18px 18px 0; display: flex; align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
@@ -84,7 +115,7 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
                                     style="background: #eee; color: #b23b3b; border-radius: 6px; padding: 2px 10px; font-size: 12px;"><?php echo htmlspecialchars($job_location); ?></span>
                                 <span
                                     style="background: #eee; color: #b23b3b; border-radius: 6px; padding: 2px 10px; font-size: 12px;">
-                                    <?php echo $days_left > 0 ? "$days_left days left to apply" : "Application closed"; ?>
+                                    <?php echo $days_left > 0 ? sprintf($lang['job_days_left'], $days_left) : $lang['job_closed']; ?>
                                 </span>
                                 <span
                                     style="background: #eee; color: #888; border-radius: 6px; padding: 2px 10px; font-size: 12px;"><?php echo $updated_str; ?></span>
@@ -93,17 +124,17 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
                                 <?php echo $salary; ?>
                             </div>
                             <div style="font-size: 14px;">
-                                Status: <span style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo $job_status; ?></span>
+                                <?= $lang['status'] ?>: <span
+                                    style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo $job_status; ?></span>
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-left: 18px; align-items: flex-end;">
                             <button class="edit-job-button" data-jobid="<?php echo $job_id; ?>"
-                                style="background: #d90000; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">Edit</button>
+                                style="background: #d90000; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;"><?= $lang['edit'] ?></button>
                             <button class="delete-job-button" data-jobid="<?php echo $job_id; ?>"
-                                style="background: #fff; color: #d90000; border: 1px solid #d90000; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">Delete</button>
+                                style="background: #fff; color: #d90000; border: 1px solid #d90000; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;"><?= $lang['delete'] ?></button>
                             <button id="btn-jobpostsapplications" data-jobid="<?php echo $job_id; ?>"
-                                style="background: #b23b3b; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">Check
-                                submitted applications</button>
+                                style="background: #b23b3b; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;"><?= $lang['check_submitted_applications'] ?></button>
                         </div>
                     </div>
                 <?php endwhile;
@@ -149,7 +180,8 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
         var jobId = $(this).data('jobid');
         var employerId = <?php echo $employer_id; ?>; // Lấy employer_id từ PHP
 
-        if (confirm('Are you sure you want to delete this job post? This action cannot be undone.')) {
+        var confirmDeleteMsg = <?php echo json_encode($lang['confirm-deletejobpost']); ?>;
+        if (confirm(confirmDeleteMsg)) {
             if (jobId && employerId) {
                 $.ajax({
                     url: 'employerprofile/delete_job_post.php', // Đường dẫn tới file PHP xử lý xóa
@@ -179,5 +211,4 @@ require_once '../config.php'; // Đảm bảo config.php được bao gồm
         }
     });
     // --- Kết thúc bổ sung ---
-
 </script>

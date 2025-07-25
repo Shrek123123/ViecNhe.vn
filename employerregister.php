@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jobseeker Register - JobHive</title>
+    <title>Employer Register - JobHive</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -12,52 +12,77 @@
             margin: 0;
             padding: 0;
             display: flex;
-        }
-
-        .container {
-            display: flex;
-            flex: 1;
-        }
-
-        .left {
-            flex: 1;
-            background: #f3f3f3;
-            padding: 40px;
-            display: flex;
             flex-direction: column;
-            justify-content: center;
+            min-height: 100vh;
+            background-color: #f3f3f3;
         }
 
-        .right {
+        .main-content {
             flex: 1;
-            background: white;
-            color: #8B0000;
-            padding: 40px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .register-form-container {
+            background: #ffffff;
+            color: #8B0000;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
             text-align: center;
+            box-sizing: border-box;
         }
 
         h2 {
             color: #d90000;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #555;
+        }
+
+        h3 {
+            color: #333;
+            text-align: left;
+            margin-top: 25px;
+            margin-bottom: 15px;
         }
 
         .form-group {
-            margin-bottom: 0px;
+            margin-bottom: 20px;
+            text-align: left;
+            position: relative;
         }
 
-        input {
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            box-sizing: border-box;
+            background: #fff;
         }
 
         input[type="checkbox"] {
             width: auto;
+            margin-right: 5px;
             padding: 0;
         }
 
@@ -65,7 +90,7 @@
             width: 100%;
             padding: 12px;
             background-color: #d90000;
-            color: white;
+            color: #ffffff;
             font-size: 18px;
             border: none;
             border-radius: 5px;
@@ -73,101 +98,139 @@
             margin-top: 10px;
         }
 
-        .login-link {
+        .login-link,
+        .redirect-jobseeker {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 20px;
             font-size: 14px;
         }
 
-        .login-link a {
+        .login-link a,
+        .redirect-jobseeker a {
             color: #d90000;
             text-decoration: none;
             font-weight: bold;
         }
 
-        select {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
+        .terms-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #terms-error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-tooltip {
+            position: absolute;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 5px;
+            border: 1px solid #f5c6cb;
             border-radius: 5px;
-            border: 1px solid #ccc;
-            background: #fff;
-            margin-bottom: 10px;
+            margin-top: 5px;
+            font-size: 12px;
+            z-index: 10;
+            left: 0;
+            right: 0;
+            text-align: left;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="left">
-            <h2>Welcome to JobHive! (Employer portal)</h2>
-            <p>Let's create an account to start your recruitment journey together!</p>
+    <?php
+    include_once(__DIR__ . '/header_loginlogout/employer.php');
+    ?>
+
+    <div class="main-content">
+        <div class="register-form-container">
+            <h2><?php echo $lang['employerregister_title']; ?></h2>
+            <p><?php echo $lang['employerregister_subtitle']; ?></p>
             <form action="employerregister.php" method="post">
+                <h3><?php echo $lang['account_information']; ?></h3>
                 <div class="form-group">
-                    <h3>Account information</h3>
-                    <label>Username</label><br>
-                    <input type="text" placeholder="Username" name="username" required>
+                    <label><?php echo $lang['username']; ?></label>
+                    <input type="text" placeholder="<?php echo $lang['placeholder_username']; ?>" name="username"
+                        required>
                 </div>
                 <div class="form-group">
-                    <label>Email</label><br>
-                    <input type="email" placeholder="Email" name="email" required>
+                    <label><?php echo $lang['email']; ?></label>
+                    <input type="email" placeholder="<?php echo $lang['placeholder_email']; ?>" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label>Password</label><br>
-                    <input type="password" placeholder="Password" name="password" required>
+                    <label><?php echo $lang['password']; ?></label>
+                    <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password"
+                        required>
                 </div>
                 <div class="form-group">
-                    <label>Re-enter password</label><br>
-                    <input type="password" placeholder="Re-enter password here" name="retypepass" required>
+                    <label><?php echo $lang['reenter_password']; ?></label>
+                    <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>"
+                        name="retypepass" required>
                 </div>
-                <h3>Company information</h3>
+
+                <h3><?php echo $lang['company_information']; ?></h3>
                 <div class="form-group">
-                    <label>Company name</label><br>
-                    <input type="text" placeholder="Company name" name="companyname" required>
+                    <label><?php echo $lang['company_name']; ?></label>
+                    <input type="text" placeholder="<?php echo $lang['placeholder_company_name']; ?>" name="companyname"
+                        required>
                 </div>
                 <div class="form-group">
-                    <label>Company address</label><br>
-                    <input type="text" placeholder="Company address" name="companyaddress" required>
+                    <label><?php echo $lang['company_address']; ?></label>
+                    <input type="text" placeholder="<?php echo $lang['placeholder_company_address']; ?>"
+                        name="companyaddress" required>
                 </div>
                 <div class="form-group">
-                    <label>Field of work</label><br>
+                    <label><?php echo $lang['field_of_work']; ?></label>
                     <select name="industry" required>
-                        <option value="">Choose an industry</option>
-                        <option value="IT">IT & Software</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Healthcare">Healthcare</option>
-                        <option value="Government & Public Sector">Government & Public Sector</option>
+                        <option value=""><?php echo $lang['choose_industry']; ?></option>
+                        <option value="IT"><?php echo $lang['industry_it_software']; ?></option>
+                        <option value="Marketing"><?php echo $lang['industry_marketing']; ?></option>
+                        <option value="Finance"><?php echo $lang['industry_finance']; ?></option>
+                        <option value="Healthcare"><?php echo $lang['industry_healthcare']; ?></option>
+                        <option value="Government & Public Sector"><?php echo $lang['industry_government']; ?></option>
+                        <option value="Education"><?php echo $lang['industry_education']; ?></option>
+                        <option value="Manufacturing"><?php echo $lang['industry_manufacturing']; ?></option>
+                        <option value="Retail"><?php echo $lang['industry_retail']; ?></option>
+                        <option value="Hospitality"><?php echo $lang['industry_hospitality']; ?></option>
+                        <option value="Telecommunications"><?php echo $lang['industry_telecommunications']; ?></option>
+                        <option value="Construction"><?php echo $lang['industry_construction']; ?></option>
+                        <option value="Media & Entertainment"><?php echo $lang['industry_media']; ?></option>
+                        <option value="Transportation & Logistics"><?php echo $lang['industry_transportation']; ?>
+                        </option>
+                        <option value="Energy & Utilities"><?php echo $lang['industry_energy']; ?></option>
+                        <option value="Real Estate"><?php echo $lang['industry_real_estate']; ?></option>
+                        <option value="Agriculture"><?php echo $lang['industry_agriculture']; ?></option>
+                        <option value="Consulting"><?php echo $lang['industry_consulting']; ?></option>
+                        <option value="Non-profit"><?php echo $lang['industry_non_profit']; ?></option>
+                        <option value="Others"><?php echo $lang['industry_others']; ?></option>
                     </select>
                 </div>
-                <button class="btn-register">Register</button>
+
+                <div class="terms-container" style="align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" name="terms" value="accepted" required style="margin: 0;">
+                        <small><?php echo $lang['terms_agreement_text']; ?> <a
+                                href="term.html"><?php echo $lang['terms_of_use_link_text']; ?></a>
+                            <?php echo $lang['terms_of_use_after_link_text']; ?></small>
+                    </label>
+                    <span id="terms-error"></span>
+                </div>
+                <button type="submit" class="btn-register"><?php echo $lang['button_register']; ?></button>
             </form>
-            <div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 30px;">
-                <div class="login-link" style="margin: 0;">
-                    Already have an account? <a href="employerlogin.php">Login</a>
-                </div>
-                <div class="login-link" style="margin: 0;">
-                    Are you a jobseeker? <a href="index.php">Click here to redirect</a>
-                </div>
+
+            <div class="login-link">
+                <?php echo $lang['login_link_text_prefix']; ?> <a
+                    href="employerlogin.php"><?php echo $lang['login_link_text']; ?></a>
             </div>
-            <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
-                <div style="display: flex; align-items: center;">
-                    <input type="checkbox" name="terms" value="accepted" style="margin-right: 5px;" required>
-                    <small>I have read and agree to the <a href="term.html">Terms of Use</a> of JobHive</small>
-                </div>
-                <span id="terms-error" style="color: red; font-size: 0.9em; margin-top: 5px; display: none;"></span>
-            </div>
-        </div>
-        <div class="right">
-            <a href="index.php">
-                <img src="image/logo.png" alt="JobHive Logo" style="height: 70px; margin-bottom: 20px;">
-            </a>
-            <h2>Your Job<br>Is our Hive</h2>
-            <p>JobHive - The pionnering job portal destination for foreigners in Vietnam</p>
-            <div class="support">
-                <p>Having trouble registering?</p>
-                <p>Call us at: <strong>012 345 6789</strong></p>
-                <p>Email us at: <a href="mailto:support@jobhive.com">support@jobhive.com</a></p>
+            <div class="redirect-jobseeker">
+                <p><?php echo $lang['jobseeker_redirect_text_prefix']; ?> <a
+                        href="jobseekerregister.php"><?php echo $lang['jobseeker_redirect_link_text']; ?></a></p>
             </div>
         </div>
     </div>
@@ -190,32 +253,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate input
     if (empty($username) || empty($email) || empty($password) || empty($retypepass) || empty($companyname) || empty($companyaddress) || empty($industry)) {
         echo "<script>
-      alert('All fields are required.');
-      window.history.back();
-      </script>";
+            alert('" . addslashes($lang['all_fields_required']) . "');
+            window.history.back();
+            </script>";
         exit;
     }
 
     if ($password !== $retypepass) {
         echo "<script>
-      const passwordField = document.querySelector('input[name=\"password\"]');
-      const errorTooltip = document.createElement('div');
-      errorTooltip.textContent = 'Passwords do not match';
-      errorTooltip.style.position = 'absolute';
-      errorTooltip.style.backgroundColor = '#f8d7da';
-      errorTooltip.style.color = '#721c24';
-      errorTooltip.style.padding = '5px';
-      errorTooltip.style.border = '1px solid #f5c6cb';
-      errorTooltip.style.borderRadius = '5px';
-      errorTooltip.style.marginTop = '5px';
-      errorTooltip.style.fontSize = '12px';
-      passwordField.parentNode.appendChild(errorTooltip);
-      passwordField.focus();
+            const passwordField = document.querySelector('input[name=\"password\"]');
+            const errorTooltip = document.createElement('div');
+            errorTooltip.textContent = '" . addslashes($lang['passwords_do_not_match']) . "';
+            errorTooltip.className = 'error-tooltip';
+            passwordField.parentNode.appendChild(errorTooltip);
+            passwordField.focus();
 
-      setTimeout(() => {
-        errorTooltip.remove();
-      }, 3000);
-      </script>";
+            setTimeout(() => {
+                errorTooltip.remove();
+            }, 3000);
+            </script>";
         exit;
     }
 
@@ -227,24 +283,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($result->num_rows > 0) {
         echo "<script>
-      const emailField = document.querySelector('input[name=\"email\"]');
-      const errorTooltip = document.createElement('div');
-      errorTooltip.textContent = 'Email already exists';
-      errorTooltip.style.position = 'absolute';
-      errorTooltip.style.backgroundColor = '#f8d7da';
-      errorTooltip.style.color = '#721c24';
-      errorTooltip.style.padding = '5px';
-      errorTooltip.style.border = '1px solid #f5c6cb';
-      errorTooltip.style.borderRadius = '5px';
-      errorTooltip.style.marginTop = '5px';
-      errorTooltip.style.fontSize = '12px';
-      emailField.parentNode.appendChild(errorTooltip);
-      emailField.focus();
+            const emailField = document.querySelector('input[name=\"email\"]');
+            const errorTooltip = document.createElement('div');
+            errorTooltip.textContent = '" . addslashes($lang['email_already_exists']) . "';
+            errorTooltip.className = 'error-tooltip';
+            emailField.parentNode.appendChild(errorTooltip);
+            emailField.focus();
 
-      setTimeout(() => {
-        errorTooltip.remove();
-      }, 3000);
-      </script>";
+            setTimeout(() => {
+                errorTooltip.remove();
+            }, 3000);
+            </script>";
         exit;
     }
 
@@ -255,53 +304,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("sss", $username, $email, $hashed_password);
     $stmt->execute();
 
-    // Lấy id của user vừa tạo
+    // Get the ID of the newly created user
     $user_id = $conn->insert_id;
 
-    // Chỉ insert vào bảng company nếu user_type là 'employer'
+    // Only insert into the company table if user_type is 'employer'
     if ($user_id) {
         $stmt_company = $conn->prepare("INSERT INTO company (employer_id, company_name, company_address, industry) VALUES (?, ?, ?, ?)");
         $stmt_company->bind_param("isss", $user_id, $companyname, $companyaddress, $industry);
         $stmt_company->execute();
         $stmt_company->close();
     }
+
     if ($stmt->affected_rows > 0) {
         $stmt->close();
         echo "<script>
-            alert('Registration successful!');
-            window.location.href = 'employerlogin.php';
-        </script>";
+                alert('" . addslashes($lang['registration_successful']) . "');
+                window.location.href = 'employerlogin.php';
+            </script>";
         exit;
     } else {
         $stmt->close();
         echo "<script>
-            alert('Error: " . addslashes($stmt->error) . "');
-            window.history.back();
-        </script>";
+                alert('" . addslashes($lang['error_prefix'] . $stmt->error) . "');
+                window.history.back();
+            </script>";
         exit;
     }
 }
+$conn->close();
 ?>
 <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const termsCheckbox = document.querySelector('input[name="terms"]');
-            const termsError = document.getElementById('terms-error');
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        const termsCheckbox = document.querySelector('input[name="terms"]');
+        const termsError = document.getElementById('terms-error');
 
-            form.addEventListener('submit', function(event) {
-                if (!termsCheckbox.checked) {
-                    event.preventDefault(); // Ngăn chặn form submit
-                    termsError.textContent = 'Please read the terms and check the box';
-                    termsError.style.display = 'block'; // Hiển thị thông báo lỗi
+        form.addEventListener('submit', function (event) {
+            if (!termsCheckbox.checked) {
+                event.preventDefault();
+                termsError.textContent = '<?php echo addslashes($lang['terms_not_checked']); ?>';
+                termsError.style.display = 'block';
 
-                    // Thiết lập thời gian chờ 3 giây (3000 milliseconds) để ẩn thông báo
-                    setTimeout(function() {
-                        termsError.style.display = 'none';
-                        termsError.textContent = ''; // Xóa nội dung thông báo (tùy chọn)
-                    }, 3000);
-                } else {
-                    termsError.style.display = 'none'; // Ẩn thông báo lỗi nếu checkbox được chọn
-                }
-            });
+                setTimeout(function () {
+                    termsError.style.display = 'none';
+                    termsError.textContent = '';
+                }, 3000);
+            } else {
+                termsError.style.display = 'none';
+            }
         });
-    </script>
+    });
+</script>

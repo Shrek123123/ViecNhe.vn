@@ -119,42 +119,49 @@
 
 <body>
   <?php include_once(__DIR__ . '/header_loginlogout/jobseeker.php'); ?>
- <div class="main-content">
-   <div class="register-form-container">
-     <h2><?php echo $lang['jobseekerregister_title']; ?></h2>
-     <p><?php echo $lang['jobseekerregister_subtitle']; ?></p>
-     <form action="jobseekerregister.php" method="post">
-       <div class="form-group">
-         <label><?php echo $lang['username']; ?></label>
-         <input type="text" placeholder="<?php echo $lang['placeholder_username']; ?>" name="username" required>
-       </div>
-       <div class="form-group">
-         <label><?php echo $lang['email']; ?></label>
-         <input type="email" placeholder="<?php echo $lang['placeholder_email']; ?>" name="email" required>
-       </div>
-       <div class="form-group">
-         <label><?php echo $lang['password']; ?></label>
-         <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password" required>
-       </div>
-       <div class="form-group">
-         <label><?php echo $lang['reenter_password']; ?></label>
-         <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>" name="retypepass" required>
-       </div>
-       <div class="terms-container">
-         <label><input type="checkbox" name="terms" value="accepted" required> <?php echo $lang['terms_agreement_text']; ?> <a
-               href="term.html"><?php echo $lang['terms_of_use_link_text']; ?></a> <?php echo $lang['terms_of_use_after_link_text']; ?></label>
-         <span id="terms-error"></span>
-       </div>
-       <button class="btn-register"><?php echo $lang['button_register']; ?></button>
-     </form>
-     <div class="login-link">
-       <?php echo $lang['login_link_text_prefix']; ?> <a href="jobseekerlogin.php"><?php echo $lang['login_link_text']; ?></a>
-     </div>
-     <div class="redirect-employer">
-       <p><?php echo $lang['employer_redirect_text_prefix']; ?> <a href="employerpage.php"><?php echo $lang['employer_redirect_link_text']; ?></a></p>
-     </div>
-   </div>
- </div>
+  <div class="main-content">
+    <div class="register-form-container">
+      <h2><?php echo $lang['jobseekerregister_title']; ?></h2>
+      <p><?php echo $lang['jobseekerregister_subtitle']; ?></p>
+      <form action="jobseekerregister.php" method="post">
+        <div class="form-group">
+          <label><?php echo $lang['username']; ?></label>
+          <input type="text" placeholder="<?php echo $lang['placeholder_username']; ?>" name="username" required>
+        </div>
+        <div class="form-group">
+          <label><?php echo $lang['email']; ?></label>
+          <input type="email" placeholder="<?php echo $lang['placeholder_email']; ?>" name="email" required>
+        </div>
+        <div class="form-group">
+          <label><?php echo $lang['password']; ?></label>
+          <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password" required>
+        </div>
+        <div class="form-group">
+          <label><?php echo $lang['reenter_password']; ?></label>
+          <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>" name="retypepass"
+            required>
+        </div>
+        <div class="terms-container" style="align-items: center;">
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" name="terms" value="accepted" required style="margin: 0;">
+            <small><?php echo $lang['terms_agreement_text']; ?> <a
+          href="term.html"><?php echo $lang['terms_of_use_link_text']; ?></a>
+              <?php echo $lang['terms_of_use_after_link_text']; ?></small>
+          </label>
+          <span id="terms-error"></span>
+        </div>
+        <button class="btn-register"><?php echo $lang['button_register']; ?></button>
+      </form>
+      <div class="login-link">
+        <?php echo $lang['login_link_text_prefix']; ?> <a
+          href="jobseekerlogin.php"><?php echo $lang['login_link_text']; ?></a>
+      </div>
+      <div class="redirect-employer">
+        <p><?php echo $lang['employer_redirect_text_prefix']; ?> <a
+            href="employerpage.php"><?php echo $lang['employer_redirect_link_text']; ?></a></p>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
@@ -202,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo "<script>
       const emailField = document.querySelector('input[name=\"email\"]');
       const errorTooltip = document.createElement('div');
-      errorTooltip.textContent = 'Email already exists';
+      errorTooltip.textContent = " . json_encode($lang['email_exists']) . ";
       errorTooltip.style.position = 'absolute';
       errorTooltip.style.backgroundColor = '#f8d7da';
       errorTooltip.style.color = '#721c24';
@@ -213,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       errorTooltip.style.fontSize = '12px';
       emailField.parentNode.appendChild(errorTooltip);
       emailField.focus();
-      setTimeout(() => { errorTooltip.remove(); }, 3000);
+      setTimeout(() => { errorTooltip.remove(); }, 10000);
     </script>";
     exit;
   }

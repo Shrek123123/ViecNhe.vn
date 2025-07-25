@@ -1,10 +1,13 @@
 <?php
 session_start();
 require_once 'config.php';
+include 'lang/' . $_SESSION['lang'] . '.php';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-
+    $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. Please try again.';
+    $invalidEmailMessage = $lang['login_invalid_email'] ?? 'Invalid email. Please try again.';
     // Check if the email and password are correct
     $stmt = $conn->prepare("SELECT * FROM user WHERE email = ? AND user_type = 'employer'");
     $stmt->bind_param("s", $email);
@@ -35,15 +38,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     } else {
         // Email not found
-        echo "<script>alert('Invalid email. Please try again.');</script>";
-    }
+     echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var errorDiv = document.createElement('div');
+                errorDiv.style.color = 'red';
+                errorDiv.style.textAlign = 'center';
+                errorDiv.style.marginTop = '10px';
+                errorDiv.innerText = " . json_encode($invalidEmailMessage) . ";
+                document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+            });
+            </script>";    }
 
     // Close the statement and connection
     $stmt->close();
     $conn->close();
 }
-$invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. Please try again.';
-
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -53,34 +62,28 @@ $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JobSeeker Login - JobHive</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
- <style>
-   body {
+    <style>
+        body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* Changed to column to stack header and content */
-            min-height: 100vh; /* Use min-height to allow content to push height */
-            background-color: #f3f3f3; /* Optional: A default background for the whole page */
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f3f3f3;
         }
-
-        /* --- Header Styling (adjust as needed for your actual header.php) --- */
-        /* If your header takes up space, you might want to give it a background or fixed height */
-        header { /* Assuming header.php will render inside a <header> tag or similar */
+        header {
             width: 100%;
-            /* background-color: #ffffff; */ /* Example header background */
-            /* padding: 10px 20px; */ /* Example header padding */
-            /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */ /* Example header shadow */
+      
         }
 
-        /* --- Main Content Area for Login Form --- */
         .main-content {
-            flex: 1; /* Allows this area to take up remaining vertical space */
+            flex: 1;
             display: flex;
-            justify-content: center; /* Horizontally center the login wrapper */
-            align-items: center; /* Vertically center the login wrapper */
-            padding: 20px; /* Add some padding around the form */
-            box-sizing: border-box; /* Include padding in element's total width and height */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .login-form-container {
@@ -90,7 +93,7 @@ $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. 
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px; /* Max width for the form block */
+            max-width: 400px;
             text-align: center;
             box-sizing: border-box;
         }
@@ -108,11 +111,11 @@ $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. 
 
         .form-group {
             margin-bottom: 20px;
-            text-align: left; /* Align labels and inputs to the left within their group */
+            text-align: left;
         }
 
         label {
-            display: block; /* Make label take full width and stack above input */
+            display: block;
             margin-bottom: 8px;
             font-weight: bold;
             color: #333;
@@ -124,7 +127,7 @@ $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. 
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
-            box-sizing: border-box; /* Include padding and border in the element's total width */
+            box-sizing: border-box;
         }
 
         .btn-login {
@@ -136,12 +139,13 @@ $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. 
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px; /* More space above the button */
+            margin-top: 20px;
             transition: background-color 0.3s ease;
         }
 
         .btn-login:hover {
-            background-color: #a60000; /* Darker red on hover */
+            background-color: #a60000;
+            /* Darker red on hover */
         }
 
         .forgot {
@@ -174,53 +178,48 @@ $invalidPasswordMessage = $lang['login_invalid_password'] ?? 'Invalid password. 
         @media (max-width: 600px) {
             .login-form-container {
                 padding: 25px;
-                margin: 0 15px; /* Add some margin on smaller screens */
+                margin: 0 15px;
+                /* Add some margin on smaller screens */
             }
         }
     </style>
 </head>
 
 <body>
-      <?php include_once(__DIR__ . '/header_loginlogout/employer.php'); ?>
+    <?php include_once(__DIR__ . '/header_loginlogout/employer.php'); ?>
 
-        <div class="main-content">
-            <div class="login-form-container">
-                <h2><?= $lang['employer_login_subtitle_h2']; ?></h2>
-                <p><?= $lang['employer_login_subtitle_p']; ?></p>
+    <div class="main-content">
+        <div class="login-form-container">
+            <h2><?= $lang['employer_login_subtitle_h2']; ?></h2>
+            <p><?= $lang['employer_login_subtitle_p']; ?></p>
 
-                <form action="employerlogin.php" method="POST">
-                    <div class="form-group">
-                        <label for="emailInput"><?= $lang['email']; ?></label>
-                        <input type="email"
-                               id="emailInput"
-                               name="email"
-                               placeholder="<?= $lang['employer_login_email_placeholder']; ?>"
-                               required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="passwordInput"><?= $lang['password']; ?></label>
-                        <input type="password"
-                               id="passwordInput"
-                               name="password"
-                               placeholder="<?= $lang['employer_login_password_placeholder']; ?>"
-                               required>
-                        <div class="forgot">
-                            <a href="employerforgetpassword.php"><?= $lang['employer_login_forgot_password']; ?></a>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-login"><?= $lang['employer_login_button']; ?></button>
-                </form>
-
-                <div class="signup">
-                    <?= $lang['employer_login_signup']; ?>
+            <form action="employerlogin.php" method="POST">
+                <div class="form-group">
+                    <label for="emailInput"><?= $lang['email']; ?></label>
+                    <input type="email" id="emailInput" name="email"
+                        placeholder="<?= $lang['employer_login_email_placeholder']; ?>" required>
                 </div>
 
-                <div style="margin-top: 20px; text-align: center;">
-                    <p><?= $lang['employer_login_redirect_jobseeker']; ?></p>
+                <div class="form-group">
+                    <label for="passwordInput"><?= $lang['password']; ?></label>
+                    <input type="password" id="passwordInput" name="password"
+                        placeholder="<?= $lang['employer_login_password_placeholder']; ?>" required>
+                    <div class="forgot">
+                        <a href="employerforgetpassword.php"><?= $lang['employer_login_forgot_password']; ?></a>
+                    </div>
                 </div>
+
+                <button type="submit" class="btn-login"><?= $lang['employer_login_button']; ?></button>
+            </form>
+
+            <div class="signup">
+                <?= $lang['employer_login_signup']; ?>
             </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <p><?= $lang['employer_login_redirect_jobseeker']; ?></p>
+            </div>
+        </div>
     </div>
 
 </body>

@@ -1,9 +1,11 @@
 <?php
 require_once '../config.php';
 session_start(); // Bắt đầu phiên làm việc nếu chưa được bắt đầu
+include '../lang/' . $_SESSION['lang'] . '.php';
+
 ?>
 <div style="padding: 30px;">
-    <h2 style="color: #b23b3b; margin-bottom: 20px;">Saved Jobs</h2>
+    <h2 style="color: #b23b3b; margin-bottom: 20px;"><?php echo $lang['saved_jobs_title'] ?></h2>
     <div style="display: flex; flex-direction: column; gap: 18px;">
         <?php
         // Lấy jobseeker id từ URL (?jobseekerid=...)
@@ -18,7 +20,7 @@ session_start(); // Bắt đầu phiên làm việc nếu chưa được bắt �
             $result_saved = $stmt_saved->get_result();
 
             if ($result_saved->num_rows === 0) {
-                echo '<div style="color: #888;">No saved jobs found.</div>';
+                echo '<div style="color: #888; text-align: center; padding: 20px;">' . $lang['no_saved_job_found'] . '</div>';
             }
 
             while ($row_saved = $result_saved->fetch_assoc()):

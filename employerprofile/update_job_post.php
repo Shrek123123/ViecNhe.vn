@@ -1,5 +1,8 @@
 <?php
 require_once '../config.php'; // Đảm bảo config.php được bao gồm
+session_start(); // Bắt đầu phiên làm việc
+include '../lang/' . $_SESSION['lang'] . '.php';
+
 
 header('Content-Type: application/json'); // Trả về JSON response
 
@@ -85,9 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute()) {
                 if ($stmt->affected_rows > 0) {
                     $response['success'] = true;
-                    $response['message'] = 'Job post updated successfully!';
+                    $response['message'] = $lang['job_update_success'];
                 } else {
-                    $response['message'] = 'No changes made or job not found/authorized.';
+                    $response['message'] = $lang['no_changes_made'] ?? 'No changes made or job not found/authorized.';
                 }
             } else {
                 $response['message'] = 'Database error: ' . $stmt->error;

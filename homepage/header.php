@@ -12,8 +12,23 @@ if (!isset($_SESSION['lang'])) {
 
 // Load file ngôn ngữ tương ứng
 include 'lang/' . $_SESSION['lang'] . '.php';
+$jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
 ?>
 <style>
+    .loggined_option {
+        display: flex;
+        gap: 15px;
+        margin-left: auto;
+        align-items: center;
+    }
+    .loggined_option button {
+        border: none;
+        background: #f5f5f5;
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 8px 16px;
+        margin-right: 50px;
+    }
     .user-info {
         display: flex;
         align-items: center;
@@ -22,10 +37,17 @@ include 'lang/' . $_SESSION['lang'] . '.php';
     }
 
     .user-info img {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
-        object-fit: cover;
+    }
+    .user-info button {
+        padding: 8px 16px;
+        border: none;
+        background: #f5f5f5;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-left: 10px; /* Thêm khoảng cách giữa ảnh và nút */
     }
 
     .user-info span {
@@ -131,12 +153,31 @@ include 'lang/' . $_SESSION['lang'] . '.php';
         </a>
     </div>
 
-    <div style="display: flex; gap: 15px; margin-left: auto">
+    <div class="loggined_option">
         <?php if (isset($_SESSION['username'])): ?>
             <div class="user-dropdown">
                 <div class="user-info">
-                    <img src="image/defaultavatar.jpg" alt="User Avatar">
-                    <span><?= htmlspecialchars($_SESSION['username']); ?></span>
+                    <?php
+                    $profilePic = "image/defaultavatar.jpg"; // ảnh mặc định
+                    if (isset($_SESSION['jobseeker_id'])) {
+                        $conn = new mysqli("localhost", "root", "", "jobhive");
+
+                        if (!$conn->connect_error) {
+                            $sql = "SELECT profile_pic FROM jobseeker_profile WHERE jobseeker_id = ?";
+                            $stmt = $conn->prepare($sql);
+                            $stmt->bind_param("i", $jobseeker_id);
+                            $stmt->execute();
+                            $stmt->bind_result($pic);
+                            if ($stmt->fetch() && !empty($pic)) {
+                                // Nếu ảnh đã có 'uploads/' ở đầu thì giữ nguyên, nếu không thì thêm vào
+                                $profilePic = (strpos($pic, 'uploads/') === 0) ? $pic : 'uploads/' . basename($pic);
+                            }
+                            $stmt->close();
+                        }
+                    }
+                    ?>
+                    <img src="<?= htmlspecialchars($profilePic); ?>" alt="User Avatar">
+                    <span><?= htmlspecialchars($_SESSION['username'] ?? 'Người dùng'); ?></span>
                 </div>
                 <div class="dropdown-menu">
                     <?php
@@ -150,8 +191,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
                     </a>
                 </div>
             </div>
-            <button id="lang-switch-btn"
-                style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
+            <button id="lang-switch-btn">
                 <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
             </button>
         <?php else: ?>
@@ -177,7 +217,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
     document.getElementById('lang-switch-btn').onclick = function () {
         // Lấy URL hiện tại
         const url = new URL(window.location.href);
-        
+
         // Lấy ngôn ngữ hiện tại từ PHP
         const currentLang = '<?php echo $_SESSION['lang']; ?>';
 

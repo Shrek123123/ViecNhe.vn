@@ -3,6 +3,8 @@ $conn = new mysqli("localhost", "root", "", "jobhive");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+session_start(); // Bắt đầu session để sử dụng biến $_SESSION
+include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ session
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -153,7 +155,7 @@ if ($conn->connect_error) {
 
     <!-- Top bar -->
     <div class="top-bar">
-        <div class="title">Jobseeker profile</div>
+        <div class="title"><?= $lang['jobseekerprofile'] ?></div>
         <div class="company">
             <img src="https://via.placeholder.com/34" alt="jobseeker logo">
             <?php
@@ -182,12 +184,12 @@ if ($conn->connect_error) {
     <div class="main">
         <!-- Sidebar -->
         <div class="sidebar">
-            <button id="btn-myprofile" class="active">My profile</button>
-            <button id="btn-myapplications">My applications</button>
-            <button id="btn-savedjobs">Saved jobs</button>
-            <button id="btn-changeinfo">Change person information</button>
+            <button id="btn-myprofile" class="active"><?= $lang['btn_myprofile'] ?></button>
+            <button id="btn-myapplications"><?= $lang['btn_myapplications'] ?></button>
+            <button id="btn-savedjobs"><?= $lang['btn_savedjobs'] ?></button>
+            <button id="btn-changeinfo"><?= $lang['btn_changeinfo'] ?></button>
 
-            <h3>Applied jobs</h3>
+            <h3><?= $lang['jobseekerprofile_appliedjobs'] ?></h3>
 
             <!-- Applicants -->
             <div class="applicant-card">

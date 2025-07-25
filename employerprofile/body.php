@@ -200,7 +200,7 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
 <body>
 
     <div class="top-bar">
-        <div class="title">Employer profile</div>
+        <div class="title"><?= $lang['employerprofile'] ?></div>
         <div class="company">
             <?php
             // Lấy employer_id từ URL
@@ -253,12 +253,12 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
 
     <div class="main">
         <div class="sidebar">
-            <button>Post a job</button>
-            <button id="btn-jobposts">My job posts</button>
-            <button>My profile</button>
-            <button>Change person information</button>
+            <button><?= $lang['employerprofile_postajob'] ?></button>
+            <button id="btn-jobposts"><?= $lang['employerprofile_myjobposts'] ?></button>
+            <button><?= $lang['employerprofile_myprofile'] ?></button>
+            <button><?= $lang['employerprofile_changeinfo'] ?></button>
 
-            <h3>Applicant profiles</h3>
+            <h3><?= $lang['employerprofile_applicantprofiles'] ?></h3>
 
             <div class="applicant-card">
                 <img src="https://via.placeholder.com/28" alt="avatar">

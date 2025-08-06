@@ -13,6 +13,11 @@ if (!isset($_SESSION['lang'])) {
 include 'lang/' . $_SESSION['lang'] . '.php';
 ?>
 <style>
+    .header a:hover {
+        color: #d70018 !important;
+        transition: color 0.1s;
+    }
+
     .user-info {
         display: flex;
         align-items: center;
@@ -129,22 +134,22 @@ include 'lang/' . $_SESSION['lang'] . '.php';
     </div>
 
     <div style="display: flex; gap: 15px; margin-left: auto">
-            <div class="guest-options">
-                <button id="lang-switch-btn"
-                    style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
-                    <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-                </button>
-                <script>
-                    document.getElementById('lang-switch-btn').onclick = function () {
-                        var currentLang = '<?php echo $_SESSION['lang']; ?>';
-                        if (currentLang === 'vi') {
-                            window.location.href = '?lang=en';
-                        } else {
-                            window.location.href = '?lang=vi';
-                        }
-                    };
-                </script>
-            </div>
+        <div class="guest-options">
+            <button id="lang-switch-btn"
+                style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
+                <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+            </button>
+            <script>
+                document.getElementById('lang-switch-btn').onclick = function () {
+                    var currentLang = '<?php echo $_SESSION['lang']; ?>';
+                    if (currentLang === 'vi') {
+                        window.location.href = '?lang=en';
+                    } else {
+                        window.location.href = '?lang=vi';
+                    }
+                };
+            </script>
+        </div>
     </div>
 
 </div>

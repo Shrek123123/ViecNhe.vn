@@ -1,7 +1,40 @@
 <?php
 session_start();
+// Nếu người dùng bấm đổi ngôn ngữ
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+
+// Load file ngôn ngữ tương ứng
+include 'lang/' . $_SESSION['lang'] . '.php';
+$jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
 ?>
 <style>
+    .loggined_option {
+        display: flex;
+        gap: 15px;
+        margin-left: auto;
+        align-items: center;
+    }
+
+    .loggined_option button {
+        border: none;
+        background: #f5f5f5;
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 8px 16px;
+        margin-right: 50px;
+    }
+    .ra_trang_ntd {
+        text-decoration: none;
+        color: #333;
+        margin-right: 15px;
+    }
     .user-info {
         display: flex;
         align-items: center;
@@ -10,10 +43,19 @@ session_start();
     }
 
     .user-info img {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
-        object-fit: cover;
+    }
+
+    .user-info button {
+        padding: 8px 16px;
+        border: none;
+        background: #f5f5f5;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-left: 10px;
+        /* Thêm khoảng cách giữa ảnh và nút */
     }
 
     .user-info span {
@@ -81,16 +123,17 @@ session_start();
         width: 100%;
     }
 
-    .navbar {
-        display: flex;
-        align-items: center;
+    .header a:hover,
+    .header .guest-options a:hover,
+    .header .dropdown-menu a:hover {
+        color: #d70018 !important;
+        transition: color 0.1s;
     }
 
     .guest-options {
         display: flex;
         gap: 15px;
         margin-left: auto;
-        margin-right: 50px;
     }
 
     .btn-login,
@@ -105,32 +148,94 @@ session_start();
             <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
-    <div style="display: flex; gap: 15px; margin-left: 50px;">
-        <a href="#" style="text-decoration: none; color: #333;">Create CV</a>
-        <a href="#" style="text-decoration: none; color: #333;">Tools</a>
-        <a href="#" style="text-decoration: none; color: #333;">Career Handbook</a>
+    <div style="display: flex; gap: 30px; margin-left: 50px;">
+        <a href="#" style="text-decoration: none; color: #333;">
+            <?= $lang['create_cv']; ?>
+        </a>
+        <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
+            <?= $lang['contact_us']; ?>
+        </a>
+        <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">
+            <?= $lang['feedback']; ?>
+        </a>
     </div>
-    <div style="display: flex; gap: 15px; margin-left: auto">
+
+    <div class="loggined_option">
         <?php if (isset($_SESSION['username'])): ?>
+            <a class="ra_trang_ntd" href="employerpage.php"><?= $lang['Ra_trang_nha_tuyen_dung']; ?></a>
             <div class="user-dropdown">
                 <div class="user-info">
-                    <img src="image/defaultavatar.jpg" alt="User Avatar">
-                    <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    <?php
+                    $profilePic = "image/defaultavatar.jpg"; // ảnh mặc định
+                    if (isset($_SESSION['jobseeker_id'])) {
+                        $conn = new mysqli("localhost", "root", "", "jobhive");
+
+                        if (!$conn->connect_error) {
+                            $sql = "SELECT profile_pic FROM jobseeker_profile WHERE jobseeker_id = ?";
+                            $stmt = $conn->prepare($sql);
+                            $stmt->bind_param("i", $jobseeker_id);
+                            $stmt->execute();
+                            $stmt->bind_result($pic);
+                            if ($stmt->fetch() && !empty($pic)) {
+                                // Nếu ảnh đã có 'uploads/' ở đầu thì giữ nguyên, nếu không thì thêm vào
+                                $profilePic = (strpos($pic, 'uploads/') === 0) ? $pic : 'uploads/' . basename($pic);
+                            }
+                            $stmt->close();
+                        }
+                    }
+                    ?>
+                    <img src="<?= htmlspecialchars($profilePic); ?>" alt="User Avatar">
+                    <span><?= htmlspecialchars($_SESSION['username'] ?? 'Người dùng'); ?></span>
                 </div>
                 <div class="dropdown-menu">
-                    <a href="jobseekerprofile.php">Profile</a>
-                    <a href="jobseekerlogout.php">Logout</a>
+                    <?php
+                    $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
+                    ?>
+                    <a href="ho_so_ung_vien.php">
+                        <?= $lang['profile']; ?>
+                    </a>
+                    <a href="jobseekerlogout.php">
+                        <?= $lang['logout']; ?>
+                    </a>
                 </div>
             </div>
-
-
+            <button id="lang-switch-btn">
+                <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+            </button>
         <?php else: ?>
             <div class="guest-options">
-                <a href="jobseekerlogin.php" class="btn-login">Login/Register for Job Seekers</a>
-                <a href="employerpage.php" class="btn-register">Are you an employer? <br><span>Click here to redirect</span></a>
-                <a href="admin/adminlogin.php" class="btn-register">Admin login</a>
+                <a href="jobseekerlogin.php" class="btn-login">
+                    <?= $lang['login/register_jobseeker']; ?>
+                </a>
+                <a href="employerpage.php" class="btn-register">
+                    <?= $lang['employer_redirect']; ?>
+                </a>
+                <a href="admin/adminlogin.php" class="btn-register">
+                    <?= $lang['admin_login']; ?>
+                </a>
+                <button id="lang-switch-btn"
+                    style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
+                    <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+                </button>
             </div>
         <?php endif; ?>
     </div>
-
 </div>
+<script>
+    document.getElementById('lang-switch-btn').onclick = function () {
+        // Lấy URL hiện tại
+        const url = new URL(window.location.href);
+
+        // Lấy ngôn ngữ hiện tại từ PHP
+        const currentLang = '<?php echo $_SESSION['lang']; ?>';
+
+        // Chuyển đổi ngôn ngữ
+        const newLang = currentLang === 'vi' ? 'en' : 'vi';
+
+        // Set lại tham số lang trên URL
+        url.searchParams.set('lang', newLang);
+
+        // Chuyển hướng tới URL mới
+        window.location.href = url.toString();
+    };
+</script>

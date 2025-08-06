@@ -20,6 +20,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
         margin-left: auto;
         align-items: center;
     }
+
     .loggined_option button {
         border: none;
         background: #f5f5f5;
@@ -27,6 +28,11 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
         border-radius: 4px;
         padding: 8px 16px;
         margin-right: 50px;
+    }
+    .ra_trang_ntd {
+        text-decoration: none;
+        color: #333;
+        margin-right: 15px;
     }
     .user-info {
         display: flex;
@@ -40,13 +46,15 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
         height: 50px;
         border-radius: 50%;
     }
+
     .user-info button {
         padding: 8px 16px;
         border: none;
         background: #f5f5f5;
         cursor: pointer;
         border-radius: 4px;
-        margin-left: 10px; /* Thêm khoảng cách giữa ảnh và nút */
+        margin-left: 10px;
+        /* Thêm khoảng cách giữa ảnh và nút */
     }
 
     .user-info span {
@@ -154,6 +162,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
 
     <div class="loggined_option">
         <?php if (isset($_SESSION['username'])): ?>
+            <a class="ra_trang_ntd" href="employerpage.php"><?= $lang['Ra_trang_nha_tuyen_dung']; ?></a>
             <div class="user-dropdown">
                 <div class="user-info">
                     <?php

@@ -12,6 +12,8 @@ $lang = [
     "jobseeker_redirect" => "Bạn là người tìm việc? <br>Nhấn vào đây để chuyển hướng",
     "employer_redirect" => "Bạn là nhà tuyển dụng? <br>Nhấn vào đây để chuyển hướng",
     "admin_login" => "Đăng nhập quản trị viên",
+    "Ra_trang_tim_viec" => "Ra trang tìm việc",
+    "Ra_trang_nha_tuyen_dung" => "Ra trang nhà tuyển dụng",
 
     //body
     "job_search" => "Tìm việc nhanh 24/7, việc làm mới nhất toàn quốc.",
@@ -197,7 +199,7 @@ $lang = [
     "jobseekerpersonalinfo_title" => "Thông tin tài khoản",
 
     //employerlogin
-    "employer_login_title" => "Đăng nhập Nhà tuyển dụng",
+    "employer_login_title" => "Đăng nhập Nhà tuyển dụng - ViecNhe",
     "employer_login_subtitle_h2" => "Đăng nhập - Nhà tuyển dụng",
     "employer_login_subtitle_p" => "Hãy cùng ViệcNhẹ tìm kiếm ứng viên phù hợp nhất cho công ty bạn",
     "employer_login_email_placeholder" => "Nhập địa chỉ email",
@@ -384,4 +386,30 @@ $lang = [
     'upload_error' => 'Đã xảy ra lỗi khi tải lên ảnh. Vui lòng thử lại sau.',
     'profile_description' => 'Mô tả bản thân',
     'profile_description_default' => 'Đây là nơi bạn có thể thêm mô tả chi tiết về bản thân hoặc hồ sơ của mình.',
+
+    //jobseekerforgetpassword
+    'jobseekerforgetpassword_title' => 'Quên mật khẩu ứng viên',
+    'jobseekerforgetpassword_intro' => 'Nhập email của bạn và chúng tôi sẽ kiểm tra xem có tài khoản khớp nào không.',
+    'jobseekerforgetpassword_button' => 'Gửi',
+    //employerforgetpassword
+    'employerforgetpassword_title' => 'Quên mật khẩu nhà tuyển dụng',
+    'employerforgetpassword_intro' => 'Nhập email của bạn và chúng tôi sẽ kiểm tra xem có tài khoản khớp nào không.',
+    //jobseekerprofilemodal
+    'personal_info' => 'Thông tin cá nhân',
+  'full_name' => 'Họ và tên',
+  'full_name_placeholder' => 'Nhập họ tên',
+  'phone_number' => 'Số điện thoại',
+  'enter_phone' => 'Nhập số điện thoại',
+  'current_address' => 'Địa chỉ hiện tại',
+  'select_province' => 'Chọn tỉnh',
+  'select_district' => 'Chọn quận/huyện',
+  'date_of_birth' => 'Ngày sinh',
+  'gender' => 'Giới tính',
+  'female' => 'Nữ',
+  'male' => 'Nam',
+  'marital_status' => 'Tình trạng hôn nhân',
+  'single' => 'Độc thân',
+  'married' => 'Đã kết hôn',
+  'cancel' => 'Huỷ',
+  'save' => 'Lưu'
 ];

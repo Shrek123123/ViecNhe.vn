@@ -681,7 +681,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
                           popup.style.transition = 'opacity 0.4s';
                           popup.style.opacity = 0;
                           setTimeout(() => popup.remove(), 400);
-                        }, 1200);
+                        }, 3000);
                       }
                     });
                   </script>

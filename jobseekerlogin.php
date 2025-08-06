@@ -78,9 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $lang['jobseeker_login_title']; ?> - JobHive</title>
+    <title><?= $lang['jobseeker_login_title']; ?> - ViecNhe</title>
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
@@ -90,39 +89,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             padding: 0;
             display: flex;
             flex-direction: column;
-            /* Changed to column to stack header and content */
             min-height: 100vh;
-            /* Use min-height to allow content to push height */
             background-color: #f3f3f3;
-            /* Optional: A default background for the whole page */
         }
-
-        /* --- Header Styling (adjust as needed for your actual header.php) --- */
-        /* If your header takes up space, you might want to give it a background or fixed height */
         header {
-            /* Assuming header.php will render inside a <header> tag or similar */
             width: 100%;
-            /* background-color: #ffffff; */
-            /* Example header background */
-            /* padding: 10px 20px; */
-            /* Example header padding */
-            /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
-            /* Example header shadow */
+          
         }
 
-        /* --- Main Content Area for Login Form --- */
         .main-content {
             flex: 1;
-            /* Allows this area to take up remaining vertical space */
             display: flex;
             justify-content: center;
-            /* Horizontally center the login wrapper */
             align-items: center;
-            /* Vertically center the login wrapper */
             padding: 20px;
-            /* Add some padding around the form */
             box-sizing: border-box;
-            /* Include padding in element's total width and height */
         }
 
         .login-form-container {
@@ -133,7 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
-            /* Max width for the form block */
             text-align: center;
             box-sizing: border-box;
         }
@@ -152,12 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .form-group {
             margin-bottom: 20px;
             text-align: left;
-            /* Align labels and inputs to the left within their group */
         }
 
         label {
             display: block;
-            /* Make label take full width and stack above input */
             margin-bottom: 8px;
             font-weight: bold;
             color: #333;
@@ -170,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 5px;
             border: 1px solid #ccc;
             box-sizing: border-box;
-            /* Include padding and border in the element's total width */
         }
 
         .btn-login {
@@ -183,13 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 5px;
             cursor: pointer;
             margin-top: 20px;
-            /* More space above the button */
             transition: background-color 0.3s ease;
         }
 
         .btn-login:hover {
             background-color: #a60000;
-            /* Darker red on hover */
         }
 
         .forgot {
@@ -199,7 +174,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .forgot a,
-        .signup a {
+        .signup a,
+        .redirect-employer a {
             color: #d90000;
             text-decoration: none;
             font-weight: bold;
@@ -207,7 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .forgot a:hover,
-        .signup a:hover {
+        .signup a:hover,
+        .redirect-employer a:hover {
             color: #a60000;
         }
 
@@ -218,12 +195,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #555;
         }
 
-        /* --- Responsive adjustments (optional but recommended) --- */
         @media (max-width: 600px) {
             .login-form-container {
                 padding: 25px;
                 margin: 0 15px;
-                /* Add some margin on smaller screens */
             }
         }
     </style>
@@ -260,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <?= $lang['jobseeker_login_signup']; ?>
             </div>
 
-            <div style="margin-top: 20px; text-align: center;">
+            <div class="redirect-employer" style="margin-top: 20px; text-align: center;">
                 <p><?= $lang['jobseeker_login_redirect_employer']; ?></p>
             </div>
         </div>

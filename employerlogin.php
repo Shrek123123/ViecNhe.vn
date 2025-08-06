@@ -1,6 +1,9 @@
 <?php
 session_start();
 require_once 'config.php';
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
 include 'lang/' . $_SESSION['lang'] . '.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -60,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobSeeker Login - JobHive</title>
+    <title><?= $lang['employer_login_title'] ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -155,7 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .forgot a,
-        .signup a {
+        .signup a,
+        .redirect-jobseeker a {
             color: #d90000;
             text-decoration: none;
             font-weight: bold;
@@ -163,7 +167,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .forgot a:hover,
-        .signup a:hover {
+        .signup a:hover,
+        .redirect-jobseeker a:hover {
             color: #a60000;
         }
 
@@ -216,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <?= $lang['employer_login_signup']; ?>
             </div>
 
-            <div style="margin-top: 20px; text-align: center;">
+            <div class="redirect-jobseeker" style="margin-top: 20px; text-align: center;">
                 <p><?= $lang['employer_login_redirect_jobseeker']; ?></p>
             </div>
         </div>

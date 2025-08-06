@@ -10,6 +10,8 @@ $lang = [
     "jobseeker_redirect" => "Are you a job seeker? <br>Click here to redirect",
     "employer_redirect" => "Are you an employer? <br>Click here to redirect",
     "admin_login" => "Admin Login",
+    "Ra_trang_tim_viec" => "Go to Job Search Page",
+    "Ra_trang_nha_tuyen_dung" => "Go to Employer Page",
 
     //body
     "job_search" => "Find jobs 24/7, latest jobs nationwide.",
@@ -197,7 +199,7 @@ $lang = [
     "jobseekerpersonalinfo_title" => "Account Information",
 
     //employerlogin
-    "employer_login_title" => "Employer Login",
+    "employer_login_title" => "Employer Login - ViecNhe",
     "employer_login_subtitle_h2" => "Welcome back, Employers!",
     "employer_login_subtitle_p" => "Let's continue to find the best candidates for your company",
     "employer_login_email_placeholder" => "Enter your email address",
@@ -386,4 +388,31 @@ $lang = [
     'upload_error' => 'An error occurred while uploading the file. Please try again.',
     'profile_description' => 'Profile Description',
     'profile_description_default' => 'This is where you can add a detailed description about yourself or your profile.',
+
+    //jobseekerforgetpassword
+    'jobseekerforgetpassword_title' => 'Jobseeker Forget Password',
+    'jobseekerforgetpassword_intro' => 'Type in your email and we\'ll check if there\'s a match.',
+    'jobseekerforgetpassword_button' => 'Submit',
+    //employerforgetpassword
+    'employerforgetpassword_title' => 'Employer Forget Password',
+    'employerforgetpassword_intro' => 'Enter your email and we will help you recover your password.',
+
+    //jobseekerprofilemodal
+    'personal_info' => 'Personal information',
+    'full_name' => 'Full name',
+    'full_name_placeholder' => 'Enter your full name',
+    'phone_number' => 'Phone number',
+    'enter_phone' => 'Enter phone number',
+    'current_address' => 'Current address',
+    'select_province' => 'Select province',
+    'select_district' => 'Select district',
+    'date_of_birth' => 'Date of birth',
+    'gender' => 'Gender',
+    'female' => 'Female',
+    'male' => 'Male',
+    'marital_status' => 'Marital Status',
+    'single' => 'Single',
+    'married' => 'Married',
+    'cancel' => 'Cancel',
+    'save' => 'Save'
 ];

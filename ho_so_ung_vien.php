@@ -234,6 +234,193 @@ if ($result_profile->num_rows > 0) {
             padding: 2px;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
         }
+
+        /* Cơ bản cho modal */
+        /* ====== Modal Base ====== */
+        /* === Modal Overlay === */
+        .open-modal {
+            cursor: pointer;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        /* === Modal Content === */
+        .modal-content {
+            background: #fff;
+            width: 95%;
+            max-width: 600px;
+            padding: 24px;
+            border-radius: 10px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* === Close Button === */
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            color: black;
+            border-radius: 50%;
+            padding: 4px 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .close:hover,
+        .close:focus {
+            background-color: #ccc;
+            /* màu xám nhẹ khi hover */
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+
+        /* === Form === */
+        form label {
+            display: block;
+            margin-top: 16px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        form input,
+        form select {
+            width: 100%;
+            padding: 8px 10px;
+            margin-top: 6px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        form input:disabled {
+            background: #f8f8f8;
+            color: #999;
+        }
+
+        /* === Flex group for province/district === */
+        .flex {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flex select {
+            flex: 1;
+        }
+
+        /* === Row for dob + gender === */
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .half-width {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        /* === Gender Group === */
+        .gender-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .gender-buttons,
+        .status-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .gender-btn,
+        .status-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            background-color: #f2f2f2;
+            cursor: pointer;
+            font-size: 13px;
+            min-width: 80px;
+            transition: 0.3s;
+        }
+
+        .gender-btn.active,
+        .status-btn.active {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        /* === Action Buttons === */
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            /* giữ nút ở bên phải */
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .cancel,
+        .save {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .cancel {
+            background-color: transparent;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+
+        .cancel:hover {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .save {
+            background-color: #c0392b;
+            color: white;
+            border: 2px solid #c0392b;
+        }
+
+        .save:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 480px) {
+            .form-row {
+                flex-direction: column;
+            }
+
+            .gender-btn,
+            .status-btn {
+                flex: 1;
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+        }
     </style>
 </head>
 
@@ -366,8 +553,8 @@ if ($result_profile->num_rows > 0) {
                             <div style="font-size: 1.2em; font-weight: bold;">
                                 <?php echo $user_display_name; ?>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#8a2be2"
-                                viewBox="0 0 16 16" style="cursor: pointer;">
+                            <svg class="open-modal" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                fill="#8a2be2" viewBox="0 0 16 16" style="cursor: pointer;">
                                 <path
                                     d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
                                 <path fill-rule="evenodd"
@@ -389,12 +576,16 @@ if ($result_profile->num_rows > 0) {
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/phone.svg" alt="phone icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <?php echo !empty($profile_data['phone_number']) ? htmlspecialchars($profile_data['phone_number']) : $lang['addmobilephone']; ?>
+                                    <div class="open-modal">
+                                        <?php echo !empty($profile_data['phone_number']) ? htmlspecialchars($profile_data['phone_number']) : $lang['addmobilephone']; ?>
+                                    </div>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/birthday.svg" alt="birthday icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <?php echo !empty($profile_data['date_of_birth']) ? htmlspecialchars($profile_data['date_of_birth']) : $lang['adddateofbirth']; ?>
+                                    <div class="open-modal">
+                                        <?php echo !empty($profile_data['date_of_birth']) ? htmlspecialchars($profile_data['date_of_birth']) : $lang['adddateofbirth']; ?>
+                                    </div>
                                 </div>
                             </div>
 
@@ -402,17 +593,23 @@ if ($result_profile->num_rows > 0) {
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/address.svg" alt="address icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <?php echo !empty($profile_data['address']) ? htmlspecialchars($profile_data['address']) : $lang['addcurrentaddress']; ?>
+                                    <div class="open-modal">
+                                        <?php echo !empty($profile_data['address']) ? htmlspecialchars($profile_data['address']) : $lang['addcurrentaddress']; ?>
+                                    </div>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/gender.svg" alt="gender icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <?php echo !empty($profile_data['gender']) ? htmlspecialchars($profile_data['gender']) : $lang['addgender']; ?>
+                                    <div class="open-modal">
+                                        <?php echo !empty($profile_data['gender']) ? htmlspecialchars($profile_data['gender']) : $lang['addgender']; ?>
+                                    </div>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/marriage.svg" alt="marital status icon"
                                         style="width: 16px; margin-right: 5px;">
-                                    <?php echo !empty($profile_data['marital_status']) ? htmlspecialchars($profile_data['marital_status']) : $lang['addmaritalstatus']; ?>
+                                    <div class="open-modal">
+                                        <?php echo !empty($profile_data['marital_status']) ? htmlspecialchars($profile_data['marital_status']) : $lang['addmaritalstatus']; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -420,7 +617,9 @@ if ($result_profile->num_rows > 0) {
                         <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 15px;">
                             <div style="font-size: 1.2em; font-weight: bold;"><?= $lang['profile_description'] ?></div>
                             <p style="margin-top: 10px; color: #6c757d;">
+                            <div class="open-modal">
                                 <?php echo !empty($profile_data['profile_description']) ? htmlspecialchars($profile_data['profile_description']) : $lang['profile_description_default']; ?>
+                            </div>
                             </p>
                         </div>
                     </div>
@@ -443,6 +642,71 @@ if ($result_profile->num_rows > 0) {
         </div>
     </div>
 
+    <!-- Modal Form -->
+    <div id="modalForm" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2><?= $lang['personal_info'] ?></h2>
+
+            <form>
+                <!-- Full Name -->
+                <label><?= $lang['full_name'] ?> *</label>
+                <input type="text" placeholder="<?= $lang['full_name_placeholder'] ?>">
+
+                <!-- Email -->
+                <label><?= $lang['email'] ?> *</label>
+                <input type="email" placeholder="example@mail.com" disabled>
+
+                <!-- Phone Number -->
+                <label><?= $lang['phone_number'] ?> *</label>
+                <input type="tel" placeholder="<?= $lang['enter_phone'] ?>">
+
+                <!-- Current Address -->
+                <label><?= $lang['current_address'] ?> *</label>
+                <div class="flex">
+                    <select>
+                        <option><?= $lang['select_province'] ?></option>
+                    </select>
+                    <select>
+                        <option><?= $lang['select_district'] ?></option>
+                    </select>
+                </div>
+
+                <!-- Date of Birth + Gender -->
+                <div class="form-row">
+                    <!-- Ngày sinh -->
+                    <div class="form-group half-width">
+                        <label for="dob"><?= $lang['date_of_birth'] ?></label>
+                        <input type="date" id="dob" name="dob" placeholder="DD/MM/YYYY">
+                    </div>
+
+                    <!-- Giới tính -->
+                    <div class="form-group gender-group">
+                        <label><?= $lang['gender'] ?></label>
+                        <div class="gender-buttons">
+                            <button type="button" class="gender-btn"><?= $lang['female'] ?></button>
+                            <button type="button" class="gender-btn"><?= $lang['male'] ?></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tình trạng hôn nhân -->
+                <div class="form-group">
+                    <label><?= $lang['marital_status'] ?></label>
+                    <div class="status-buttons">
+                        <button type="button" class="status-btn"><?= $lang['single'] ?></button>
+                        <button type="button" class="status-btn"><?= $lang['married'] ?></button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button type="button" class="cancel"><?= $lang['cancel'] ?></button>
+                    <button type="submit" class="save"><?= $lang['save'] ?></button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
 
@@ -547,6 +811,41 @@ if ($result_profile->num_rows > 0) {
                     alert("Lỗi kết nối khi tải ảnh.");
                 });
         }
+    </script>
+    <!-- script mở modal -->
+    <script>
+        // Đóng modal
+        document.querySelector('.close').addEventListener('click', function () {
+            document.getElementById('modalForm').style.display = 'none';
+        });
+
+        // Nút Hủy cũng đóng modal
+        document.querySelector('.cancel').addEventListener('click', function () {
+            document.getElementById('modalForm').style.display = 'none';
+        });
+
+        // Toggle nút giới tính
+        document.querySelectorAll('.gender-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Toggle tình trạng hôn nhân
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Mở modal (tuỳ chọn - gọi từ nút ngoài)
+        document.querySelectorAll('.open-modal').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('modalForm').style.display = 'flex';
+            });
+        });
     </script>
 
 

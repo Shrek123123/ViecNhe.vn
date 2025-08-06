@@ -1,84 +1,116 @@
+<?php
+session_start();
+require_once 'config.php';
+
+// Nếu người dùng bấm đổi ngôn ngữ
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+
+// Load file ngôn ngữ tương ứng
+include 'lang/' . $_SESSION['lang'] . '.php';
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobSeeker Login - JobHive</title>
+    <title><?= $lang['jobseekerforgetpassword_title'] ?> - ViecNhe</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
-            height: 100vh;
-        }
-
-        .container {
-            display: flex;
-            flex: 1;
-        }
-
-        .left {
-            flex: 1;
-            background: #f3f3f3;
-            padding: 40px;
-            display: flex;
             flex-direction: column;
-            justify-content: center;
+            min-height: 100vh;
+            background-color: #f3f3f3;
         }
 
-        .right {
+        .main-content {
             flex: 1;
-            background: white;
-            color: #8B0000;
-            padding: 40px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .form-container {
+            background: #ffffff;
+            color: #8B0000;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
+            box-sizing: border-box;
         }
 
         h2 {
             color: #d90000;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #555;
         }
 
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
         }
 
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            box-sizing: border-box;
         }
 
         .btn-login {
             width: 100%;
             padding: 12px;
             background-color: #d90000;
-            color: white;
+            color: #ffffff;
             font-size: 18px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
         }
 
-        .forgot,
-        .signup {
-            text-align: right;
-            margin-top: 10px;
-            font-size: 14px;
+        .btn-login:hover {
+            background-color: #a60000;
         }
 
         .signup {
             text-align: center;
             margin-top: 30px;
+            font-size: 15px;
+            color: #555;
         }
 
         .signup a {
@@ -86,44 +118,62 @@
             text-decoration: none;
             font-weight: bold;
         }
+
+        .signup a:hover {
+            color: #a60000;
+        }
+
+        .redirect {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .redirect a {
+            color: #d90000;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .redirect a:hover {
+            color: #a60000;
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 25px;
+                margin: 0 15px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="left">
-            <h2>We are glad to see our fellow jobseekers back!</h2>
-            <p>Type in your email and we'll check if there's an email that matches our record</p>
-            <form>
+    <?php include_once(__DIR__ . '/header_loginlogout/jobseeker.php'); ?>
+
+    <div class="main-content">
+        <div class="form-container">
+            <h2><?= $lang['jobseekerforgetpassword_title']; ?></h2>
+            <p><?= $lang['jobseekerforgetpassword_intro'] ?? 'Type in your email and we\'ll check if there\'s a match.'; ?></p>
+
+            <form action="jobseekerforgetpassword_process.php" method="POST">
                 <div class="form-group">
-                    <label>Email</label><br>
-                    <input type="email" placeholder="Email" required>
+                    <label for="emailInput"><?= $lang['email']; ?></label>
+                    <input type="email" id="emailInput" name="email" placeholder="<?= $lang['jobseeker_login_email_placeholder']; ?>" required>
                 </div>
-                
-                <button class="btn-login">Submit</button>
+                <button type="submit" class="btn-login"><?= $lang['jobseekerforgetpassword_button'] ?? 'Submit'; ?></button>
             </form>
+
             <div class="signup">
-                Haven't had an account yet? <a href="jobseekerregister.php">Register here</a>
+                <?= $lang['jobseeker_login_signup'] ?>
             </div>
-            <div style="margin-top: 20px; text-align: center;">
-                <p>Are you an employer? <a href="employerpage.php">Click here to redirect</a></p>
-            </div>
-        </div>
-        <div class="right">
-            <a href="index.php">
-            <img src="image/logo.png" alt="JobHive Logo" style="height: 70px; margin-bottom: 20px;">
-            </a>
-            <h2>Your Job<br>Is our Hive</h2>
-            <p>JobHive - The pionnering job portal destination for foreigners in Vietnam</p>
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ccc;">
-            <div class="support">
-                <p>Having trouble logging in?</p>
-                <p>Call us at: <strong>012 345 6789</strong></p>
-                <p>Email us at: <a href="mailto:support@jobhive.com">support@jobhive.com</a></p>
+
+            <div class="redirect">
+                <p><?= $lang['jobseeker_login_redirect_employer'] ?></p>
             </div>
         </div>
-        
     </div>
+
 </body>
 
 </html>

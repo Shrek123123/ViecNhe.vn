@@ -13,6 +13,12 @@ if (!isset($_SESSION['lang'])) {
 include 'lang/' . $_SESSION['lang'] . '.php';
 ?>
 <style>
+    .loggined_option {
+        display: flex;
+        gap: 15px;
+        margin-left: auto;
+        align-items: center;
+    }
     .user-info {
         display: flex;
         align-items: center;
@@ -29,6 +35,12 @@ include 'lang/' . $_SESSION['lang'] . '.php';
     .user-info span {
         font-size: 16px;
         font-weight: bold;
+    }
+
+    .ra_trang_tim_viec {
+        text-decoration: none;
+        color: #333;
+        margin-right: 15px;
     }
 
     .user-dropdown {
@@ -68,7 +80,6 @@ include 'lang/' . $_SESSION['lang'] . '.php';
     .user-dropdown:hover .dropdown-menu {
         display: flex;
     }
-
 
     body {
         margin: 0;
@@ -131,8 +142,9 @@ include 'lang/' . $_SESSION['lang'] . '.php';
             style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a>
         <a href="feedback_employer.php" style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
     </div>
-    <div style="display: flex; gap: 15px; margin-left: auto;">
+    <div class="loggined_option">
         <?php if (isset($_SESSION['usernameemployer'])): ?>
+            <a class="ra_trang_tim_viec" href="index.php"><?php echo $lang['Ra_trang_tim_viec'] ?></a>
             <div class="user-dropdown">
                 <div class="user-info">
                     <img src="image/defaultavatar.jpg" alt="User Avatar">

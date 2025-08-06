@@ -10,8 +10,6 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Jobseeker Dashboard</title>
     <style>
         body {
             margin: 0;

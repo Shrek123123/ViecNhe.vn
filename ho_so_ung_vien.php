@@ -57,6 +57,44 @@ if ($result_profile->num_rows > 0) {
     $profile_data = $result_profile->fetch_assoc();
 }
 // KẾT THÚC: KHỐI MÃ PHP XỬ LÝ DỮ LIỆU
+
+
+$gender_value_from_db = $profile_data['gender'] ?? null;
+$translated_gender = '';
+
+if (!empty($gender_value_from_db)) {
+    // Tạo khóa dịch động: 'gender_male' -> 'gender_Male' -> 'gender_male'
+    $translation_key = 'gender_' . strtolower($gender_value_from_db);
+
+    // Lấy chuỗi dịch từ mảng $lang. Nếu không có, dùng giá trị gốc từ DB
+    $translated_gender = $lang[$translation_key] ?? $gender_value_from_db;
+} else {
+    // Nếu giá trị từ DB rỗng, sử dụng chuỗi mặc định
+    $translated_gender = $lang['addgender'];
+}
+$marital_status_value_from_db = $profile_data['marital_status'] ?? null;
+$translated_marital_status = '';
+if (!empty($marital_status_value_from_db)) {
+    $translation_key = 'marital_status_' . strtolower($marital_status_value_from_db);
+
+    $translated_marital_status = $lang[$translation_key] ?? $marital_status_value_from_db;
+} else {
+    $translated_marital_status = $lang['addmaritalstatus'];
+}
+
+$uploadedFile = '';
+
+// Lấy file đã upload nếu có
+$stmt = $conn->prepare("SELECT cv_file FROM jobseeker_profile WHERE jobseeker_id=?");
+$stmt->bind_param("i", $jobseeker_id);
+$stmt->execute();
+$stmt->bind_result($cv_file_path);
+$stmt->fetch();
+$stmt->close();
+
+if ($cv_file_path) {
+    $uploadedFile = basename($cv_file_path); // chỉ tên file hiển thị
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -297,7 +335,8 @@ if ($result_profile->num_rows > 0) {
         }
 
         form input,
-        form select {
+        form select,
+        form textarea {
             width: 100%;
             padding: 8px 10px;
             margin-top: 6px;
@@ -327,7 +366,6 @@ if ($result_profile->num_rows > 0) {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            margin-top: 16px;
         }
 
         .half-width {
@@ -420,6 +458,18 @@ if ($result_profile->num_rows > 0) {
                 font-size: 13px;
                 padding: 6px 10px;
             }
+        }
+
+        #message {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            /* ban đầu ẩn */
+            font-weight: bold;
+            max-width: 400px;
+            margin: 0 auto 15px auto;
+            /* căn giữa */
         }
     </style>
 </head>
@@ -550,7 +600,7 @@ if ($result_profile->num_rows > 0) {
                     <div style="flex-grow: 1; text-align: left;">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <div style="font-size: 1.2em; font-weight: bold;">
+                            <div style="font-size: 1.2em; font-weight: bold;" id="display_full_name">
                                 <?php echo $user_display_name; ?>
                             </div>
                             <svg class="open-modal" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
@@ -576,14 +626,14 @@ if ($result_profile->num_rows > 0) {
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/phone.svg" alt="phone icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <div class="open-modal">
+                                    <div class="open-modal" id="display_phone_number">
                                         <?php echo !empty($profile_data['phone_number']) ? htmlspecialchars($profile_data['phone_number']) : $lang['addmobilephone']; ?>
                                     </div>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/birthday.svg" alt="birthday icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <div class="open-modal">
+                                    <div class="open-modal" id="display_date_of_birth">
                                         <?php echo !empty($profile_data['date_of_birth']) ? htmlspecialchars($profile_data['date_of_birth']) : $lang['adddateofbirth']; ?>
                                     </div>
                                 </div>
@@ -593,22 +643,22 @@ if ($result_profile->num_rows > 0) {
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/address.svg" alt="address icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <div class="open-modal">
+                                    <div class="open-modal" id="display_address">
                                         <?php echo !empty($profile_data['address']) ? htmlspecialchars($profile_data['address']) : $lang['addcurrentaddress']; ?>
                                     </div>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/gender.svg" alt="gender icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
-                                    <div class="open-modal">
-                                        <?php echo !empty($profile_data['gender']) ? htmlspecialchars($profile_data['gender']) : $lang['addgender']; ?>
+                                    <div class="open-modal" id="display_gender">
+                                        <?php echo !empty($profile_data['gender']) ? htmlspecialchars($translated_gender) : $lang['addgender']; ?>
                                     </div>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                                     <img src="image/marriage.svg" alt="marital status icon"
                                         style="width: 16px; margin-right: 5px;">
-                                    <div class="open-modal">
-                                        <?php echo !empty($profile_data['marital_status']) ? htmlspecialchars($profile_data['marital_status']) : $lang['addmaritalstatus']; ?>
+                                    <div class="open-modal" id="display_marital_status">
+                                        <?php echo !empty($profile_data['marital_status']) ? htmlspecialchars($translated_marital_status) : $lang['addmaritalstatus']; ?>
                                     </div>
                                 </div>
                             </div>
@@ -617,8 +667,15 @@ if ($result_profile->num_rows > 0) {
                         <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 15px;">
                             <div style="font-size: 1.2em; font-weight: bold;"><?= $lang['profile_description'] ?></div>
                             <p style="margin-top: 10px; color: #6c757d;">
-                            <div class="open-modal">
-                                <?php echo !empty($profile_data['profile_description']) ? htmlspecialchars($profile_data['profile_description']) : $lang['profile_description_default']; ?>
+                            <div class="open-modal" id="display_profile_description">
+                                <?php
+                                if (!empty($profile_data['profile_description'])) {
+                                    // Giữ cả ký tự xuống dòng khi hiển thị
+                                    echo nl2br(htmlspecialchars($profile_data['profile_description']));
+                                } else {
+                                    echo $lang['profile_description_default'];
+                                }
+                                ?>
                             </div>
                             </p>
                         </div>
@@ -629,13 +686,28 @@ if ($result_profile->num_rows > 0) {
                     style="background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
                     <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 15px;"><?php echo $lang['my_cv']; ?>
                     </div>
-                    <div style="border: 2px dashed #e0e0e0; border-radius: 8px; padding: 40px 20px;">
-                        <img src="image/Uploadlogo2.svg" alt="Upload Icon" width="20" height="20">
-                        <div style="color: #ff0000ff; font-weight: bold; margin-bottom: 5px;">
-                            <?php echo $lang['upload_existing_CV'] ?>
-                        </div>
-                        <div style="font-size: 0.9em; color: #6c757d;"><?php echo $lang['supported_format_file'] ?>
-                        </div>
+
+                    <div id="uploadWrapper">
+                        <?php if ($uploadedFile): ?>
+                            <div
+                                style="border:1px solid #ccc; border-radius:8px; padding:20px; text-align:center; position:relative;">
+                                <?php echo $uploadedFile; ?>
+                                <button id="deleteFile"
+                                    style="position:absolute; top:-10px; right:-10px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer;">x</button>
+                            </div>
+                        <?php else: ?>
+                            <div id="uploadContainer"
+                                style="border: 2px dashed #e0e0e0; border-radius: 8px; padding: 40px 20px; cursor: pointer;">
+                                <input type="file" id="fileInput" accept=".doc,.docx,.pdf" style="display:none;">
+                                <img src="image/Uploadlogo2.svg" alt="Upload Icon" width="20" height="20">
+                                <div style="color: #ff0000ff; font-weight: bold; margin-bottom: 5px;">
+                                    <?php echo $lang['upload_existing_CV'] ?>
+                                </div>
+                                <div style="font-size: 0.9em; color: #6c757d;">
+                                    <?php echo $lang['supported_format_file'] ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -648,58 +720,124 @@ if ($result_profile->num_rows > 0) {
             <span class="close">&times;</span>
             <h2><?= $lang['personal_info'] ?></h2>
 
-            <form>
-                <!-- Full Name -->
+            <form method="POST" action="save_profile.php" id="profileForm">
                 <label><?= $lang['full_name'] ?> *</label>
-                <input type="text" placeholder="<?= $lang['full_name_placeholder'] ?>">
+                <input type="text" name="full_name" placeholder="<?= $lang['full_name_placeholder'] ?>" required
+                    value="<?= htmlspecialchars($user_display_name) ?>">
 
-                <!-- Email -->
                 <label><?= $lang['email'] ?> *</label>
-                <input type="email" placeholder="example@mail.com" disabled>
+                <input type="email" placeholder="example@mail.com" disabled
+                    value="<?= htmlspecialchars($user_email ?? '') ?>">
 
-                <!-- Phone Number -->
                 <label><?= $lang['phone_number'] ?> *</label>
-                <input type="tel" placeholder="<?= $lang['enter_phone'] ?>">
+                <input type="tel" name="phone_number" placeholder="<?= $lang['enter_phone'] ?>" required
+                    value="<?= htmlspecialchars($profile_data['phone_number'] ?? '') ?>">
 
-                <!-- Current Address -->
                 <label><?= $lang['current_address'] ?> *</label>
-                <div class="flex">
-                    <select>
-                        <option><?= $lang['select_province'] ?></option>
-                    </select>
-                    <select>
-                        <option><?= $lang['select_district'] ?></option>
-                    </select>
-                </div>
+                <input type="text" name="address" placeholder="<?= $lang['current_address_placeholder'] ?>" required
+                    value="<?= htmlspecialchars($profile_data['address'] ?? '') ?>">
 
-                <!-- Date of Birth + Gender -->
                 <div class="form-row">
-                    <!-- Ngày sinh -->
                     <div class="form-group half-width">
                         <label for="dob"><?= $lang['date_of_birth'] ?></label>
-                        <input type="date" id="dob" name="dob" placeholder="DD/MM/YYYY">
+                        <input type="date" id="dob" name="date_of_birth" placeholder="DD/MM/YYYY"
+                            value="<?= htmlspecialchars($profile_data['date_of_birth'] ?? '') ?>">
                     </div>
 
-                    <!-- Giới tính -->
                     <div class="form-group gender-group">
                         <label><?= $lang['gender'] ?></label>
                         <div class="gender-buttons">
-                            <button type="button" class="gender-btn"><?= $lang['female'] ?></button>
-                            <button type="button" class="gender-btn"><?= $lang['male'] ?></button>
+                            <button type="button"
+                                class="gender-btn <?= ($profile_data['gender'] ?? '') == 'Female' ? 'active' : '' ?>"
+                                data-value="Female"><?= $lang['female'] ?></button>
+                            <button type="button"
+                                class="gender-btn <?= ($profile_data['gender'] ?? '') == 'Male' ? 'active' : '' ?>"
+                                data-value="Male"><?= $lang['male'] ?></button>
+                            <button type="button"
+                                class="gender-btn <?= ($profile_data['gender'] ?? '') == 'Other' ? 'active' : '' ?>"
+                                data-value="Other"><?= $lang['other'] ?></button>
                         </div>
+                        <input type="hidden" name="gender" id="genderInput" required
+                            value="<?= htmlspecialchars($profile_data['gender'] ?? '') ?>">
                     </div>
                 </div>
 
-                <!-- Tình trạng hôn nhân -->
                 <div class="form-group">
                     <label><?= $lang['marital_status'] ?></label>
                     <div class="status-buttons">
-                        <button type="button" class="status-btn"><?= $lang['single'] ?></button>
-                        <button type="button" class="status-btn"><?= $lang['married'] ?></button>
+                        <button type="button"
+                            class="status-btn <?= ($profile_data['marital_status'] ?? '') == 'Single' ? 'active' : '' ?>"
+                            data-value="Single"><?= $lang['single'] ?></button>
+                        <button type="button"
+                            class="status-btn <?= ($profile_data['marital_status'] ?? '') == 'Married' ? 'active' : '' ?>"
+                            data-value="Married"><?= $lang['married'] ?></button>
+                        <button type="button"
+                            class="status-btn <?= ($profile_data['marital_status'] ?? '') == 'Other' ? 'active' : '' ?>"
+                            data-value="Other"><?= $lang['other'] ?></button>
                     </div>
+                    <input type="hidden" name="marital_status" id="statusInput" required
+                        value="<?= htmlspecialchars($profile_data['marital_status'] ?? '') ?>">
                 </div>
 
-                <!-- Action Buttons -->
+                <label><?= $lang['profile_description'] ?></label>
+                <textarea name="profile_description" id="profile_description" rows="4"
+                    maxlength="300"
+                    placeholder="<?= $lang['profile_description_placeholder'] ?>"><?= htmlspecialchars($profile_data['profile_description'] ?? '') ?></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                    <span id="desc-char-count" style="font-size: 13px; color: #666;">
+                        <?= $lang['desc_char_limit'] ?> <span id="desc-current-count">0</span>/300 <?= $lang['desc_char_unit'] ?>
+                    </span>
+                    <div id="newline-warning" style="color: red; font-size: 13px; display: none; text-align: left; margin-left: 16px;">
+                        <?= $lang['newline_warning'] ?>
+                    </div>
+                </div>
+                <script>
+                    (function () {
+                        const textarea = document.getElementById('profile_description');
+                        const countSpan = document.getElementById('desc-current-count');
+                        const limitSpan = document.getElementById('desc-char-count');
+                        const warningDiv = document.getElementById('newline-warning');
+                        const maxLen = 300;
+                        const maxNewlines = 7;
+
+                        function countNewlines(str) {
+                            // Count both \n and \r\n as newlines
+                            return (str.match(/\n/g) || []).length;
+                        }
+
+                        function updateCount() {
+                            let val = textarea.value;
+                            let newlines = countNewlines(val);
+
+                            // Enforce max length
+                            if (val.length > maxLen) {
+                                textarea.value = val.substring(0, maxLen);
+                                val = textarea.value;
+                            }
+
+                            // Enforce max newlines
+                            if (newlines > maxNewlines) {
+                                // Remove last entered character
+                                textarea.value = val.substring(0, val.lastIndexOf('\n'));
+                                warningDiv.style.display = 'block';
+                            } else {
+                                warningDiv.style.display = 'none';
+                            }
+
+                            countSpan.textContent = textarea.value.length;
+                            if (textarea.value.length >= maxLen) {
+                                limitSpan.style.color = 'red';
+                            } else {
+                                limitSpan.style.color = '#666';
+                            }
+                        }
+
+                        textarea.addEventListener('input', updateCount);
+                        // Init on page load
+                        updateCount();
+                    })();
+                </script>
+
                 <div class="button-group">
                     <button type="button" class="cancel"><?= $lang['cancel'] ?></button>
                     <button type="submit" class="save"><?= $lang['save'] ?></button>
@@ -708,6 +846,142 @@ if ($result_profile->num_rows > 0) {
         </div>
     </div>
 
+
+    <script>
+        const uploadWrapper = document.getElementById('uploadWrapper');
+
+        const uploadContainer = document.getElementById('uploadContainer');
+        const fileInput = document.getElementById('fileInput');
+
+        if (uploadContainer) {
+            uploadContainer.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                const allowedExt = /(\.doc|\.docx|\.pdf)$/i;
+                if (!allowedExt.exec(file.name)) {
+                    alert('File không đúng định dạng (doc, docx, pdf)');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File vượt quá 5MB');
+                    fileInput.value = '';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('cv_file', file);
+
+                fetch('upload_cv.php', { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            uploadWrapper.innerHTML = `
+                    <div style="border:1px solid #ccc; border-radius:8px; padding:20px; text-align:center; position:relative;">
+                        ${data.file_name}
+                        <button id="deleteFile" style="position:absolute; top:-10px; right:-10px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer;">x</button>
+                    </div>
+                `;
+                            setupDelete();
+                        } else {
+                            alert('Upload thất bại: ' + data.message);
+                        }
+                    })
+                    .catch(err => alert('Upload thất bại'));
+            });
+        }
+
+        function setupDelete() {
+            const delBtn = document.getElementById('deleteFile');
+            if (delBtn) {
+                delBtn.addEventListener('click', () => {
+                    if (confirm('<?= $lang['confirm_delete_cv'] ?>')) {
+                        fetch('delete_cv.php', { method: 'POST' })
+                            .then(res => res.json())
+                            .then(del => {
+                                if (del.success) {
+                                    alert('<?= $lang['cv_deleted_successfully'] ?>');
+                                    location.reload();
+                                } else {
+                                    alert('<?= $lang['cv_fail_to_delete'] ?>' + del.message);
+                                }
+                            });
+                    }
+                });
+            }
+        }
+
+        setupDelete();
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("#modalForm form");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                fetch("save_profile.php", {
+                    method: "POST",
+                    body: formData,
+                    credentials: "same-origin"
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showModalMessage(data.message, "green"); // Hiển thị thông báo trước
+                            setTimeout(() => {
+                                location.reload(); // Tải lại trang sau 2 giây để người dùng kịp đọc thông báo
+                            }, 2000);
+                        } else {
+                            showModalMessage(data.message, "red");
+                        }
+                    })
+                    .catch(() => {
+                        showModalMessage("Có lỗi xảy ra khi kết nối server.", "red");
+                    });
+            });
+
+            function showModalMessage(text, color) {
+                // Tạo nền mờ
+                const overlay = document.createElement("div");
+                overlay.style.position = "fixed";
+                overlay.style.top = 0;
+                overlay.style.left = 0;
+                overlay.style.width = "100%";
+                overlay.style.height = "100%";
+                overlay.style.backgroundColor = "rgba(0,0,0,0.4)";
+                overlay.style.display = "flex";
+                overlay.style.alignItems = "center";
+                overlay.style.justifyContent = "center";
+                overlay.style.zIndex = 9999;
+
+                // Tạo khung thông báo
+                const modal = document.createElement("div");
+                modal.style.background = color === "green" ? "#e6ffed" : "#ffe6e6";
+                modal.style.color = color;
+                modal.style.padding = "20px 30px";
+                modal.style.borderRadius = "8px";
+                modal.style.fontSize = "16px";
+                modal.style.fontWeight = "bold";
+                modal.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+                modal.textContent = text;
+
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+
+                // Tự tắt sau 4 giây
+                setTimeout(() => {
+                    overlay.remove();
+                }, 3000);
+            }
+        });
+    </script>
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -844,6 +1118,23 @@ if ($result_profile->num_rows > 0) {
         document.querySelectorAll('.open-modal').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.getElementById('modalForm').style.display = 'flex';
+            });
+        });
+        const genderInput = document.getElementById('genderInput'); // input hidden name="gender"
+        document.querySelectorAll('.gender-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                if (genderInput) genderInput.value = this.getAttribute('data-value');
+            });
+        });
+
+        const statusInput = document.getElementById('statusInput'); // input hidden name="marital_status"
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                if (statusInput) statusInput.value = this.getAttribute('data-value');
             });
         });
     </script>

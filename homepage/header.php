@@ -13,6 +13,22 @@ if (!isset($_SESSION['lang'])) {
 // Load file ngôn ngữ tương ứng
 include 'lang/' . $_SESSION['lang'] . '.php';
 $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
+$user_data = null;
+if ($jobseeker_id > 0) {
+    $conn = new mysqli("localhost", "root", "", "jobhive");
+    if (!$conn->connect_error) {
+        $sql = "SELECT username FROM user WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $jobseeker_id);
+        $stmt->execute();
+        $stmt->bind_result($username);
+        if ($stmt->fetch()) {
+            $user_data = $username;
+        }
+        $stmt->close();
+        $conn->close();
+    }
+}
 ?>
 <style>
     .loggined_option {
@@ -185,7 +201,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
                     }
                     ?>
                     <img src="<?= htmlspecialchars($profilePic); ?>" alt="User Avatar">
-                    <span><?= htmlspecialchars($_SESSION['username'] ?? 'Người dùng'); ?></span>
+                    <span><?= htmlspecialchars($username ?? 'Người dùng'); ?></span>
                 </div>
                 <div class="dropdown-menu">
                     <?php

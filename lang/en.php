@@ -51,7 +51,9 @@ $lang = [
     "dayleft" => " :d days left",
     "expired" => "Expired",
     'login_to_save_jobs' => 'Please login to save jobs to your account.',
-
+    'job_saved_successfully' => 'Job saved successfully!',
+    'job_unsaved_successfully' => 'Job unsaved successfully.',
+    'remove' => 'Remove',
 
     //footer
     // Hotline section
@@ -321,6 +323,11 @@ $lang = [
     'updated_hours' => 'Updated %d hours ago',
     'updated_minutes' => 'Updated %d minutes ago',
     'updated_now' => 'Updated just now',
+    'updated' => [
+        'days'  => 'Updated :d days ago',
+        'hours' => 'Updated :h hours ago',
+        'just'  => 'Just updated',
+    ],
     //edit_job_post_modal
     'edit_job_post_modal_title' => 'Edit Job Post',
     'edit_job_post_modal_company_name' => 'Company Name',
@@ -367,6 +374,7 @@ $lang = [
     'don_ung_tuyen' => '📝 Application #',
     'at' => 'at',
     'vi_tri' => '💼 Position',
+    'cong_ty' => '🏢 Company',
     'submitted_on' => '📅 Submitted on: ',
     'submitted_cv' => '📄 CV submitted: ',
     'khong_co' => '[No CV submitted]',
@@ -414,5 +422,25 @@ $lang = [
     'single' => 'Single',
     'married' => 'Married',
     'cancel' => 'Cancel',
-    'save' => 'Save'
+    'save' => 'Save',
+    'current_address_placeholder' => 'Enter your current address',
+    'other' => 'Other',
+    'prefer_not_to_say' => 'Prefer not to say',
+    'gender_male' => 'Male',
+    'gender_female' => 'Female',
+    'gender_other' => 'Other (not specified)',
+    'marital_status_single' => 'Single',
+    'marital_status_married' => 'Married',
+    'marital_status_other' => '',
+    'profile_description_placeholder' => 'Enter a brief description about yourself or your profile',
+    'luu_ho_so_thanh_cong' => 'Profile saved successfully!',
+    'loi_luu_ho_so' => 'Error saving profile: ',
+    'days_left_to_apply' => ' days left to apply',
+    'application_closed' => 'Application closed',
+    'confirm_delete_cv' => 'Are you sure you want to delete your CV?',
+    'cv_deleted_successfully' => 'CV deleted successfully.',
+    'cv_fail_to_delete' => 'Failed to delete CV: ',
+    'newline_warning' => 'Limit of newline characters reached.',
+    'desc_char_limit' => 'Character limit:',
+    'desc_char_unit' => 'characters',
 ];

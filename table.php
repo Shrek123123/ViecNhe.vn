@@ -30,16 +30,16 @@ if ($stmt === TRUE) {
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS jobseeker_profile (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     jobseeker_id INT UNSIGNED NOT NULL,
-    profile_description TEXT, -- Có thể để NULL nếu không bắt buộc
+    profile_description TEXT,
     profile_pic VARCHAR(255),
-    -- Các trường mới được thêm vào
-    phone_number VARCHAR(20) UNIQUE, -- Số điện thoại, có thể để UNIQUE nếu bạn muốn mỗi số chỉ thuộc về 1 profile
-    gender ENUM('Male', 'Female', 'Other', 'Prefer not to say'), -- Giới tính
-    address VARCHAR(255), -- Địa chỉ hiện tại
-    date_of_birth DATE, -- Ngày sinh (yyyy-mm-dd)
-    marital_status VARCHAR(50), -- Tình trạng hôn nhân (ví dụ: 'Single', 'Married', 'Divorced')
+    phone_number VARCHAR(20) UNIQUE,
+    gender ENUM('Male', 'Female', 'Other', 'Prefer not to say'),
+    address VARCHAR(255),
+    date_of_birth DATE,
+    marital_status VARCHAR(50),
+    cv_file VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Thêm trường updated_at để theo dõi sửa đổi
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (jobseeker_id) REFERENCES user(id) ON DELETE CASCADE
 )");
 if ($stmt === TRUE) {

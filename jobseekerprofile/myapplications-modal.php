@@ -106,9 +106,11 @@ if ($jobseeker_id <= 0) {
                                 <?= $lang['vi_tri'] ?>:
                                 <a href="jobdetail.php?id=<?php echo $job_id; ?>"
                                     style="color: #007bff; text-decoration: none; font-weight: bold;">
-                                    <?php echo $job_title; ?>                 <?= $lang['tai'] ?>                 <?php echo $job_location; ?>
+                                    <?php echo $job_title; ?>                 <?= $lang['tai'] ?>                 <?php echo $job_location; ?> <?= $lang['xem_chi_tiet'] ?>
                                 </a>
                             </div>
+                            <div style="margin-bottom: 5px;">
+                                <?= $lang['cong_ty'] ?>: <strong><?php echo $company_name; ?></strong></div>
                             <div style="margin-bottom: 5px;"><?= $lang['submitted_on'] ?><?php echo $submitted_date_only; ?></div>
                             <div style="margin-bottom: 5px;">
                                 <?= $lang['submitted_cv'] ?>

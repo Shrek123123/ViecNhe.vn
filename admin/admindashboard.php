@@ -208,7 +208,7 @@ $conn->close();
         <div class="top-bar">
             <h1>Dashboard</h1>
             <div>
-                <img src="../uploads/default.png" alt="Profile" style="width: 200px; height: 48px; border-radius: 10px; background: #ccc; object-fit: cover;">
+                <img src="../image/logo.png" alt="Profile" style="width: 200px; height: 48px; border-radius: 10px; object-fit: cover;">
             </div>
             <form method="post" action="adminlogout.php" style="display: inline;">
                 <button type="submit" name="admin_logout"

@@ -95,6 +95,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS job (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status ENUM('pending_review', 'approved', 'rejected') DEFAULT 'pending_review',
+    job_post_number_by_employer INT(11) NOT NULL DEFAULT 0,
     FOREIGN KEY (posted_by_employer_id) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
 )");
 if ($stmt === TRUE) {
@@ -115,6 +116,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS application (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     cv_file VARCHAR(255),
     allow_search BOOLEAN DEFAULT FALSE,
+    hidden_from_employer BOOLEAN DEFAULT FALSE,
     UNIQUE (job_id, jobseeker_id),
     FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
     FOREIGN KEY (jobseeker_id) REFERENCES user(id) ON DELETE CASCADE

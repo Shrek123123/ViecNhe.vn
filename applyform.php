@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             if (move_uploaded_file($file_tmp, $file_path)) {
                 $stmt = $conn->prepare("INSERT INTO application (job_id, jobseeker_id, fullname, email, phonenumber, cv_file, allow_search, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                $status = "applied";
+                $status = "pending";
                 $stmt->bind_param("iissssss", $job_id, $jobseeker_id, $fullname, $email, $phone, $file_path, $allow_search, $status);
                 if ($stmt->execute()) {
                     echo json_encode(['success' => true, 'message' => 'Application submitted successfully!']);

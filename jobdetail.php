@@ -197,13 +197,13 @@ require_once 'config.php';
                         $login_url = "jobseekerlogin.php?redirect=" . urlencode($current_url);
                         ?>
 
+                        
                         <div class="d-flex gap-3">
                             <button class="btn btn-danger apply-btn" type="button"
                                 data-logged-in="<?= $is_logged_in ? '1' : '0' ?>" data-login-url="<?= $login_url ?>"
                                 data-job-id="<?= $job['id'] ?>">
                                 <?= $lang['jobdetail_apply_now'] ?>
                             </button>
-
                             <button class="btn btn-secondary" type="button" id="save-job-btn"
                                 data-job-id="<?= $job_detail_id ?>" <?php if (!$is_logged_in): ?>
                                     onclick="window.location.href='<?= $login_url ?>'; return false;" <?php endif; ?>>

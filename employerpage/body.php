@@ -114,9 +114,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $jobStatus = 'pending_review'; // Mặc định là chờ duyệt
 
   // Database connection and insertion logic here
+  // Lấy số thứ tự bài đăng mới nhất của employer này
+  $sql = "SELECT MAX(job_post_number_by_employer) AS last_number FROM job WHERE posted_by_employer_id = ?";
+  $stmt_number = $conn->prepare($sql);
+  if (!$stmt_number) {
+    echo "<script>alert('Error preparing statement for job number: {$conn->error}');</script>";
+    exit;
+  }
+  $stmt_number->bind_param("i", $employerid);
+  $stmt_number->execute();
+  $result = $stmt_number->get_result();
+  $row = $result ? $result->fetch_assoc() : null;
+  $last_number = $row && isset($row['last_number']) ? (int)$row['last_number'] : 0;
+  $stmt_number->close();
+
+  $new_job_number = $last_number + 1;
+
   $stmt = $conn->prepare("INSERT INTO job (
-    posted_by_employer_id, company_name, job_title, job_description, job_location, salary, post_duration, contact_email, contact_phone, job_type, job_category, required_certification, job_experience, company_logo, job_requirement, job_benefit, company_size, no_employee_needed, job_position, job_detailed_location, job_location_district, status
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    posted_by_employer_id, job_post_number_by_employer, company_name, job_title, job_description, job_location, salary, post_duration, contact_email, contact_phone, job_type, job_category, required_certification, job_experience, company_logo, job_requirement, job_benefit, company_size, no_employee_needed, job_position, job_detailed_location, job_location_district, status
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
   if (!$stmt) {
     echo "<script>alert('Error preparing statement: {$conn->error}');</script>";
@@ -124,8 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   }
 
   $stmt->bind_param(
-    "isssssissssssssssissss",
+    "iisssssissssssssssissss",
     $employerid,
+    $new_job_number,
     $companyName,
     $jobTitle,
     $jobDescription,
@@ -158,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 // }
   if ($stmt->execute()) {
     // Thay đổi thông báo và cách thoát ra
-    echo "<script>alert('Your job post is now saved for review. Please wait for further notice!'); window.location.href = window.location.href;</script>";
+    echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
     // window.location.href = window.location.href; sẽ tải lại trang hiện tại (body.php)
     // và đóng modal, làm mới trạng thái
   } else {

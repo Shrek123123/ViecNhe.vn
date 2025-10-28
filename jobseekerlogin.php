@@ -37,6 +37,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (ob_get_level()) {
                 ob_end_clean();
             }
+            // Respect optional redirect parameter (only allow internal redirects)
+            $redirect = null;
+            if (!empty($_GET['redirect'])) {
+                $redirect = $_GET['redirect'];
+            } elseif (!empty($_POST['redirect'])) {
+                $redirect = $_POST['redirect'];
+            }
+
+            // Simple open-redirect protection: only allow relative/internal paths (no host)
+            if (!empty($redirect)) {
+                $parsed = parse_url($redirect);
+                if (empty($parsed['host']) && empty($parsed['scheme'])) {
+                    // safe to redirect
+                    header('Location: ' . $redirect);
+                    exit();
+                }
+            }
+
+            // Fallback destination
             header("Location: jobseekerdashboard.php");
             exit();
 
@@ -212,7 +231,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <h2><?= $lang['jobseeker_login_subtitle_h2']; ?></h2>
             <p><?= $lang['jobseeker_login_subtitle_p']; ?></p>
 
-            <form action="jobseekerlogin.php" method="POST">
+            <?php
+            // Preserve redirect query parameter in the form action if present so POST keeps it
+            $form_action = 'jobseekerlogin.php';
+            if (!empty($_GET['redirect'])) {
+                $form_action .= '?redirect=' . urlencode($_GET['redirect']);
+            }
+            ?>
+            <form action="<?= htmlspecialchars($form_action) ?>" method="POST">
                 <div class="form-group">
                     <label for="emailInput"><?= $lang['email']; ?></label>
                     <input type="email" id="emailInput" name="email"

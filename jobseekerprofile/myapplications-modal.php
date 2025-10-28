@@ -76,11 +76,15 @@ if ($jobseeker_id <= 0) {
                         switch ($app_status) {
                             case 'pending':
                                 $display_status = $lang['pending'];
-                                $status_color = '#ffc107';
+                                $status_color = '#007bff';
+                                break;
+                            case 'viewed':
+                                $display_status = $lang['viewed'];
+                                $status_color = '#17a2b8';
                                 break;
                             case 'interviewed':
                                 $display_status = $lang['interviewed'];
-                                $status_color = '#007bff';
+                                $status_color = '#ffc107';
                                 break;
                             case 'hired':
                                 $display_status = $lang['hired'];

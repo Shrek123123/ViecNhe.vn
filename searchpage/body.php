@@ -483,7 +483,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
             $sql_base = "SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration FROM job";
             $sql_count_base = "SELECT COUNT(*) as total FROM job";
 
-            $conditions = [];
+            $conditions[] = "status = 'approved'";
             $params = [];
             $param_types = '';
 

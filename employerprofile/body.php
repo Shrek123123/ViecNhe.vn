@@ -286,10 +286,8 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
     <div id="jobApplicationsModal" class="custom-modal-overlay">
         <div class="custom-modal-content">
             <span class="custom-modal-close">&times;</span>
-            <h3 style="color: #b23b3b; margin-bottom: 15px;">Submitted Applications for Job <span
-                    id="jobIdDisplay"></span></h3>
             <div id="modal2-content">
-                <div style="text-align: center; padding: 20px;">Loading applications...</div>
+                <div style="text-align: center;">Loading applications...</div>
             </div>
         </div>
     </div>

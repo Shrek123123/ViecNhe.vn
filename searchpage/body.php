@@ -418,24 +418,23 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
 <section class="section-1">
     <div class="container">
-        <div class="title">Find jobs fast 24/7, the latest jobs nationwide.</div>
-        <div class="subtitle">Access 40,000+ new job postings every day from thousands of reputable companies in
-            Vietnam.
+        <div class="title"><?php echo $lang['find_jobs_title']; ?></div>
+        <div class="subtitle"><?php echo $lang['find_jobs_subtitle']; ?>
         </div>
 
         <div class="search-box">
             <form action="" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <select name="category">
-                    <option value="">Job Category</option>
+                    <option value=""><?php echo $lang['job_category_select_menu']; ?></option>
                     <option value="IT & Software" <?php echo (isset($_GET['category']) && $_GET['category'] == 'IT & Software') ? 'selected' : ''; ?>>IT & Software</option>
                     <option value="Marketing" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Marketing') ? 'selected' : ''; ?>>Marketing</option>
                     <option value="Finance" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Finance') ? 'selected' : ''; ?>>Finance</option>
                     <option value="Healthcare" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Healthcare') ? 'selected' : ''; ?>>Healthcare</option>
                     <option value="Government & Public Sector" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Government & Public Sector') ? 'selected' : ''; ?>>Government & Public Sector</option>
                     </select>
-                <input type="text" name="q" placeholder="Job title, company name" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
-                <input type="text" name="location" placeholder="Location" value="<?php echo htmlspecialchars($_GET['location'] ?? ''); ?>">
-                <button type="submit">Search</button>
+                <input type="text" name="q" placeholder="<?php echo $lang['job_title_company_placeholder'] ?? 'Job title, company name'; ?>" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
+                <input type="text" name="location" placeholder="<?php echo $lang['location_placeholder'] ?? 'Location'; ?>" value="<?php echo htmlspecialchars($_GET['location'] ?? ''); ?>">
+                <button type="submit"><?php echo $lang['search']; ?></button>
             </form>
         </div>
     </div>
@@ -459,10 +458,10 @@ $savedJobIdsJson = json_encode($savedJobIds);
                 }
                 ?>
                 <select name="sort" onchange="this.form.submit()">
-                    <option value="newest_first" <?php echo ($current_sort == 'newest_first') ? 'selected' : ''; ?>>Date posted: Newest first</option>
-                    <option value="oldest_first" <?php echo ($current_sort == 'oldest_first') ? 'selected' : ''; ?>>Date posted: Oldest first</option>
-                    <option value="salary_highest" <?php echo ($current_sort == 'salary_highest') ? 'selected' : ''; ?>>Salary: Highest to lowest</option>
-                    <option value="salary_lowest" <?php echo ($current_sort == 'salary_lowest') ? 'selected' : ''; ?>>Salary: Lowest to highest</option>
+                    <option value="newest_first" <?php echo ($current_sort == 'newest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_newest_first'] ?? 'Date posted: Newest first'; ?></option>
+                    <option value="oldest_first" <?php echo ($current_sort == 'oldest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_oldest_first'] ?? 'Date posted: Oldest first'; ?></option>
+                    <option value="salary_highest" <?php echo ($current_sort == 'salary_highest') ? 'selected' : ''; ?>><?php echo $lang['sort_salary_highest'] ?? 'Salary: Highest to lowest'; ?></option>
+                    <option value="salary_lowest" <?php echo ($current_sort == 'salary_lowest') ? 'selected' : ''; ?>><?php echo $lang['sort_salary_lowest'] ?? 'Salary: Lowest to highest'; ?></option>
                 </select>
             </form>
         </div>
@@ -632,7 +631,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
                     $now = new DateTime();
                     $interval = $now->diff($expire_at);
                     $days_left = (int) $interval->format('%r%a');
-                    $days_left_text = $days_left > 0 ? $days_left . ' days left' : 'Expired';
+                    $days_left_text = $days_left > 0 ? sprintf($lang['days_left'], $days_left) : $lang['expired'];
                     $job_id = (int) $row['id'];
                     $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds);
                     ?>

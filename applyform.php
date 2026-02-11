@@ -1,5 +1,18 @@
 <?php
 require_once 'config.php';
+session_start();
+// Nếu người dùng bấm đổi ngôn ngữ
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+
+// Load file ngôn ngữ tương ứng
+include 'lang/' . $_SESSION['lang'] . '.php';
 $job_id = $_GET['id'] ?? 0;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     session_start();
@@ -45,42 +58,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 <div class="modal-header">
-    <h5 class="w-100 text-center">Application Form</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <h5 class="w-100 text-center"><?= $lang['application_form'] ?></h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= $lang['close'] ?>"></button>
 </div>
+
 <form id="apply-form" method="post" enctype="multipart/form-data">
     <input type="hidden" name="job_id" value="<?= htmlspecialchars($job_id) ?>">
+
     <div class="modal-body">
         <div class="mb-3">
-            <label class="form-label">Full Name *</label>
+            <label class="form-label"><?= $lang['full_name'] ?> *</label>
             <input type="text" class="form-control" name="fullname" required>
         </div>
+
         <div class="mb-3">
-            <label class="form-label">Email *</label>
+            <label class="form-label"><?= $lang['email'] ?> *</label>
             <input type="email" class="form-control" name="email" required>
         </div>
+
         <div class="mb-3">
-            <label class="form-label">Phone Number *</label>
+            <label class="form-label"><?= $lang['phone_number'] ?> *</label>
             <input type="tel" class="form-control" name="phone" required>
         </div>
+
         <div class="mb-3">
-            <label class="form-label">Upload CV</label>
+            <label class="form-label"><?= $lang['upload_cv'] ?></label>
             <input type="file" class="form-control" name="cv_file" accept=".pdf,.doc,.docx" required>
         </div>
+
         <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" name="allow_search" id="allowSearch">
             <label class="form-check-label" for="allowSearch">
-                Allow employers to find you
+                <?= $lang['allow_employers_find'] ?>
             </label>
         </div>
     </div>
+
     <div class="modal-footer">
-        <button type="submit" class="btn btn-success w-100 ">Apply</button>
+        <button type="submit" class="btn btn-success w-100">
+            <?= $lang['apply'] ?>
+        </button>
     </div>
-    <p class="note mt-3">
-        By clicking the submit button, I agree to share my personal information with employers according to the
-        <a href="#">Terms of Use</a>,
-        <a href="#">Privacy Policy</a>, and
-        <a href="#">Personal Data Policy</a>.
+
+    <p class="note mt-3" style="margin-left: 15px; margin-right: 15px; text-align: center;">
+        <?= $lang['agreement_text'] ?>
+        <a href="#"><?= $lang['terms_of_use'] ?></a>,
+        <a href="#"><?= $lang['privacy_policy'] ?></a>,
+        <?= $lang['and'] ?>
+        <a href="#"><?= $lang['personal_data_policy'] ?></a>.
     </p>
 </form>

@@ -457,4 +457,33 @@ $lang = [
     'delete_submitted_applications' => 'Delete',
     'confirm_delete_submitted_applications' => "Are you sure that you want to delete this application? You can't undo this action.",
     'delete_application_success_message' => 'Application deleted successfully.',
+    //searchpage
+    'find_jobs_title' => 'Find jobs fast 24/7, the latest jobs nationwide.',
+    'find_jobs_subtitle' => 'Access over 40,000 new job postings every day from thousands of reputable companies in Vietnam.',
+    'job_category_select_menu' => 'Job Category',
+    'job_title_company_placeholder' => 'Job title, company name',
+    'location_placeholder' => 'Location',
+    'sort_newest_first' => 'Date posted: Newest first',
+    'sort_oldest_first' => 'Date posted: Oldest first',
+    'sort_salary_highest' => 'Salary: Highest to lowest',
+    'sort_salary_lowest' => 'Salary: Lowest to highest',
+    'days_left' => '%d days left',
+    //application form
+    'application_form'        => 'Application Form',
+    'close'                   => 'Close',
+    'upload_cv'               => 'Upload CV',
+    'allow_employers_find'    => 'Allow employers to find you',
+    'apply'                   => 'Apply',
+    'agreement_text'          => 'By clicking the submit button, I agree to share my personal information with employers according to the',
+    'terms_of_use'            => 'Terms of Use',
+    'privacy_policy'          => 'Privacy Policy',
+    'personal_data_policy'    => 'Personal Data Policy',
+    'and'                     => 'and',
+
+    //employerprofile/add_job_post.php
+    '30_day_posting_option' => '30-Day Job Posting',
+    '60_day_posting_option' => '60-Day Job Posting',
+    '6_month_posting_option' => '6-Month Job Posting',
+    '1_year_posting_option' => '1-Year Job Posting',
+
 ];

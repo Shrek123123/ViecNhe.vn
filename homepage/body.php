@@ -369,7 +369,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
         <!-- GIỮ NGUYÊN HTML TĨNH CHO DANH MỤC NGÀNH -->
         <select name="category">
-          <option value="">Job Category</option>
+          <option value=""><?php echo $lang['job_category_select_menu']; ?></option>
           <option value="IT & Software">IT & Software</option>
           <option value="Marketing">Marketing</option>
           <option value="Finance">Finance</option>

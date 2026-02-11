@@ -154,7 +154,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
                     <?php
                     $employerId = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
                     ?>
-                    <a href="employerprofile.php"><?php echo $lang['profile']; ?></a>
+                    <a href="employerprofile/add_job_post.php"><?php echo $lang['profile']; ?></a>
                     <a href="employerlogout.php"><?php echo $lang['logout']; ?></a>
                 </div>
             </div>

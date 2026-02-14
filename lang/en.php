@@ -485,5 +485,6 @@ $lang = [
     '60_day_posting_option' => '60-Day Job Posting',
     '6_month_posting_option' => '6-Month Job Posting',
     '1_year_posting_option' => '1-Year Job Posting',
+    'searchpage_no_jobs_found' => 'No jobs found matching your criteria. Please try adjusting your search filters or check back later for new job postings.',
 
 ];

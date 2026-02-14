@@ -482,4 +482,5 @@ $lang = [
     '60_day_posting_option' => 'Đăng tin 60 ngày',
     '6_month_posting_option' => 'Đăng tin 6 tháng',
     '1_year_posting_option' => 'Đăng tin 1 năm',
+    'searchpage_no_jobs_found' => 'Không tìm thấy công việc nào phù hợp với tiêu chí của bạn. Vui lòng thử điều chỉnh bộ lọc tìm kiếm hoặc kiểm tra lại sau để xem các tin tuyển dụng mới.',
 ];

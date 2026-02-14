@@ -674,7 +674,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
                     </a>
                 <?php endwhile; ?>
             <?php else: ?>
-                <div style="text-align: center; padding: 20px; font-size: 16px; color: #555;">No jobs found matching your criteria.</div>
+                <div style="text-align: center; padding: 20px; font-size: 16px; color: #555;"><?php echo $lang['searchpage_no_jobs_found']; ?></div>
             <?php endif; ?>
         </div>
 

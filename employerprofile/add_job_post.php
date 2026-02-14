@@ -34,7 +34,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your profile - JobHive</title>
+    <title><?= $lang['employerprofile_postajob'] ?></title>
     <style>
         .user-info {
             display: flex;
@@ -561,7 +561,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="dashboard-sidebar">
                 <button id="btn-postjob"
                     class="<?= ($currentPage == 'add_job_post.php') ? 'active' : '' ?>"><?= $lang['employerprofile_postajob'] ?></button>
-                <button><?= $lang['employerprofile_myjobposts'] ?></button>
+                <button onclick="window.location.href='my_job_posts.php'"><?= $lang['employerprofile_myjobposts'] ?></button>
                 <button><?= $lang['employerprofile_myprofile'] ?></button>
                 <button><?= $lang['employerprofile_changeinfo'] ?></button>
 
@@ -591,19 +591,19 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="dashboard-content">
                 <!-- Content load sau -->
                 <div class="posting-options">
-                    <button class="post-btn blue">
+                    <button class="post-btn blue" onclick="window.location.href='add_job_post_30_day.php'">
                         <?= $lang['30_day_posting_option'] ?>
                     </button>
 
-                    <button class="post-btn teal">
+                    <button class="post-btn teal" onclick="window.location.href='add_job_post_60_day.php'">
                         <?= $lang['60_day_posting_option'] ?>
                     </button>
 
-                    <button class="post-btn green">
+                    <button class="post-btn green" onclick="window.location.href='add_job_post_6_months.php'">
                         <?= $lang['6_month_posting_option'] ?>
                     </button>
 
-                    <button class="post-btn indigo">
+                    <button class="post-btn indigo" onclick="window.location.href='add_job_post_1_year.php'">
                         <?= $lang['1_year_posting_option'] ?>
                     </button>
                 </div>

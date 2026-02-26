@@ -26,6 +26,8 @@ if (!isset($_SESSION['lang'])) {
 include '../lang/' . $_SESSION['lang'] . '.php';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
+$employername = $_SESSION['usernameemployer'] ?? 'Employer';
+
 ?>
 <?php
 require_once '../config.php';

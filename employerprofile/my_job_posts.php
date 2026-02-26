@@ -27,6 +27,7 @@ include '../lang/' . $_SESSION['lang'] . '.php';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 
+$employername = $_SESSION['usernameemployer'] ?? 'Employer';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -621,7 +622,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             $stmt->bind_param("i", $employer_id);
                             $stmt->execute();
                             $result = $stmt->get_result();
-                            
+
 
                             if ($result->num_rows === 0) {
                                 echo '<div style="color: #888; text-align: center; padding: 20px;">No job posts found.</div>';
@@ -662,7 +663,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                 $status_colors = ['pending_review' => '#ffc107', 'approved' => '#28a745', 'rejected' => '#dc3545'];
                                 $status_color = $status_colors[$job_status_raw] ?? '#6c757d';
                                 $job_status_text = $lang[$job_status_raw] ?? $job_status_raw;
-                                
+
                                 ?>
                                 <div
                                     style="background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 18px; display: flex; align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
@@ -671,7 +672,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
                                     <div style="flex: 1;">
                                         <div style="font-weight: bold; font-size: 18px; margin-bottom: 4px;">
-                                            <a href="jobdetail.php?id=<?= $job_id ?>"
+                                            <a href="../jobdetail.php?id=<?= $job_id ?>"
                                                 style="color: #333; text-decoration: none;"><?= htmlspecialchars($row['job_title']) ?></a>
                                         </div>
                                         <div style="color: #888; font-size: 13px; margin-bottom: 8px;">
@@ -700,10 +701,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
                                     <div
                                         style="display: flex; flex-direction: column; gap: 8px; margin-left: 18px; align-items: flex-end;">
-                                        <a href="jobposts_edit.php?id=<?php echo $job_id; ?>"
-                                            style="background: #d90000; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block;">
-                                            <?= $lang['edit'] ?>
-                                        </a>
+                                        <form action="jobposts_edit.php" method="POST" style="display: inline;">
+                                            <input type="hidden" name="id_to_edit" value="<?php echo $job_id; ?>">
+                                            <button type="submit"
+                                                style="background: #d90000; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">
+                                                <?= $lang['edit'] ?>
+                                            </button>
+                                        </form>
 
                                         <a href="delete_job_post.php?job_id=<?php echo $job_id; ?>"
                                             onclick="return confirm('<?php echo addslashes($lang['confirm-deletejobpost']); ?>')"

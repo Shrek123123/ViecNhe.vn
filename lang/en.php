@@ -117,7 +117,7 @@ $lang = [
     "post_job_form_job_description" => "Job Description",
     "post_job_form_job_location" => "Work Location",
     "post_job_form_salary" => "Salary",
-    "employee_gender" => "Select employee gender <br> you want to hire",
+    "employee_gender" => "Select employee gender you want to hire",
     "employee_gender_male" => "Male",
     "employee_gender_female" => "Female",
     "employee_gender_not_required" => "Not specified",
@@ -487,4 +487,6 @@ $lang = [
     '1_year_posting_option' => '1-Year Job Posting',
     'searchpage_no_jobs_found' => 'No jobs found matching your criteria. Please try adjusting your search filters or check back later for new job postings.',
 
+    //jobposts_edit.php
+    'validation_error' => 'Please fill in all required fields correctly.',
 ];

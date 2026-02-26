@@ -120,7 +120,7 @@ $lang = [
     "post_job_form_job_description" => "Mô tả công việc",
     "post_job_form_job_location" => "Thành phố",
     "post_job_form_salary" => "Mức lương",
-    "employee_gender" => "Chọn giới tính nhân viên <br> bạn muốn tuyển dụng",
+    "employee_gender" => "Chọn giới tính nhân viên muốn tuyển dụng",
     "employee_gender_male" => "Nam",
     "employee_gender_female" => "Nữ",
     "employee_gender_not_required" => "Không yêu cầu",
@@ -483,4 +483,7 @@ $lang = [
     '6_month_posting_option' => 'Đăng tin 6 tháng',
     '1_year_posting_option' => 'Đăng tin 1 năm',
     'searchpage_no_jobs_found' => 'Không tìm thấy công việc nào phù hợp với tiêu chí của bạn. Vui lòng thử điều chỉnh bộ lọc tìm kiếm hoặc kiểm tra lại sau để xem các tin tuyển dụng mới.',
+    //jobpost_edit
+    'validation_error' => 'Vui lòng điền đầy đủ các thông tin bắt buộc.',
 ];
+

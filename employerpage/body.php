@@ -299,6 +299,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   <div class="modal-content">
     <span class="closeBtn">&times;</span>
     <h2><?= $lang['post_job_form_title']; ?></h2>
+    <h4 style="color: grey; margin-bottom: 20px;"><?= $lang['post_job_form_subtitle']; ?></h4>
     <form method="POST" enctype="multipart/form-data">
       <input type="hidden" name="MAX_FILE_SIZE" value="1000000">
       <table class="form-table">
@@ -350,7 +351,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           <td><input type="text" id="salary" name="salary" placeholder="<?= $lang['required']; ?>" required></td>
         </tr>
         <tr>
-          <td><label for="employee_gender"><?= $lang['employee_gender']; ?></label></td>
+          <td><label for="employee_gender"><?= $lang['employee_gender_quick_post']; ?></label></td>
           <td>
             <select id="employee_gender" required>
               <option value="Nam"><?= $lang['employee_gender_male']; ?></option>

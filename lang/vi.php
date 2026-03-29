@@ -37,7 +37,7 @@ $lang = [
         "remote" => "Làm việc từ xa"
     ],
     "job_type_filter_all" => "Tất cả",
-    "no_jobs_found" => "Không tìm thấy công việc nào",
+    "no_jobs_found" => "Không tìm thấy bài đăng nào",
     "featured_companies" => "🌟 Các công ty nổi bật",
     "view_all" => "Xem tất cả →",
     "opportunities_at_top_companies" => "Cơ hội ứng tuyển vào các công việc hấp dẫn tại các công ty hàng đầu",
@@ -102,6 +102,7 @@ $lang = [
 
     //post-job form
     "post_job_form_title" => "Mẫu đăng tuyển dụng nhanh",
+    "post_job_form_subtitle" => "1 bài đăng miễn phí trong 30 ngày!",
     "post_job_form_company_name" => "Tên công ty",
     "post_job_form_company_size" => "Quy mô công ty",
     "post_job_form_company_size_select" => "-- Chọn quy mô công ty --",
@@ -121,6 +122,7 @@ $lang = [
     "post_job_form_job_location" => "Thành phố",
     "post_job_form_salary" => "Mức lương",
     "employee_gender" => "Chọn giới tính nhân viên muốn tuyển dụng",
+    "employee_gender_quick_post" => "Chọn giới tính nhân viên <br>muốn tuyển dụng",
     "employee_gender_male" => "Nam",
     "employee_gender_female" => "Nữ",
     "employee_gender_not_required" => "Không yêu cầu",
@@ -307,6 +309,7 @@ $lang = [
     'delete' => 'Xóa',
     'check_submitted_applications' => 'Xem hồ sơ ứng viên nộp',
     'confirm-deletejobpost' => 'Bạn có chắc muốn xóa bài đăng không? Việc này sẽ không thể hoàn tác được.',
+    'delete_job_post_success' => 'Bài đăng đã được xóa thành công.',
     'employerprofile' => 'Hồ sơ nhà tuyển dụng',
     'employerprofile_postajob' => 'Đăng tin tuyển dụng',
     'employerprofile_myjobposts' => 'Xem bài tuyển dụng đã đăng',
@@ -388,8 +391,12 @@ $lang = [
     'viewed' => '👀 Nhà tuyển dụng đã xem CV của bạn',
     'interviewed' => '✅ Đang chờ phỏng vấn',
     'hired' => '🎉 Đã được tuyển',
+    'reject' => 'Từ chối',
+    'application' => 'Hồ sơ của: ',
     'rejected_application' => '❌ Đã từ chối',
     'unknown_status' => '❓ Trạng thái không xác định',
+    'status_update_success' => 'Cập nhật trạng thái thành công!',
+    'current' => 'Trạng thái hồ sơ: ',
     'no_applications' => 'Bạn chưa nộp đơn ứng tuyển nào.',
     'no_saved_job_found' => 'Không tìm thấy công việc đã lưu.',
     'upload_success' => 'Ảnh đã được tải lên thành công!',
@@ -485,5 +492,7 @@ $lang = [
     'searchpage_no_jobs_found' => 'Không tìm thấy công việc nào phù hợp với tiêu chí của bạn. Vui lòng thử điều chỉnh bộ lọc tìm kiếm hoặc kiểm tra lại sau để xem các tin tuyển dụng mới.',
     //jobpost_edit
     'validation_error' => 'Vui lòng điền đầy đủ các thông tin bắt buộc.',
+    'back_to_list' => 'Quay lại danh sách bài đăng',
+
 ];
 

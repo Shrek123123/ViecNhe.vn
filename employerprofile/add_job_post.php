@@ -731,6 +731,4 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
         </div>
     </footer>
-
-
 </html>

@@ -625,7 +625,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
 
                             if ($result->num_rows === 0) {
-                                echo '<div style="color: #888; text-align: center; padding: 20px;">No job posts found.</div>';
+                                echo '<div style="color: #888; text-align: center; padding: 20px;">' . $lang['no_jobs_found'] . '</div>';
                             }
 
                             while ($row = $result->fetch_assoc()):
@@ -708,17 +708,19 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                                 <?= $lang['edit'] ?>
                                             </button>
                                         </form>
-
-                                        <a href="delete_job_post.php?job_id=<?php echo $job_id; ?>"
-                                            onclick="return confirm('<?php echo addslashes($lang['confirm-deletejobpost']); ?>')"
-                                            style="background: #fff; color: #d90000; border: 1px solid #d90000; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block;">
-                                            <?= $lang['delete'] ?>
-                                        </a>
-
-                                        <a href="view_applications.php?job_id=<?php echo $job_id; ?>"
-                                            style="background: #b23b3b; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block;">
-                                            <?= $lang['check_submitted_applications'] ?>
-                                        </a>
+                                        <form style="display: inline;" onsubmit="deleteJobPost(event, <?= $job_id ?>)">
+                                            <button type="submit"
+                                                style="background: #fff; color: #d90000; border: 1px solid #d90000; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer;">
+                                                <?= $lang['delete'] ?>
+                                            </button>
+                                        </form>
+                                        <form action="view_applications.php" method="POST" style="display: inline;">
+                                            <input type="hidden" name="job_id" value="<?php echo $job_id; ?>">
+                                            <button type="submit"
+                                                style="background: #b23b3b; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block;">
+                                                <?= $lang['check_submitted_applications'] ?>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                                 <?php
@@ -852,5 +854,81 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
         </div>
     </footer>
 
+    <script>
+        function deleteJobPost(event, jobId) {
+            event.preventDefault();
+
+            if (!confirm("<?php echo $lang['confirm-deletejobpost']; ?>")) return;
+
+            fetch('delete_job_post.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'job_id=' + jobId
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast("<?php echo $lang['delete_job_post_success']; ?>", "success");
+
+                        // 👉 reload sau 2 giây
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+
+                    } else {
+                        showToast(data.message, "error");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast("Lỗi server!", "error");
+                });
+        }
+
+
+        // 👉 fix lỗi showToast undefined
+        function showToast(message, type) {
+            // overlay (nền mờ)
+            let overlay = document.createElement("div");
+            overlay.style.position = "fixed";
+            overlay.style.top = "0";
+            overlay.style.left = "0";
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.background = "rgba(0,0,0,0.4)";
+            overlay.style.display = "flex";
+            overlay.style.alignItems = "center";
+            overlay.style.justifyContent = "center";
+            overlay.style.zIndex = "9999";
+
+            // box thông báo
+            let box = document.createElement("div");
+            box.innerText = message;
+
+            box.style.background = "#fff";
+            box.style.padding = "20px 40px";
+            box.style.borderRadius = "10px";
+            box.style.fontSize = "16px";
+            box.style.fontWeight = "500";
+            box.style.boxShadow = "0 4px 20px rgba(0,0,0,0.2)";
+            box.style.textAlign = "center";
+
+            if (type === "success") {
+                box.style.color = "#28a745";
+            } else {
+                box.style.color = "#dc3545";
+            }
+
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+
+            // tự biến mất sau 2s
+            setTimeout(() => {
+                overlay.remove();
+            }, 2000);
+        }
+    </script>
 
 </html>

@@ -99,6 +99,7 @@ $lang = [
 
     //post-job form
     "post_job_form_title" => "Post job form",
+    "post_job_form_subtitle" => "1 free job post for 30 days!",
     "post_job_form_company_name" => "Company Name",
     "post_job_form_company_size" => "Company Size",
     "post_job_form_company_size_select" => "-- Select company size --",
@@ -118,6 +119,7 @@ $lang = [
     "post_job_form_job_location" => "Work Location",
     "post_job_form_salary" => "Salary",
     "employee_gender" => "Select employee gender you want to hire",
+    "employee_gender_quick_post" => "Select employee gender <br>you want to hire (optional)",
     "employee_gender_male" => "Male",
     "employee_gender_female" => "Female",
     "employee_gender_not_required" => "Not specified",
@@ -306,6 +308,7 @@ $lang = [
     'delete' => 'Delete',
     'check_submitted_applications' => 'Check submitted applications',
     'confirm-deletejobpost' => 'Are you sure you want to delete this job post? This action cannot be undone.',
+    'delete_job_post_success' => 'Job post deleted successfully.',
     'employerprofile' => 'Employer Profile',
     'employerprofile_postajob' => 'Post a job',
     'employerprofile_myjobposts' => 'My job posts',
@@ -318,6 +321,7 @@ $lang = [
     'pending_review' => 'Pending Review',
     'approved' => 'Approved',
     'rejected' => 'Rejected',
+    'reject' => 'Reject',
     'job_days_left' => '%d days left to apply',
     'job_closed' => 'Application closed',
     'updated_days' => 'Updated %d days ago',
@@ -388,6 +392,7 @@ $lang = [
     'viewed' => '👀 Employer has viewed your CV',
     'interviewed' => '✅ Move to interview',
     'hired' => '🎉 Hired',
+    'application' => 'Application of: ',
     'rejected_application' => '❌ Rejected',
     'unknown_status' => '❓ Unknown status',
     'no_applications' => 'You have not applied for any jobs yet.',
@@ -398,7 +403,8 @@ $lang = [
     'upload_error' => 'An error occurred while uploading the file. Please try again.',
     'profile_description' => 'Profile Description',
     'profile_description_default' => 'This is where you can add a detailed description about yourself or your profile.',
-
+    'current' => 'current: ',
+    'status_update_success' => 'Application status updated successfully.',
     //jobseekerforgetpassword
     'jobseekerforgetpassword_title' => 'Jobseeker Forget Password',
     'jobseekerforgetpassword_intro' => 'Type in your email and we\'ll check if there\'s a match.',
@@ -489,4 +495,6 @@ $lang = [
 
     //jobposts_edit.php
     'validation_error' => 'Please fill in all required fields correctly.',
+    'back_to_list' => 'Back to job post list',
+
 ];

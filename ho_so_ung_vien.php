@@ -93,7 +93,10 @@ $stmt->fetch();
 $stmt->close();
 
 if ($cv_file_path) {
-    $uploadedFile = basename($cv_file_path); // chỉ tên file hiển thị
+    $filename = basename($cv_file_path); // chỉ tên file hiển thị
+    // Hiển thị link để mở file trong tab mới
+    $fileUrl = htmlspecialchars($cv_file_path, ENT_QUOTES, 'UTF-8');
+    $uploadedFile = '<a href="'.$fileUrl.'" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'</a>';
 }
 ?>
 <!DOCTYPE html>

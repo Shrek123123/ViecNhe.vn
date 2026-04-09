@@ -1,5 +1,17 @@
 <?php
 session_start();
+
+if (isset($_POST['lang'])) {
+    $_SESSION['lang'] = $_POST['lang'];
+} elseif (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+
 if (!isset($_SESSION['usernameemployer'])) {
     $redirect = $_SERVER['HTTP_REFERER'] ?? 'employerpage.php';
     header("Location: $redirect");
@@ -11,22 +23,107 @@ if (!isset($_SESSION['employerid'])) {
     header("Location: employerpage.php");
     exit();
 }
-?>
-<?php
-if (isset($_GET['lang'])) {
-    $_SESSION['lang'] = $_GET['lang'];
-}
 
-// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
-if (!isset($_SESSION['lang'])) {
-    $_SESSION['lang'] = 'vi';
-}
-
-// Load file ngôn ngữ tương ứng
+require_once '../config.php';
+include '../helpers.php';
 include '../lang/' . $_SESSION['lang'] . '.php';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 $employername = $_SESSION['usernameemployer'] ?? 'Employer';
+
+$job_id = isset($_POST['job_id']) ? intval($_POST['job_id']) : (isset($_GET['job_id']) ? intval($_GET['job_id']) : 0);
+$flash_message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if (!isset($_SESSION['employerid']) || empty($_SESSION['employerid'])) {
+        header('Location: employerpage.php');
+        exit;
+    }
+
+    $action = $_POST['action'];
+    $employerid = $_SESSION['employerid'];
+
+    if ($action === 'hideFromEmployer') {
+        $application_id = isset($_POST['application_id']) ? intval($_POST['application_id']) : 0;
+        if ($application_id <= 0) {
+            $_SESSION['flash_message'] = $lang['invalid_application_id'] ?? 'Invalid application ID.';
+        } else {
+            // Kiểm tra quyền
+            $checkSql = "SELECT j.posted_by_employer_id FROM application a JOIN job j ON a.job_id = j.id WHERE a.id = ? LIMIT 1";
+            $checkStmt = $conn->prepare($checkSql);
+            if ($checkStmt) {
+                $checkStmt->bind_param('i', $application_id);
+                $checkStmt->execute();
+                $res = $checkStmt->get_result();
+                if ($row = $res->fetch_assoc()) {
+                    if (intval($row['posted_by_employer_id']) === intval($employerid)) {
+                        $updSql = "UPDATE application SET hidden_from_employer = 1 WHERE id = ?";
+                        $updStmt = $conn->prepare($updSql);
+                        if ($updStmt) {
+                            $updStmt->bind_param('i', $application_id);
+                            if ($updStmt->execute()) {
+                                $_SESSION['flash_message'] = $lang['delete_application_success_message'] ?? 'Application hidden successfully.';
+                            } else {
+                                $_SESSION['flash_message'] = $lang['database_error'] ?? 'Database error.';
+                            }
+                            $updStmt->close();
+                        }
+                    } else {
+                        $_SESSION['flash_message'] = $lang['unauthorized_action'] ?? 'Unauthorized action.';
+                    }
+                } else {
+                    $_SESSION['flash_message'] = $lang['application_not_found'] ?? 'Application not found.';
+                }
+                $checkStmt->close();
+            }
+        }
+
+        header('Location: view_applications.php?job_id=' . $job_id);
+        exit;
+    }
+
+    if ($action === 'updateApplicationStatus') {
+        $application_id = isset($_POST['application_id']) ? intval($_POST['application_id']) : 0;
+        $new_status = isset($_POST['new_status']) ? $_POST['new_status'] : '';
+        $allowed_statuses = ['applied', 'viewed', 'interviewed', 'hired', 'rejected'];
+
+        if ($application_id <= 0 || !in_array($new_status, $allowed_statuses, true)) {
+            $_SESSION['flash_message'] = $lang['invalid_request'] ?? 'Invalid request.';
+        } else {
+            $checkSql = "SELECT j.posted_by_employer_id FROM application a JOIN job j ON a.job_id = j.id WHERE a.id = ? LIMIT 1";
+            $checkStmt = $conn->prepare($checkSql);
+            if ($checkStmt) {
+                $checkStmt->bind_param('i', $application_id);
+                $checkStmt->execute();
+                $res = $checkStmt->get_result();
+                if (($row = $res->fetch_assoc()) && intval($row['posted_by_employer_id']) === intval($employerid)) {
+                    $sql = "UPDATE application SET status = ? WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    if ($stmt) {
+                        $stmt->bind_param('si', $new_status, $application_id);
+                        if ($stmt->execute()) {
+                            $_SESSION['flash_message'] = $lang['status_update_success'] ?? 'Status updated successfully.';
+                        } else {
+                            $_SESSION['flash_message'] = $lang['database_error'] ?? 'Database error.';
+                        }
+                        $stmt->close();
+                    }
+                } else {
+                    $_SESSION['flash_message'] = $lang['unauthorized_action'] ?? 'Unauthorized action.';
+                }
+                $checkStmt->close();
+            }
+        }
+
+        header('Location: view_applications.php?job_id=' . $job_id);
+        exit;
+    }
+}
+
+if (isset($_SESSION['flash_message'])) {
+    $flash_message = $_SESSION['flash_message'];
+    unset($_SESSION['flash_message']);
+}
 
 ?>
 <!DOCTYPE html>
@@ -400,14 +497,40 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             font-size: 13px;
         }
 
-        .status-viewed {
-            font-size: 11px;
-            color: #b2ffb2;
-        }
-
         .status-new {
             font-size: 11px;
-            color: #cce0ff;
+            color: #17a2b8;
+            font-weight: bold;
+        }
+
+        .status-viewed {
+            font-size: 11px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-hired {
+            font-size: 11px;
+            color: #20c997;
+            font-weight: bold;
+        }
+
+        .status-interviewed {
+            font-size: 11px;
+            color: #6f42c1;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            font-size: 11px;
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-default {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: bold;
         }
 
         .view-more {
@@ -416,6 +539,8 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             background: #fff;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
+            text-decoration: underline;
         }
 
         /* ===== CONTENT ===== */
@@ -507,6 +632,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     </div>
                 </div>
                 <button id="lang-switch-btn"
+                    type="button"
                     style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
                     <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
                 </button>
@@ -516,6 +642,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     <a href="index.php" class="btn-register"><?php echo $lang['jobseeker_redirect']; ?></a>
                     <a href="admin/adminlogin.php" class="btn-register"><?php echo $lang['admin_login']; ?></a>
                     <button id="lang-switch-btn"
+                        type="button"
                         style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
                         <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
                     </button>
@@ -523,14 +650,16 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             <?php endif; ?>
         </div>
 
+        <form id="lang-switch-form" method="POST" action="view_applications.php" style="display:none;">
+            <input type="hidden" name="lang" id="lang-switch-input" value="">
+            <input type="hidden" name="job_id" value="<?php echo htmlspecialchars($job_id); ?>">
+        </form>
+
         <script>
             document.getElementById('lang-switch-btn').onclick = function () {
                 var currentLang = '<?php echo $_SESSION['lang']; ?>';
-                if (currentLang === 'vi') {
-                    window.location.href = '?lang=en';
-                } else {
-                    window.location.href = '?lang=vi';
-                }
+                document.getElementById('lang-switch-input').value = (currentLang === 'vi') ? 'en' : 'vi';
+                document.getElementById('lang-switch-form').submit();
             };
         </script>
     </div>
@@ -561,140 +690,81 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             <!-- SIDEBAR -->
             <div class="dashboard-sidebar">
                 <button id="btn-postjob"
-                    class="<?= ($currentPage == 'add_job_post.php') ? 'active' : '' ?>"><?= $lang['employerprofile_postajob'] ?></button>
+                    onclick="window.location.href='add_job_post.php'"><?= $lang['employerprofile_postajob'] ?></button>
                 <button
                     onclick="window.location.href='my_job_posts.php'"><?= $lang['employerprofile_myjobposts'] ?></button>
-                <button><?= $lang['employerprofile_myprofile'] ?></button>
-                <button><?= $lang['employerprofile_changeinfo'] ?></button>
+                <button onclick="window.location.href='company_profile.php'" class="<?= ($currentPage == 'company_profile.php') ? 'active' : '' ?>"><?= $lang['employerprofile_companyprofile'] ?></button>
+                <button onclick="window.location.href='change_employer_info.php'" class="<?= ($currentPage == 'change_employer_info.php') ? 'active' : '' ?>"><?= $lang['employerprofile_changeinfo'] ?></button>
 
-                <h3><?= $lang['employerprofile_applicantprofiles'] ?></h3>
+                <?php
+                // Tính tổng số đơn ứng tuyển cho employer hiện tại
+                $total_applications = 0;
+                $employerid = $_SESSION['employerid'] ?? 0;
+                if ($employerid > 0 && isset($conn) && $conn->ping()) {
+                    $sql_total = "SELECT COUNT(a.id) AS total FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL)";
+                    $stmt_total = $conn->prepare($sql_total);
+                    $stmt_total->bind_param("i", $employerid);
+                    $stmt_total->execute();
+                    $result_total = $stmt_total->get_result();
+                    if ($row_total = $result_total->fetch_assoc()) {
+                        $total_applications = $row_total['total'];
+                    }
+                    $stmt_total->close();
+                }
+                ?>
 
-                <!-- Applicant preview (static demo) -->
-                <div class="applicant-card">
-                    <img src="https://via.placeholder.com/28">
-                    <div class="applicant-info">
-                        Alex<br>
-                        <span class="status-viewed">✔ Viewed</span>
+                <h3><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+
+                <?php
+                // Lấy 2 đơn ứng tuyển đầu tiên từ database
+                $applications = [];
+                $employerid = $_SESSION['employerid'] ?? 0;
+                if ($employerid > 0 && isset($conn) && $conn->ping()) {
+                    $sql_app = "SELECT a.fullname, a.status FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL) ORDER BY a.id DESC LIMIT 2";
+                    $stmt_app = $conn->prepare($sql_app);
+                    $stmt_app->bind_param("i", $employerid);
+                    $stmt_app->execute();
+                    $result_app = $stmt_app->get_result();
+                    while ($row_app = $result_app->fetch_assoc()) {
+                        $applications[] = $row_app;
+                    }
+                    $stmt_app->close();
+                }
+                ?>
+
+                <!-- Applicant preview (dynamic) -->
+                <?php foreach ($applications as $app): 
+                    $status_raw = strtolower($app['status']);
+                    
+                    // Map status với CSS class và language key
+                    $status_mapping = [
+                        'pending' => ['class' => 'status-new', 'lang_key' => 'application_pending'],
+                        'viewed' => ['class' => 'status-viewed', 'lang_key' => 'application_viewed'],
+                        'hired' => ['class' => 'status-hired', 'lang_key' => 'application_hired'],
+                        'interviewed' => ['class' => 'status-interviewed', 'lang_key' => 'application_interviewed'],
+                        'rejected' => ['class' => 'status-rejected', 'lang_key' => 'application_rejected'],
+                    ];
+                    
+                    $config = $status_mapping[$status_raw] ?? ['class' => 'status-default', 'lang_key' => $status_raw];
+                    $status_class = $config['class'];
+                    $status_icon = isset($lang[$config['lang_key']]) ? $lang[$config['lang_key']] : ucfirst($status_raw);
+                ?>
+                    <div class="applicant-card">
+                        <img src="https://via.placeholder.com/28">
+                        <div class="applicant-info">
+                            <?= htmlspecialchars($app['fullname']) ?><br>
+                            <span class="<?= $status_class ?>"><?= $status_icon ?></span>
+                        </div>
                     </div>
-                </div>
+                <?php endforeach; ?>
 
-                <div class="applicant-card">
-                    <img src="https://via.placeholder.com/28">
-                    <div class="applicant-info">
-                        Selena<br>
-                        <span class="status-new">★ New</span>
-                    </div>
-                </div>
-
-                <div class="view-more">View more</div>
+                <div class="view-more" onclick="window.location.href='view_more_list_application.php'" style="cursor: pointer;"><?= $lang['view_more'] ?></div>
             </div>
 
             <!-- CONTENT -->
             <div class="dashboard-content">
                 <!-- Content load sau -->
                 <?php
-                require_once '../config.php'; // Đảm bảo config.php được bao gồm và thiết lập kết nối $conn
-                include '../lang/' . $_SESSION['lang'] . '.php';
-                include '../helpers.php';
-                require_once '../config.php';
-
-                // Lấy job_id ưu tiên từ POST (form submit), nếu không có dùng GET
-                $job_id = isset($_POST['job_id']) ? intval($_POST['job_id']) : (isset($_GET['job_id']) ? intval($_GET['job_id']) : 0);
-
-                $flash_message = '';
-                if (isset($_SESSION['flash_message'])) {
-                    $flash_message = $_SESSION['flash_message'];
-                    unset($_SESSION['flash_message']);
-                }
-
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-                    if (!isset($_SESSION['employerid']) || empty($_SESSION['employerid'])) {
-                        header('Location: employerpage.php');
-                        exit;
-                    }
-
-                    $action = $_POST['action'];
-                    $employerid = $_SESSION['employerid'];
-
-                    if ($action === 'hideFromEmployer') {
-                        $application_id = isset($_POST['application_id']) ? intval($_POST['application_id']) : 0;
-                        if ($application_id <= 0) {
-                            $_SESSION['flash_message'] = $lang['invalid_application_id'] ?? 'Invalid application ID.';
-                        } else {
-                            // Kiểm tra quyền
-                            $checkSql = "SELECT j.posted_by_employer_id FROM application a JOIN job j ON a.job_id = j.id WHERE a.id = ? LIMIT 1";
-                            $checkStmt = $conn->prepare($checkSql);
-                            if ($checkStmt) {
-                                $checkStmt->bind_param('i', $application_id);
-                                $checkStmt->execute();
-                                $res = $checkStmt->get_result();
-                                if ($row = $res->fetch_assoc()) {
-                                    if (intval($row['posted_by_employer_id']) === intval($employerid)) {
-                                        $updSql = "UPDATE application SET hidden_from_employer = 1 WHERE id = ?";
-                                        $updStmt = $conn->prepare($updSql);
-                                        if ($updStmt) {
-                                            $updStmt->bind_param('i', $application_id);
-                                            if ($updStmt->execute()) {
-                                                $_SESSION['flash_message'] = $lang['delete_application_success_message'] ?? 'Application hidden successfully.';
-                                            } else {
-                                                $_SESSION['flash_message'] = $lang['database_error'] ?? 'Database error.';
-                                            }
-                                            $updStmt->close();
-                                        }
-                                    } else {
-                                        $_SESSION['flash_message'] = $lang['unauthorized_action'] ?? 'Unauthorized action.';
-                                    }
-                                } else {
-                                    $_SESSION['flash_message'] = $lang['application_not_found'] ?? 'Application not found.';
-                                }
-                                $checkStmt->close();
-                            }
-                        }
-
-                        header('Location: view_applications.php?job_id=' . $job_id);
-                        exit;
-                    }
-
-                    if ($action === 'updateApplicationStatus') {
-                        $application_id = isset($_POST['application_id']) ? intval($_POST['application_id']) : 0;
-                        $new_status = isset($_POST['new_status']) ? $_POST['new_status'] : '';
-                        $allowed_statuses = ['applied', 'viewed', 'interviewed', 'hired', 'rejected'];
-
-                        if ($application_id <= 0 || !in_array($new_status, $allowed_statuses, true)) {
-                            $_SESSION['flash_message'] = $lang['invalid_request'] ?? 'Invalid request.';
-                        } else {
-                            $checkSql = "SELECT j.posted_by_employer_id FROM application a JOIN job j ON a.job_id = j.id WHERE a.id = ? LIMIT 1";
-                            $checkStmt = $conn->prepare($checkSql);
-                            if ($checkStmt) {
-                                $checkStmt->bind_param('i', $application_id);
-                                $checkStmt->execute();
-                                $res = $checkStmt->get_result();
-                                if (($row = $res->fetch_assoc()) && intval($row['posted_by_employer_id']) === intval($employerid)) {
-                                    $sql = "UPDATE application SET status = ? WHERE id = ?";
-                                    $stmt = $conn->prepare($sql);
-                                    if ($stmt) {
-                                        $stmt->bind_param('si', $new_status, $application_id);
-                                        if ($stmt->execute()) {
-                                            $_SESSION['flash_message'] = $lang['status_update_success'] ?? 'Status updated successfully.';
-                                        } else {
-                                            $_SESSION['flash_message'] = $lang['database_error'] ?? 'Database error.';
-                                        }
-                                        $stmt->close();
-                                    }
-                                } else {
-                                    $_SESSION['flash_message'] = $lang['unauthorized_action'] ?? 'Unauthorized action.';
-                                }
-                                $checkStmt->close();
-                            }
-                        }
-
-                        echo '<form id="redirectForm" method="POST" action="view_applications.php" style="display:none;">
-                            <input type="hidden" name="job_id" value="' . htmlspecialchars($job_id) . '">
-                        </form>';
-                        echo '<script>document.getElementById("redirectForm").submit();</script>';
-                        exit;
-                    }
-                }
                 $employerid = $_SESSION['employerid'] ?? 0;
                 $stmt = $conn->prepare("
     SELECT *

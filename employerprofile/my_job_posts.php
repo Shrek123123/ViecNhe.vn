@@ -25,9 +25,12 @@ if (!isset($_SESSION['lang'])) {
 // Load file ngôn ngữ tương ứng
 include '../lang/' . $_SESSION['lang'] . '.php';
 
+require_once '../config.php';
+
 $currentPage = basename($_SERVER['PHP_SELF']);
 
 $employername = $_SESSION['usernameemployer'] ?? 'Employer';
+$employer_id = $_SESSION['employerid'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -400,14 +403,40 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             font-size: 13px;
         }
 
-        .status-viewed {
-            font-size: 11px;
-            color: #b2ffb2;
-        }
-
         .status-new {
             font-size: 11px;
-            color: #cce0ff;
+            color: #17a2b8;
+            font-weight: bold;
+        }
+
+        .status-viewed {
+            font-size: 11px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-hired {
+            font-size: 11px;
+            color: #20c997;
+            font-weight: bold;
+        }
+
+        .status-interviewed {
+            font-size: 11px;
+            color: #6f42c1;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            font-size: 11px;
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-default {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: bold;
         }
 
         .view-more {
@@ -416,6 +445,8 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             background: #fff;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
+            text-decoration: underline;
         }
 
         /* ===== CONTENT ===== */
@@ -571,46 +602,77 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     onclick="window.location.href='add_job_post.php'"><?= $lang['employerprofile_postajob'] ?></button>
                 <button id="btn-myjobposts" onclick="window.location.href='my_job_posts.php'"
                     class="<?= ($currentPage == 'my_job_posts.php') ? 'active' : '' ?>"><?= $lang['employerprofile_myjobposts'] ?></button>
-                <button><?= $lang['employerprofile_myprofile'] ?></button>
-                <button><?= $lang['employerprofile_changeinfo'] ?></button>
+                <button onclick="window.location.href='company_profile.php'" class="<?= ($currentPage == 'company_profile.php') ? 'active' : '' ?>"><?= $lang['employerprofile_companyprofile'] ?></button>
+                <button onclick="window.location.href='change_employer_info.php'" class="<?= ($currentPage == 'change_employer_info.php') ? 'active' : '' ?>"><?= $lang['employerprofile_changeinfo'] ?></button>
 
-                <h3><?= $lang['employerprofile_applicantprofiles'] ?></h3>
+                <?php
+                // Tính tổng số đơn ứng tuyển cho employer hiện tại
+                $total_applications = 0;
+                $employerid = $_SESSION['employerid'] ?? 0;
+                if ($employerid > 0 && isset($conn) && $conn->ping()) {
+                    $sql_total = "SELECT COUNT(a.id) AS total FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL)";
+                    $stmt_total = $conn->prepare($sql_total);
+                    $stmt_total->bind_param("i", $employerid);
+                    $stmt_total->execute();
+                    $result_total = $stmt_total->get_result();
+                    if ($row_total = $result_total->fetch_assoc()) {
+                        $total_applications = $row_total['total'];
+                    }
+                    $stmt_total->close();
+                }
+                ?>
 
-                <!-- Applicant preview (static demo) -->
-                <div class="applicant-card">
-                    <img src="https://via.placeholder.com/28">
-                    <div class="applicant-info">
-                        Alex<br>
-                        <span class="status-viewed">✔ Viewed</span>
+                <h3><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+
+                <?php
+                // Lấy 2 đơn ứng tuyển đầu tiên từ database
+                $applications = [];
+                $employerid = $_SESSION['employerid'] ?? 0;
+                if ($employerid > 0 && isset($conn) && $conn->ping()) {
+                    $sql_app = "SELECT a.fullname, a.status FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL) ORDER BY a.id DESC LIMIT 2";
+                    $stmt_app = $conn->prepare($sql_app);
+                    $stmt_app->bind_param("i", $employerid);
+                    $stmt_app->execute();
+                    $result_app = $stmt_app->get_result();
+                    while ($row_app = $result_app->fetch_assoc()) {
+                        $applications[] = $row_app;
+                    }
+                    $stmt_app->close();
+                }
+                ?>
+
+                <!-- Applicant preview (dynamic) -->
+                <?php foreach ($applications as $app): 
+                    $status_raw = strtolower($app['status']);
+                    
+                    // Map status với CSS class và language key
+                    $status_mapping = [
+                        'pending' => ['class' => 'status-new', 'lang_key' => 'application_pending'],
+                        'viewed' => ['class' => 'status-viewed', 'lang_key' => 'application_viewed'],
+                        'hired' => ['class' => 'status-hired', 'lang_key' => 'application_hired'],
+                        'interviewed' => ['class' => 'status-interviewed', 'lang_key' => 'application_interviewed'],
+                        'rejected' => ['class' => 'status-rejected', 'lang_key' => 'application_rejected'],
+                    ];
+                    
+                    $config = $status_mapping[$status_raw] ?? ['class' => 'status-default', 'lang_key' => $status_raw];
+                    $status_class = $config['class'];
+                    $status_icon = isset($lang[$config['lang_key']]) ? $lang[$config['lang_key']] : ucfirst($status_raw);
+                ?>
+                    <div class="applicant-card">
+                        <img src="https://via.placeholder.com/28">
+                        <div class="applicant-info">
+                            <?= htmlspecialchars($app['fullname']) ?><br>
+                            <span class="<?= $status_class ?>"><?= $status_icon ?></span>
+                        </div>
                     </div>
-                </div>
+                <?php endforeach; ?>
 
-                <div class="applicant-card">
-                    <img src="https://via.placeholder.com/28">
-                    <div class="applicant-info">
-                        Selena<br>
-                        <span class="status-new">★ New</span>
-                    </div>
-                </div>
-
-                <div class="view-more">View more</div>
+                <div class="view-more" onclick="window.location.href='view_more_list_application.php'" style="cursor: pointer;"><?= $lang['view_more'] ?></div>
             </div>
 
             <!-- CONTENT -->
             <div class="dashboard-content">
                 <!-- Content load sau -->
-
-                <?php
-                // 1. Cấu hình và Ngôn ngữ (Giữ lại logic từ file cũ)
-                require_once '../config.php';
-                if (session_status() === PHP_SESSION_NONE) {
-                    session_start();
-                }
-                include '../lang/' . $_SESSION['lang'] . '.php';
-                date_default_timezone_set('Asia/Ho_Chi_Minh');
-
-                $employer_id = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
-                ?>
 
                 <div style="padding: 30px; border-radius: 8px;">
                     <h2 style="color: #b23b3b; margin-bottom: 20px;"><?= $lang['my_job_post'] ?></h2>

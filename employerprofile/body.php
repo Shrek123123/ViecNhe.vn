@@ -119,6 +119,8 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
             align-items: center;
             background: #fff;
             border-radius: 4px;
+            font-weight: bold;
+            text-decoration: underline;
         }
 
         .content-area {

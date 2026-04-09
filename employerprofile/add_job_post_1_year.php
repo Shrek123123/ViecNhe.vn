@@ -32,7 +32,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 <?php
 require_once '../config.php';
 if (!isset($_SESSION['usernameemployer'])) {
-  echo "<script>
+    echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       var openBtn = document.getElementById('openModalBtn');
       if (openBtn) {
@@ -45,177 +45,193 @@ if (!isset($_SESSION['usernameemployer'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-  $companyName = $_POST['companyName'];
-  $companySize = $_POST['company_size']; // This will be set by the hidden input
-  if (isset($_POST['custom_company_size']) && !empty($_POST['custom_company_size'])) {
-    $companySize = $_POST['custom_company_size'];
-  }
-  $jobRequirementText = $_POST['jobRequirementText'];
-  $jobBenefit = $_POST['jobBenefit'];
-  $jobTitle = $_POST['jobTitle'];
-  $jobDescription = $_POST['jobDescription'];
-  $jobLocation = $_POST['jobLocation'];
-  $salary = $_POST['salary'];
-  $post_duration = 365; // 1 year in days
-  $contactEmail = $_POST['contactEmail'];
-  $contactPhone = $_POST['contactPhone'];
-  $jobType = $_POST['jobType'];
-  $jobCategory = $_POST['jobCategory'];
-  $requiredcertification = $_POST['requiredcertification'];
-  $jobExperience = $_POST['jobExperience'];
-  $jobPosition = $_POST['jobPosition'] ?? '';
-  $noEmplpoyeeNeeeded = $_POST['noEmplpoyeeNeeded'] ?? 0;
-
-  $jobDetailedLocation = $_POST['jobDetailedLocation'] ?? '';
-  $jobLocationDistrict = $_POST['jobLocationDistrict'] ?? '';
-  if (!isset($_SESSION['employerid'])) {
-    echo "<script>alert('You must be logged in as an employer to post a job.');</script>";
-    exit;
-  }
-  $employerid = $_SESSION['employerid'];
-
-  // Handle file upload
-  if (isset($_FILES['companylogo']) && $_FILES['companylogo']['error'] == 0) {
-    $targetDir = "uploads/companylogo/";
-    if (!is_dir($targetDir)) {
-      mkdir($targetDir, 0777, true);
+    $companyName = $_POST['companyName'];
+    $companySize = $_POST['company_size']; // This will be set by the hidden input
+    if (isset($_POST['custom_company_size']) && !empty($_POST['custom_company_size'])) {
+        $companySize = $_POST['custom_company_size'];
     }
-    $fileName = basename($_FILES["companylogo"]["name"]);
-    $targetFile = $targetDir . uniqid() . "_" . $fileName;
-    $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+    $jobRequirementText = $_POST['jobRequirementText'];
+    $jobBenefit = $_POST['jobBenefit'];
+    $jobTitle = $_POST['jobTitle'];
+    $jobDescription = $_POST['jobDescription'];
+    $jobLocation = $_POST['jobLocation'];
+    $salary = $_POST['salary'];
+    $post_duration = 365; // 1 year in days
+    $contactEmail = $_POST['contactEmail'];
+    $contactPhone = $_POST['contactPhone'];
+    $jobType = $_POST['jobType'];
+    $jobCategory = $_POST['jobCategory'];
+    $requiredcertification = $_POST['requiredcertification'];
+    $jobExperience = $_POST['jobExperience'];
+    $jobPosition = $_POST['jobPosition'] ?? '';
+    $noEmplpoyeeNeeeded = $_POST['noEmplpoyeeNeeded'] ?? 0;
 
-    // Check file size (1MB limit)
-    if ($_FILES["companylogo"]["size"] > 1000000) {
-      echo "<script>alert('Sorry, your file is too large.');</script>";
-      exit;
+    $jobDetailedLocation = $_POST['jobDetailedLocation'] ?? '';
+    $jobLocationDistrict = $_POST['jobLocationDistrict'] ?? '';
+    if (!isset($_SESSION['employerid'])) {
+        echo "<script>alert('You must be logged in as an employer to post a job.');</script>";
+        exit;
     }
+    $employerid = $_SESSION['employerid'];
 
-    // Allow certain file formats
-    $allowedTypes = ['jpg', 'png', 'jpeg', 'gif'];
-    if (!in_array($fileType, $allowedTypes)) {
-      echo "<script>
+    // Handle file upload
+    if (isset($_FILES['companylogo']) && $_FILES['companylogo']['error'] == 0) {
+        $targetDir = "uploads/companylogo/";
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+        $fileName = basename($_FILES["companylogo"]["name"]);
+        $targetFile = $targetDir . uniqid() . "_" . $fileName;
+        $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+
+        // Check file size (1MB limit)
+        if ($_FILES["companylogo"]["size"] > 1000000) {
+            echo "<script>alert('Sorry, your file is too large.');</script>";
+            exit;
+        }
+
+        // Allow certain file formats
+        $allowedTypes = ['jpg', 'png', 'jpeg', 'gif'];
+        if (!in_array($fileType, $allowedTypes)) {
+            echo "<script>
       alert('Sorry, only JPG, JPEG, PNG & GIF files are allowed.');
       window.history.back();
       </script>";
-      exit;
-    }
+            exit;
+        }
 
-    // Upload file
-    if (!move_uploaded_file($_FILES["companylogo"]["tmp_name"], $targetFile)) {
-      echo "<script>alert('Sorry, there was an error uploading your file.');
+        // Upload file
+        if (!move_uploaded_file($_FILES["companylogo"]["tmp_name"], $targetFile)) {
+            echo "<script>alert('Sorry, there was an error uploading your file.');
       window.history.back();
       </script>";
-      exit;
+            exit;
+        }
+    } else {
+        $targetFile = ""; // No file uploaded
     }
-  } else {
-    $targetFile = ""; // No file uploaded
-  }
-  if (empty($targetFile)) {
-    $targetFile = "uploads/default.png"; // Default image if no upload
-  }
+    if (empty($targetFile)) {
+        $targetFile = "uploads/default.png"; // Default image if no upload
+    }
 
-  // Validate required fields
-  // $requiredFields = [
-  //   'companyName' => $companyName,
-  //   'jobTitle' => $jobTitle,
-  //   'jobDescription' => $jobDescription,
-  //   'jobLocation' => $jobLocation,
-  //   'salary' => $salary,
-  //   'contactEmail' => $contactEmail,
-  //   'contactPhone' => $contactPhone,
-  //   'jobType' => $jobType,
-  //   'jobCategory' => $jobCategory,
-  //   'requiredcertification' => $requiredcertification,
-  //   'jobExperience' => $jobExperience,
-  //   'post_duration' => $post_duration,
-  //   'jobRequirementText' => $jobRequirementText,
-  //   'jobBenefit' => $jobBenefit,
-  //   'companySize' => $companySize,
-  //   'jobPosition' => $jobPosition,
-  //   'noEmplpoyeeNeeded' => $noEmplpoyeeNeeeded,
-  //   'jobDetailedLocation' => $jobDetailedLocation,
-  //   'jobLocationDistrict' => $jobLocationDistrict
-  // ];
+    // Validate required fields
+    // $requiredFields = [
+    //   'companyName' => $companyName,
+    //   'jobTitle' => $jobTitle,
+    //   'jobDescription' => $jobDescription,
+    //   'jobLocation' => $jobLocation,
+    //   'salary' => $salary,
+    //   'contactEmail' => $contactEmail,
+    //   'contactPhone' => $contactPhone,
+    //   'jobType' => $jobType,
+    //   'jobCategory' => $jobCategory,
+    //   'requiredcertification' => $requiredcertification,
+    //   'jobExperience' => $jobExperience,
+    //   'post_duration' => $post_duration,
+    //   'jobRequirementText' => $jobRequirementText,
+    //   'jobBenefit' => $jobBenefit,
+    //   'companySize' => $companySize,
+    //   'jobPosition' => $jobPosition,
+    //   'noEmplpoyeeNeeded' => $noEmplpoyeeNeeeded,
+    //   'jobDetailedLocation' => $jobDetailedLocation,
+    //   'jobLocationDistrict' => $jobLocationDistrict
+    // ];
 
-  // foreach ($requiredFields as $field => $value) {
-  //   if (empty($value)) {
-  //     echo "<script>alert('Please fill out all required information.');</script>";
-  //   }
-  // }
-  $jobStatus = 'pending_review'; // Mặc định là chờ duyệt
+    // foreach ($requiredFields as $field => $value) {
+    //   if (empty($value)) {
+    //     echo "<script>alert('Please fill out all required information.');</script>";
+    //   }
+    // }
+    $jobStatus = 'pending_review'; // Mặc định là chờ duyệt
 
-  // Database connection and insertion logic here
-  // Lấy số thứ tự bài đăng mới nhất của employer này
-  $sql = "SELECT MAX(job_post_number_by_employer) AS last_number FROM job WHERE posted_by_employer_id = ?";
-  $stmt_number = $conn->prepare($sql);
-  if (!$stmt_number) {
-    echo "<script>alert('Error preparing statement for job number: {$conn->error}');</script>";
-    exit;
-  }
-  $stmt_number->bind_param("i", $employerid);
-  $stmt_number->execute();
-  $result = $stmt_number->get_result();
-  $row = $result ? $result->fetch_assoc() : null;
-  $last_number = $row && isset($row['last_number']) ? (int)$row['last_number'] : 0;
-  $stmt_number->close();
+    // Database connection and insertion logic here
+    // Lấy số thứ tự bài đăng mới nhất của employer này
+    $sql = "SELECT MAX(job_post_number_by_employer) AS last_number FROM job WHERE posted_by_employer_id = ?";
+    $stmt_number = $conn->prepare($sql);
+    if (!$stmt_number) {
+        echo "<script>alert('Error preparing statement for job number: {$conn->error}');</script>";
+        exit;
+    }
+    $stmt_number->bind_param("i", $employerid);
+    $stmt_number->execute();
+    $result = $stmt_number->get_result();
+    $row = $result ? $result->fetch_assoc() : null;
+    $last_number = $row && isset($row['last_number']) ? (int) $row['last_number'] : 0;
+    $stmt_number->close();
 
-  $new_job_number = $last_number + 1;
+    $new_job_number = $last_number + 1;
 
-  $stmt = $conn->prepare("INSERT INTO job (
+    $stmt = $conn->prepare("INSERT INTO job (
     posted_by_employer_id, job_post_number_by_employer, company_name, job_title, job_description, job_location, salary, post_duration, contact_email, contact_phone, job_type, job_category, required_certification, job_experience, company_logo, job_requirement, job_benefit, company_size, no_employee_needed, job_position, job_detailed_location, job_location_district, status
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-  if (!$stmt) {
-    echo "<script>alert('Error preparing statement: {$conn->error}');</script>";
-    exit;
-  }
+    if (!$stmt) {
+        echo "<script>alert('Error preparing statement: {$conn->error}');</script>";
+        exit;
+    }
 
-  $stmt->bind_param(
-    "iisssssissssssssssissss",
-    $employerid,
-    $new_job_number,
-    $companyName,
-    $jobTitle,
-    $jobDescription,
-    $jobLocation,
-    $salary,
-    $post_duration,
-    $contactEmail,
-    $contactPhone,
-    $jobType,
-    $jobCategory,
-    $requiredcertification,
-    $jobExperience,
-    $targetFile,
-    $jobRequirementText,
-    $jobBenefit,
-    $companySize,
-    $noEmplpoyeeNeeeded,
-    $jobPosition,
-    $jobDetailedLocation,
-    $jobLocationDistrict,
-    $jobStatus
-  );
+    $stmt->bind_param(
+        "iisssssissssssssssissss",
+        $employerid,
+        $new_job_number,
+        $companyName,
+        $jobTitle,
+        $jobDescription,
+        $jobLocation,
+        $salary,
+        $post_duration,
+        $contactEmail,
+        $contactPhone,
+        $jobType,
+        $jobCategory,
+        $requiredcertification,
+        $jobExperience,
+        $targetFile,
+        $jobRequirementText,
+        $jobBenefit,
+        $companySize,
+        $noEmplpoyeeNeeeded,
+        $jobPosition,
+        $jobDetailedLocation,
+        $jobLocationDistrict,
+        $jobStatus
+    );
 
-  //   if ($stmt->execute()) {
+    //   if ($stmt->execute()) {
 //     echo "<script>alert('Job posted successfully!');</script>";
 //   } else {
 //     echo "<script>alert('Error posting job: {$stmt->error}');</script>";
 //   }
 //   $stmt->close();
 // }
-  if ($stmt->execute()) {
-    // Thay đổi thông báo và cách thoát ra
-    echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
-    // window.location.href = window.location.href; sẽ tải lại trang hiện tại (body.php)
-    // và đóng modal, làm mới trạng thái
-  } else {
-    echo "<script>alert('Error posting job: {$stmt->error}');</script>";
-  }
-  $stmt->close();
-  // Đảm bảo kết nối được đóng sau khi xử lý POST
-  $conn->close(); // Nếu bạn không đóng ở config.php
-  exit; // Quan trọng: dừng script sau khi xử lý POST
+    if ($stmt->execute()) {
+        // Thay đổi thông báo và cách thoát ra
+        echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
+        // window.location.href = window.location.href; sẽ tải lại trang hiện tại (body.php)
+        // và đóng modal, làm mới trạng thái
+    } else {
+        echo "<script>alert('Error posting job: {$stmt->error}');</script>";
+    }
+    $stmt->close();
+    // Đảm bảo kết nối được đóng sau khi xử lý POST
+    $conn->close(); // Nếu bạn không đóng ở config.php
+    exit; // Quan trọng: dừng script sau khi xử lý POST
+}
+?>
+<?php
+// Tính tổng số đơn ứng tuyển cho employer hiện tại
+$total_applications = 0;
+$employerid = $_SESSION['employerid'] ?? 0;
+if ($employerid > 0 && isset($conn) && $conn->ping()) {
+    $sql_total = "SELECT COUNT(a.id) AS total FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL)";
+    $stmt_total = $conn->prepare($sql_total);
+    $stmt_total->bind_param("i", $employerid);
+    $stmt_total->execute();
+    $result_total = $stmt_total->get_result();
+    if ($row_total = $result_total->fetch_assoc()) {
+        $total_applications = $row_total['total'];
+    }
+    $stmt_total->close();
 }
 ?>
 <!DOCTYPE html>
@@ -589,14 +605,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 13px;
         }
 
-        .status-viewed {
-            font-size: 11px;
-            color: #b2ffb2;
-        }
-
         .status-new {
             font-size: 11px;
-            color: #cce0ff;
+            color: #17a2b8;
+            font-weight: bold;
+        }
+
+        .status-viewed {
+            font-size: 11px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-hired {
+            font-size: 11px;
+            color: #20c997;
+            font-weight: bold;
+        }
+
+        .status-interviewed {
+            font-size: 11px;
+            color: #6f42c1;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            font-size: 11px;
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-default {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: bold;
         }
 
         .view-more {
@@ -605,6 +647,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background: #fff;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
+            text-decoration: underline;
         }
 
         /* ===== CONTENT ===== */
@@ -786,30 +830,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="dashboard-sidebar">
                 <button id="btn-postjob" onclick="window.location.href='add_job_post.php'"
                     class="<?= ($currentPage == 'add_job_post_1_year.php') ? 'active' : '' ?>"><?= $lang['employerprofile_postajob'] ?></button>
-                <button onclick="window.location.href='my_job_posts.php'"><?= $lang['employerprofile_myjobposts'] ?></button>
-                <button><?= $lang['employerprofile_myprofile'] ?></button>
-                <button><?= $lang['employerprofile_changeinfo'] ?></button>
+                <button
+                    onclick="window.location.href='my_job_posts.php'"><?= $lang['employerprofile_myjobposts'] ?></button>
+                <button onclick="window.location.href='company_profile.php'"><?= $lang['employerprofile_companyprofile'] ?></button>
+                <button onclick="window.location.href='change_info.php'"><?= $lang['employerprofile_changeinfo'] ?></button>
 
-                <h3><?= $lang['employerprofile_applicantprofiles'] ?></h3>
+                <h3><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
 
-                <!-- Applicant preview (static demo) -->
-                <div class="applicant-card">
-                    <img src="https://via.placeholder.com/28">
-                    <div class="applicant-info">
-                        Alex<br>
-                        <span class="status-viewed">✔ Viewed</span>
+                <?php
+                // Lấy 2 đơn ứng tuyển đầu tiên từ database
+                $applications = [];
+                $employerid = $_SESSION['employerid'] ?? 0;
+                if ($employerid > 0 && isset($conn) && $conn->ping()) {
+                    $sql_app = "SELECT a.fullname, a.status FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL) ORDER BY a.id DESC LIMIT 2";
+                    $stmt_app = $conn->prepare($sql_app);
+                    $stmt_app->bind_param("i", $employerid);
+                    $stmt_app->execute();
+                    $result_app = $stmt_app->get_result();
+                    while ($row_app = $result_app->fetch_assoc()) {
+                        $applications[] = $row_app;
+                    }
+                    $stmt_app->close();
+                }
+                ?>
+
+                <!-- Applicant preview (dynamic) -->
+                <?php foreach ($applications as $app): 
+                    $status_raw = strtolower($app['status']);
+                    
+                    // Map status với CSS class và language key
+                    $status_mapping = [
+                        'pending' => ['class' => 'status-new', 'lang_key' => 'application_pending'],
+                        'viewed' => ['class' => 'status-viewed', 'lang_key' => 'application_viewed'],
+                        'hired' => ['class' => 'status-hired', 'lang_key' => 'application_hired'],
+                        'interviewed' => ['class' => 'status-interviewed', 'lang_key' => 'application_interviewed'],
+                        'rejected' => ['class' => 'status-rejected', 'lang_key' => 'application_rejected'],
+                    ];
+                    
+                    $config = $status_mapping[$status_raw] ?? ['class' => 'status-default', 'lang_key' => $status_raw];
+                    $status_class = $config['class'];
+                    $status_icon = isset($lang[$config['lang_key']]) ? $lang[$config['lang_key']] : ucfirst($status_raw);
+                ?>
+                    <div class="applicant-card">
+                        <img src="https://via.placeholder.com/28">
+                        <div class="applicant-info">
+                            <?= htmlspecialchars($app['fullname']) ?><br>
+                            <span class="<?= $status_class ?>"><?= $status_icon ?></span>
+                        </div>
                     </div>
-                </div>
+                <?php endforeach; ?>
 
-                <div class="applicant-card">
-                    <img src="https://via.placeholder.com/28">
-                    <div class="applicant-info">
-                        Selena<br>
-                        <span class="status-new">★ New</span>
-                    </div>
-                </div>
-
-                <div class="view-more">View more</div>
+                <div class="view-more" onclick="window.location.href='view_more_list_application.php'" style="cursor: pointer;"><?= $lang['view_more'] ?></div>
             </div>
 
             <!-- CONTENT -->

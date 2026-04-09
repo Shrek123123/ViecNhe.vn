@@ -369,13 +369,13 @@ require_once 'config.php';
                     icon.innerHTML = '☆';
                     this.classList.remove('btn-danger');
                     this.classList.add('btn-secondary');
-                    showToast('Job unliked successfully!');
+                    showToast('<?= $lang['job_unliked'] ?>');
                 } else {
                     savedJobs.push(jobId);
                     icon.innerHTML = '★';
                     this.classList.add('btn-danger');
                     this.classList.remove('btn-secondary');
-                    showToast('Job liked successfully!');
+                    showToast('<?= $lang['job_liked'] ?>');
                 }
                 localStorage.setItem('savedJobs', JSON.stringify(savedJobs));
             });
@@ -483,7 +483,7 @@ require_once 'config.php';
                         // Show success message
                         document.getElementById('applyFormContent').innerHTML = `
                     <div class="modal-body text-center p-5">
-                        <div class="alert alert-success">Applied successfully!</div>
+                        <div class="alert alert-success"><?php echo $lang['applied_successfully']; ?></div>
                     </div>
                 `;
                         // Optionally close modal after a delay:

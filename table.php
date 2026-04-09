@@ -150,6 +150,8 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS company (
     company_name VARCHAR(100) NOT NULL,
     company_address VARCHAR(255) NOT NULL,
     industry VARCHAR(100) NOT NULL,
+    information TEXT,
+    banner_logo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (employer_id) REFERENCES user(id)
 )");

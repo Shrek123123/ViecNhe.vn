@@ -698,7 +698,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
 
                                 // Nếu không trống, thêm ../ để thoát khỏi thư mục employerprofile
                                 if (!empty($db_logo)) {
-                                    $logo = "../" . htmlspecialchars($db_logo);
+                                    $logo = htmlspecialchars($db_logo);
                                 } else {
                                     $logo = 'https://placehold.co/120x70/cccccc/333333?text=No+Logo';
                                 }

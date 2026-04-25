@@ -522,6 +522,7 @@ $lang = [
 
     //company_profile.php
     'company_profile' => 'Company Profile',
+    'detail_company_link' => 'Detailed Company Information Page',
     'company_name_label' => 'Company Name',
     'company_address_label' => 'Company Address',
     'industry_label' => 'Industry',

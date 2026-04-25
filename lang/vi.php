@@ -518,6 +518,7 @@ $lang = [
 
     //company_profile.php
     'company_profile' => 'Hồ sơ công ty',
+    'detail_company_link' => 'Trang Chi Tiết Thông Tin Công Ty',
     'company_name_label' => 'Tên công ty',
     'company_address_label' => 'Địa chỉ công ty',
     'industry_label' => 'Ngành công nghiệp',

@@ -77,18 +77,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $employerid = $_SESSION['employerid'];
 
   // Handle file upload
+  if (isset($_FILES['companylogo'])) {
+    $error = $_FILES['companylogo']['error'];
+    if ($error == 1) {
+      echo "<script>alert('File quá lớn so với cấu hình server. Vui lòng giảm kích thước ảnh <2MB.'); window.history.back();</script>";
+      exit;
+    } elseif ($error == 2) {
+      echo "<script>alert('File quá lớn so với form. Vui lòng giảm kích thước ảnh <2MB.'); window.history.back();</script>";
+      exit;
+    } elseif ($error != 0) {
+      echo "<script>alert('Lỗi upload file. Mã lỗi: $error'); window.history.back();</script>";
+      exit;
+    }
+  }
   if (isset($_FILES['companylogo']) && $_FILES['companylogo']['error'] == 0) {
-    $targetDir = "uploads/companylogo/";
+    $targetDir = "../uploads/companylogo/";
     if (!is_dir($targetDir)) {
-      mkdir($targetDir, 0777, true);
+      if (!mkdir($targetDir, 0777, true)) {
+        echo "<script>alert('Failed to create upload directory.');</script>";
+        exit;
+      }
     }
     $fileName = basename($_FILES["companylogo"]["name"]);
+    $fileName = preg_replace("/[^a-zA-Z0-9\.\-_]/", "_", $fileName); // Sanitize file name
     $targetFile = $targetDir . uniqid() . "_" . $fileName;
     $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-    // Check file size (1MB limit)
-    if ($_FILES["companylogo"]["size"] > 1000000) {
-      echo "<script>alert('Sorry, your file is too large.');</script>";
+    // Check file size (2MB limit)
+    if ($_FILES["companylogo"]["size"] > 2000000) {
+      echo "<script>alert('Vui lòng đăng ảnh <2MB đi.');</script>";
       exit;
     }
 
@@ -113,8 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $targetFile = ""; // No file uploaded
   }
   if (empty($targetFile)) {
-    $targetFile = "uploads/default.png"; // Default image if no upload
+    $targetFile = "../uploads/default.png"; // Default image if no upload
   }
+
+  // Loại bỏ "../" khỏi đường dẫn để lưu đường dẫn gốc vào DB
+  $targetFile = str_replace("../", "", $targetFile);
 
   // Validate required fields
   // $requiredFields = [
@@ -207,6 +227,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 //   $stmt->close();
 // }
   if ($stmt->execute()) {
+    // Insert or update company info
+    $sql_company = "INSERT INTO company (employer_id, company_name, company_address, industry) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE company_name = VALUES(company_name), company_address = VALUES(company_address), industry = VALUES(industry)";
+    $stmt_company = $conn->prepare($sql_company);
+    if ($stmt_company) {
+      $stmt_company->bind_param("isss", $employerid, $companyName, $jobLocation, $jobCategory);
+      $stmt_company->execute();
+      $stmt_company->close();
+    }
     // Thay đổi thông báo và cách thoát ra
     echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
     // window.location.href = window.location.href; sẽ tải lại trang hiện tại (body.php)

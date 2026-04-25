@@ -655,7 +655,6 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                 <!-- Content load sau -->
                 <div style="padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 400px;">
                     <div style="max-width: 600px; width: 100%;">
-                    <h2 style="color: #b23b3b; margin-bottom: 20px;"><?= $lang['company_profile'] ?></h2>
                     
                     <?php
                     $employerid = $_SESSION['employerid'] ?? 0;
@@ -673,6 +672,14 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     
                     if ($company_data):
                     ?>
+                    <h2 style="color: #b23b3b; margin-bottom: 20px;"><?= $lang['company_profile'] ?></h2>
+                    
+                    <h3 style="color: #b23b3b; margin-bottom: 20px; font-size: 16px;"><a href="#" onclick="document.getElementById('companyDetailsForm').submit(); return false;"><?= $lang['detail_company_link'] ?></a></h3>
+                    
+                    <form id="companyDetailsForm" method="POST" action="../company_information.php" style="display: none;">
+                        <input type="hidden" name="company_id" value="<?= $company_data['id'] ?>">
+                    </form>
+                    
                     <form id="companyProfileForm" enctype="multipart/form-data">
                         <input type="hidden" name="company_id" value="<?= htmlspecialchars($company_data['id']); ?>">
                         

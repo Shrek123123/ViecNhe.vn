@@ -284,6 +284,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
   }
 
   .job-header {
@@ -303,6 +304,10 @@ $savedJobIdsJson = json_encode($savedJobIds);
     font-size: 20px;
     color: #e74c3c;
     cursor: pointer;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
   }
 
   .job-body {
@@ -458,7 +463,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
       </div> <!-- giữ nguyên thẻ đóng của khối bên ngoài nếu có -->
 
       <div class="job-filters">
-        <button class="job-category-filter active" data-category="">
+        <button class="job-category-filter" data-category="">
           <?= $lang['all_jobs']; ?>
         </button>
 
@@ -483,24 +488,21 @@ $savedJobIdsJson = json_encode($savedJobIds);
         </button>
       </div>
       <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const urlParams = new URLSearchParams(window.location.search);
+          const category = urlParams.get('category') || '';
+          document.querySelectorAll('.job-category-filter').forEach(function (btn) {
+            if (btn.getAttribute('data-category') === category) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+        });
         document.querySelectorAll('.job-category-filter').forEach(function (btn) {
           btn.addEventListener('click', function () {
-            // Remove active class from all buttons
-            document.querySelectorAll('.job-category-filter').forEach(function (b) {
-              b.classList.remove('active');
-            });
-            // Add active class to clicked button
-            btn.classList.add('active');
             const category = btn.getAttribute('data-category');
-            fetch('job_filter/job_category_filter.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: 'category=' + encodeURIComponent(category)
-            })
-              .then(response => response.text())
-              .then(data => {
-                document.querySelector('.job-grid').innerHTML = data;
-              });
+            window.location.href = '?category=' + encodeURIComponent(category) + '&page=1#job-grid';
           });
         });
       </script>
@@ -510,23 +512,39 @@ $savedJobIdsJson = json_encode($savedJobIds);
         // Pagination logic
         $jobs_per_page = 9;
         $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+        $category = isset($_GET['category']) ? trim($_GET['category']) : '';
 
-        // --- START SỬA ĐỔI SQL Ở ĐÂY ---
         // Get total APPROVED jobs count
         $count_sql = "SELECT COUNT(*) as total FROM job WHERE status = 'approved'";
-        $count_result = $conn->query($count_sql);
-        $total_jobs = $count_result ? (int) $count_result->fetch_assoc()['total'] : 0;
+        if ($category !== '') {
+          $count_sql .= " AND job_category = ?";
+        }
+        $stmt_count = $conn->prepare($count_sql);
+        if ($category !== '') {
+          $stmt_count->bind_param("s", $category);
+        }
+        $stmt_count->execute();
+        $result_count = $stmt_count->get_result();
+        $total_jobs = $result_count ? (int) $result_count->fetch_assoc()['total'] : 0;
         $total_pages = ceil($total_jobs / $jobs_per_page);
 
         // Fetch APPROVED jobs for current page
         $offset = ($page - 1) * $jobs_per_page;
-        // Thêm điều kiện `WHERE status = 'approved'` vào câu lệnh SELECT
         $sql = "SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration 
                         FROM job 
-                        WHERE status = 'approved' 
-                        LIMIT $jobs_per_page OFFSET $offset";
-        $result = $conn->query($sql);
-        // --- KẾT THÚC SỬA ĐỔI SQL ---
+                        WHERE status = 'approved'";
+        if ($category !== '') {
+          $sql .= " AND job_category = ?";
+        }
+        $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare($sql);
+        if ($category !== '') {
+          $stmt->bind_param("sii", $category, $jobs_per_page, $offset);
+        } else {
+          $stmt->bind_param("ii", $jobs_per_page, $offset);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
         
         // Output jobs (only 9 per page)
         if ($result && $result->num_rows > 0):
@@ -549,143 +567,10 @@ $savedJobIdsJson = json_encode($savedJobIds);
               $savedClass = '';
             }
             ?>
-            <a href="jobdetail.php?id=<?php echo $job_id; ?>" style="text-decoration:none;color:inherit;">
-              <div class="job-card">
+            <div class="job-card">
+              <a href="jobdetail.php?id=<?php echo $job_id; ?>" style="text-decoration:none;color:inherit;">
                 <div class="job-header">
                   <h3><?php echo htmlspecialchars($row['job_title']); ?></h3>
-                  <?php
-                  $isLoggedIn = isset($_SESSION['jobseeker_id']);
-                  $userId = $isLoggedIn ? (int) $_SESSION['jobseeker_id'] : 0;
-                  ?>
-                  <button class="save-btn" aria-pressed="<?php echo $isJobAlreadySaved ? 'true' : 'false'; ?>"
-                    title="Save job" data-job-id="<?php echo $job_id; ?>">
-                    <svg class="heart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c"
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path
-                        d="M12 21s-6.5-5.5-8.5-8.5C1.5 9.5 3.5 6 7 6c1.7 0 3.4 1.1 4.1 2.7C11.6 7.1 13.3 6 15 6c3.5 0 5.5 3.5 3.5 6.5C18.5 15.5 12 21 12 21z"
-                        fill="<?php echo $isJobAlreadySaved ? '#e74c3c' : '#fff'; ?>" />
-                    </svg>
-                  </button>
-                  <script>
-                    // Lưu trữ biến lang trong window để sử dụng trong các script khác
-                    window.lang = <?= json_encode($lang) ?>;
-                    // Các biến PHP truyền sang JavaScript
-                    window.isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
-                    window.currentUserId = <?php echo $userId; ?>;
-                    // Danh sách Job ID đã lưu của người dùng hiện tại, lấy từ database
-                    window.initialSavedJobIds = <?php echo $savedJobIdsJson; ?>;
-
-                    document.addEventListener('DOMContentLoaded', function () {
-                      // Khởi tạo trạng thái cho localStorage nếu chưa có hoặc không khớp
-                      // Điều này đảm bảo trạng thái localStorage luôn phản ánh dữ liệu từ DB khi tải trang
-                      localStorage.setItem('savedJobs', JSON.stringify(window.initialSavedJobIds));
-
-                      document.querySelectorAll('.save-btn').forEach(function (btn) {
-                        const jobId = btn.getAttribute('data-job-id');
-                        const heartPath = btn.querySelector('.heart-icon path');
-                        // Lấy trạng thái hiện tại từ localStorage (đã được đồng bộ với DB ở trên)
-                        let savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-
-                        // Cập nhật trạng thái ban đầu của nút dựa trên dữ liệu PHP (và localStorage)
-                        if (savedJobs.includes(jobId)) {
-                          heartPath.setAttribute('fill', '#e74c3c');
-                          btn.setAttribute('aria-pressed', 'true');
-                        } else {
-                          heartPath.setAttribute('fill', '#fff');
-                          btn.setAttribute('aria-pressed', 'false');
-                        }
-
-                        btn.addEventListener('click', function (e) {
-                          e.preventDefault(); // Ngăn chặn hành vi mặc định của button
-
-                          // Kiểm tra đăng nhập
-                          if (!window.isLoggedIn) {
-                            showPopup(window.lang.login_to_save_jobs);
-                            return;
-                          }
-
-                          let currentSavedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-                          const isCurrentlySaved = btn.getAttribute('aria-pressed') === 'true';
-                          let action;
-
-                          if (!isCurrentlySaved) { // Chưa lưu -> Lưu
-                            heartPath.setAttribute('fill', '#e74c3c');
-                            btn.setAttribute('aria-pressed', 'true');
-                            currentSavedJobs.push(jobId);
-                            showPopup(window.lang.job_saved_successfully);
-                            action = 'save';
-                          } else { // Đã lưu -> Hủy lưu
-                            heartPath.setAttribute('fill', '#fff');
-                            btn.setAttribute('aria-pressed', 'false');
-                            currentSavedJobs = currentSavedJobs.filter(id => id !== jobId);
-                            showPopup(window.lang.job_unsaved_successfully);
-                            action = 'unsave';
-                          }
-                          localStorage.setItem('savedJobs', JSON.stringify(currentSavedJobs));
-                          saveJobAjax(jobId, action); // Gửi yêu cầu AJAX
-                        });
-                      });
-
-                      // Hàm gửi yêu cầu AJAX đến save_job_action.php
-                      function saveJobAjax(jobId, action) {
-                        fetch('save_job_action.php', { // Tên file xử lý AJAX mới
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                          },
-                          body: 'action=' + encodeURIComponent(action) + '&job_id=' + encodeURIComponent(jobId)
-                        })
-                          .then(response => {
-                            if (!response.ok) {
-                              throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-                            return response.json(); // Chờ phản hồi JSON từ server
-                          })
-                          .then(data => {
-                            if (data.status === 'success') {
-                              console.log('Database update successful:', data.message);
-                            } else {
-                              console.error('Database update failed:', data.message);
-                              // Optionally handle error here, e.g., revert UI changes
-                              showPopup('Error: ' + data.message); // Show error from server
-                            }
-                          })
-                          .catch(error => {
-                            console.error('AJAX request error:', error);
-                            showPopup('Connection or processing error. Please try again.');
-                          });
-                      }
-
-                      // Hàm hiển thị Popup (giữ nguyên từ code của bạn)
-                      function showPopup(message) {
-                        let existing = document.getElementById('job-popup-message');
-                        if (existing) {
-                          existing.remove();
-                        }
-                        let popup = document.createElement('div');
-                        popup.id = 'job-popup-message';
-                        popup.textContent = message;
-                        popup.style.position = 'fixed';
-                        popup.style.top = '30px';
-                        popup.style.left = '50%';
-                        popup.style.transform = 'translateX(-50%)';
-                        popup.style.background = '#fff';
-                        popup.style.color = '#e74c3c';
-                        popup.style.padding = '12px 28px';
-                        popup.style.borderRadius = '8px';
-                        popup.style.boxShadow = '0 2px 12px rgba(0,0,0,0.15)';
-                        popup.style.zIndex = 9999;
-                        popup.style.opacity = 1;
-                        document.body.appendChild(popup);
-                        setTimeout(() => {
-                          popup.style.transition = 'opacity 0.4s';
-                          popup.style.opacity = 0;
-                          setTimeout(() => popup.remove(), 400);
-                        }, 3000);
-                      }
-                    });
-                  </script>
-
                 </div>
                 <div class="job-body">
                   <img src="<?php echo htmlspecialchars($row['company_logo']); ?>" alt="Company Logo" class="company-logo">
@@ -699,8 +584,17 @@ $savedJobIdsJson = json_encode($savedJobIds);
                 <div class="job-footer">
                   <div class="deadline"><?php echo $days_left_text; ?></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="save-btn" aria-pressed="<?php echo $isJobAlreadySaved ? 'true' : 'false'; ?>"
+                title="Save job" data-job-id="<?php echo $job_id; ?>">
+                <svg class="heart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M12 21s-6.5-5.5-8.5-8.5C1.5 9.5 3.5 6 7 6c1.7 0 3.4 1.1 4.1 2.7C11.6 7.1 13.3 6 15 6c3.5 0 5.5 3.5 3.5 6.5C18.5 15.5 12 21 12 21z"
+                    fill="<?php echo $isJobAlreadySaved ? '#e74c3c' : '#fff'; ?>" />
+                </svg>
+              </button>
+            </div>
             <?php
           endwhile;
         else:
@@ -709,20 +603,138 @@ $savedJobIdsJson = json_encode($savedJobIds);
         <?php endif; ?>
       </div>
 
+      <script>
+        // Lưu trữ biến lang trong window để sử dụng trong các script khác
+        window.lang = <?= json_encode($lang) ?>;
+        // Các biến PHP truyền sang JavaScript
+        window.isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
+        window.currentUserId = <?php echo $userId; ?>;
+        // Danh sách Job ID đã lưu của người dùng hiện tại, lấy từ database
+        window.initialSavedJobIds = <?php echo $savedJobIdsJson; ?>;
+
+        document.addEventListener('DOMContentLoaded', function () {
+          // Khởi tạo trạng thái cho localStorage nếu chưa có hoặc không khớp
+          // Điều này đảm bảo trạng thái localStorage luôn phản ánh dữ liệu từ DB khi tải trang
+          localStorage.setItem('savedJobs', JSON.stringify(window.initialSavedJobIds));
+
+          document.querySelectorAll('.save-btn').forEach(function (btn) {
+            const jobId = btn.getAttribute('data-job-id');
+            const heartPath = btn.querySelector('.heart-icon path');
+            // Lấy trạng thái hiện tại từ localStorage (đã được đồng bộ với DB ở trên)
+            let savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+
+            // Cập nhật trạng thái ban đầu của nút dựa trên dữ liệu PHP (và localStorage)
+            if (savedJobs.includes(jobId)) {
+              heartPath.setAttribute('fill', '#e74c3c');
+              btn.setAttribute('aria-pressed', 'true');
+            } else {
+              heartPath.setAttribute('fill', '#fff');
+              btn.setAttribute('aria-pressed', 'false');
+            }
+
+            btn.addEventListener('click', function (e) {
+              // Kiểm tra đăng nhập
+              if (!window.isLoggedIn) {
+                showPopup(window.lang.login_to_save_jobs);
+                return;
+              }
+
+              let currentSavedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+              const isCurrentlySaved = btn.getAttribute('aria-pressed') === 'true';
+              let action;
+
+              if (!isCurrentlySaved) { // Chưa lưu -> Lưu
+                heartPath.setAttribute('fill', '#e74c3c');
+                btn.setAttribute('aria-pressed', 'true');
+                currentSavedJobs.push(jobId);
+                showPopup(window.lang.job_saved_successfully);
+                action = 'save';
+              } else { // Đã lưu -> Hủy lưu
+                heartPath.setAttribute('fill', '#fff');
+                btn.setAttribute('aria-pressed', 'false');
+                currentSavedJobs = currentSavedJobs.filter(id => id !== jobId);
+                showPopup(window.lang.job_unsaved_successfully);
+                action = 'unsave';
+              }
+              localStorage.setItem('savedJobs', JSON.stringify(currentSavedJobs));
+              saveJobAjax(jobId, action); // Gửi yêu cầu AJAX
+            });
+          });
+
+          // Hàm gửi yêu cầu AJAX đến save_job_action.php
+          function saveJobAjax(jobId, action) {
+            fetch('save_job_action.php', { // Tên file xử lý AJAX mới
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: 'action=' + encodeURIComponent(action) + '&job_id=' + encodeURIComponent(jobId)
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json(); // Chờ phản hồi JSON từ server
+              })
+              .then(data => {
+                if (data.status === 'success') {
+                  console.log('Database update successful:', data.message);
+                } else {
+                  console.error('Database update failed:', data.message);
+                  // Optionally handle error here, e.g., revert UI changes
+                  showPopup('Error: ' + data.message); // Show error from server
+                }
+              })
+              .catch(error => {
+                console.error('AJAX request error:', error);
+                showPopup('Connection or processing error. Please try again.');
+              });
+          }
+
+          // Hàm hiển thị Popup (giữ nguyên từ code của bạn)
+          function showPopup(message) {
+            let existing = document.getElementById('job-popup-message');
+            if (existing) {
+              existing.remove();
+            }
+            let popup = document.createElement('div');
+            popup.id = 'job-popup-message';
+            popup.textContent = message;
+            popup.style.position = 'fixed';
+            popup.style.top = '30px';
+            popup.style.left = '50%';
+            popup.style.transform = 'translateX(-50%)';
+            popup.style.background = '#fff';
+            popup.style.color = '#e74c3c';
+            popup.style.padding = '12px 28px';
+            popup.style.borderRadius = '8px';
+            popup.style.boxShadow = '0 2px 12px rgba(0,0,0,0.15)';
+            popup.style.zIndex = 9999;
+            popup.style.opacity = 1;
+            document.body.appendChild(popup);
+            setTimeout(() => {
+              popup.style.transition = 'opacity 0.4s';
+              popup.style.opacity = 0;
+              setTimeout(() => popup.remove(), 400);
+            }, 3000);
+          }
+        });
+      </script>
+
       <div class="pagination" id="job-pagination">
-        <a href="<?php echo $page > 1 ? '?page=' . ($page - 1) : 'javascript:void(0);'; ?>" class="arrow<?php if ($page <= 1)
+        <a href="<?php echo $page > 1 ? '?page=' . ($page - 1) . ($category ? '&category=' . urlencode($category) : '') : 'javascript:void(0);'; ?>" class="arrow<?php if ($page <= 1)
                        echo ' disabled'; ?>" <?php if ($page <= 1)
                            echo 'tabindex="-1" aria-disabled="true"'; ?>
           data-scroll="1">
           &larr;
         </a>
         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-          <a href="?page=<?php echo $i; ?>" class="page-number<?php if ($i == $page)
+          <a href="?page=<?php echo $i; ?><?php if ($category) echo '&category=' . urlencode($category); ?>" class="page-number<?php if ($i == $page)
                echo ' active'; ?>" data-scroll="1">
             <?php echo $i; ?>
           </a>
         <?php endfor; ?>
-        <a href="<?php echo $page < $total_pages ? '?page=' . ($page + 1) : 'javascript:void(0);'; ?>" class="arrow<?php if ($page >= $total_pages)
+        <a href="<?php echo $page < $total_pages ? '?page=' . ($page + 1) . ($category ? '&category=' . urlencode($category) : '') : 'javascript:void(0);'; ?>" class="arrow<?php if ($page >= $total_pages)
                        echo ' disabled'; ?>" <?php if ($page >= $total_pages)
                            echo 'tabindex="-1" aria-disabled="true"'; ?> data-scroll="1">&rarr;
         </a>

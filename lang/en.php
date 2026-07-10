@@ -54,6 +54,11 @@ $lang = [
     'job_saved_successfully' => 'Job saved successfully!',
     'job_unsaved_successfully' => 'Job unsaved successfully.',
     'remove' => 'Remove',
+    'confirm_remove_saved_job' => 'Are you sure you want to remove this job from your saved list?',
+    'remove_saved_job_success' => 'Job removed successfully!',
+    'remove_saved_job_error' => 'Error removing job:',
+    'remove_saved_job_failed' => 'An error occurred while trying to remove the job.',
+    'no_saved_jobs_found' => 'No saved jobs found.',
 
     //footer
     // Hotline section
@@ -354,7 +359,7 @@ $lang = [
     'edit_job_post_modal_job_category' => 'Job Category',
     'edit_job_post_modal_required_certification' => 'Required Certification',
     'edit_job_post_modal_job_experience' => 'Job Experience',
-    'edit_job_post_modal_company_logo' => 'Company Logo URL',
+    'edit_job_post_modal_company_logo' => 'Company Logo',
     'edit_job_post_modal_submit' => 'Update Job',
     'edit_job_post_modal_cancel' => 'Cancel',
     'edit_job_post_modal_success' => 'Job post updated successfully!',

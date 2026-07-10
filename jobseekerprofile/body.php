@@ -163,14 +163,14 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             // Lấy ảnh đại diện jobseeker
             $sql = "SELECT profile_pic FROM jobseeker_profile WHERE id = $jobseeker_id LIMIT 1";
             $result = $conn->query($sql);
-            $profile_pic = "https://via.placeholder.com/34";
+            $profile_pic = "../image/defaultavatar.jpg";
             if ($result && $row = $result->fetch_assoc()) {
-                $profile_pic = !empty($row['profile_pic']) ? htmlspecialchars($row['profile_pic']) : $profile_pic;
+                $profile_pic = !empty($row['profile_pic']) ? $row['profile_pic'] : $profile_pic;
             }
             $conn->close();
             $jobseeker_name = "Tên ứng viên";
             ?>
-            <img src="<?php echo $profile_pic; ?>" alt="jobseeker logo">
+            <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $profile_pic) ? $profile_pic : '../' . ltrim($profile_pic, '/')); ?>" alt="jobseeker logo">
             <div class="company-info">
                 <div><strong><?php echo $jobseeker_name; ?></strong></div>
                 <div class="status">● Online</div>
@@ -191,7 +191,7 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
 
             <!-- Applicants -->
             <div class="applicant-card">
-                <img src="<?php echo $user1['avatar']; ?>" alt="avatar">
+                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user1['avatar']) ? $user1['avatar'] : '../' . ltrim($user1['avatar'], '/')); ?>" alt="avatar">
                 <div class="applicant-info">
                     Alex<br>
                     <span class="status-viewed">✔ Viewed</span>
@@ -199,7 +199,7 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             </div>
 
             <div class="applicant-card">
-                <img src="<?php echo $user2['avatar']; ?>" alt="avatar">
+                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user2['avatar']) ? $user2['avatar'] : '../' . ltrim($user2['avatar'], '/')); ?>" alt="avatar">
                 <div class="applicant-info">
                     Selena<br>
                     <span class="status-new">★ New</span>
@@ -207,7 +207,7 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             </div>
 
             <div class="applicant-card">
-                <img src="<?php echo $user3['avatar']; ?>" alt="avatar">
+                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user3['avatar']) ? $user3['avatar'] : '../' . ltrim($user3['avatar'], '/')); ?>" alt="avatar">
                 <div class="applicant-info">
                     Tyler<br>
                     <span class="status-new">★ New</span>
@@ -215,7 +215,7 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             </div>
 
             <div class="applicant-card">
-                <img src="<?php echo $user4['avatar']; ?>" alt="avatar">
+                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user4['avatar']) ? $user4['avatar'] : '../' . ltrim($user4['avatar'], '/')); ?>" alt="avatar">
                 <div class="applicant-info">
                     Patrica<br>
                     <span class="status-new">★ New</span>
@@ -223,7 +223,7 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             </div>
 
             <div class="applicant-card">
-                <img src="<?php echo $user5['avatar']; ?>" alt="avatar">
+                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user5['avatar']) ? $user5['avatar'] : '../' . ltrim($user5['avatar'], '/')); ?>" alt="avatar">
                 <div class="applicant-info">
                     Miranda<br>
                     <span class="status-new">★ New</span>

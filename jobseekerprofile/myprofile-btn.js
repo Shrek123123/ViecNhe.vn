@@ -4,7 +4,7 @@
 $(function () {
     // Lắng nghe sự kiện click trên nút "My Profile"
     $('#btn-myprofile').on('click', function () {
-        window.location.href = '/JobHive-main/ho_so_ung_vien.php';
+        window.location.href = '/JobHive-main/jobseekerprofile/ho_so_ung_vien.php';
 
         // 1. Thay đổi trạng thái active của nút (làm nút đỏ)
         // Dù chuyển trang, việc này có thể hữu ích để người dùng thấy nút nào đã được bấm

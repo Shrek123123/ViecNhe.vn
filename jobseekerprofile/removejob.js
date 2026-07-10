@@ -1,45 +1,53 @@
-// Sử dụng jQuery nếu bạn đang dùng jQuery ở các modal khác, nếu không thì dùng fetch API.
-    // Tôi sẽ dùng jQuery cho đồng bộ với các ví dụ trước, nhưng fetch API cũng rất tốt.
-    // Đảm bảo jQuery đã được tải trước script này.
-    
-    $(document).ready(function() {
-        // Sử dụng event delegation vì các nút này được tải động qua Ajax
-        $(document).on('click', '.remove-btn', function(event) {
-            event.stopPropagation(); // Ngăn chặn sự kiện click nổi bọt lên phần tử cha (ví dụ: thẻ <a>)
-            event.preventDefault(); // Ngăn chặn hành vi mặc định của nút
+document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest('.remove-btn');
+        if (!button) return;
 
-            const jobId = $(this).data('jobid');
-            const jobseekerId = $(this).data('jobseekerid'); // Lấy jobseekerId từ nút
+        event.preventDefault();
+        event.stopPropagation();
 
-            if (confirm('Are you sure you want to remove this job from your saved list?')) {
-                $.ajax({
-                    url: 'jobseekerprofile/removesavedjobs.php', // Đường dẫn đến file xử lý xóa
-                    method: 'POST',
-                    data: {
-                        job_id: jobId,
-                        jobseeker_id: jobseekerId
-                    },
-                    dataType: 'json', // Mong đợi phản hồi JSON
-                    success: function(response) {
-                        if (response.success) {
-                            alert('Job removed successfully!');
-                            // Xóa phần tử job khỏi DOM
-                            $('#saved-job-' + jobId).remove();
-                            // Nếu không còn job nào, hiển thị thông báo
-                            if ($('.saved-job-item').length === 0) {
-                                $('.saved-jobs-container').html('<div style="color: #888;">No saved jobs found.</div>'); // Thay thế container bằng thông báo
-                            }
-                        } else {
-                            alert('Error removing job: ' + response.message);
-                            console.error('Remove saved job error:', response.error);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Ajax error removing saved job:', error);
-                        console.error('Full AJAX Error Response:', xhr.responseText);
-                        alert('An error occurred while trying to remove the job.');
+        const jobId = button.getAttribute('data-jobid');
+        const jobseekerId = button.getAttribute('data-jobseekerid');
+        const item = document.getElementById('saved-job-' + jobId);
+
+        if (!confirm(window.lang && window.lang.remove_confirm ? window.lang.remove_confirm : 'Are you sure you want to remove this job from your saved list?')) {
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.append('job_id', jobId);
+        params.append('jobseeker_id', jobseekerId);
+
+        fetch('removesavedjobs.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: params.toString()
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (response) {
+                if (response.success) {
+                    alert(window.lang && window.lang.remove_success ? window.lang.remove_success : 'Job removed successfully!');
+                    if (item) {
+                        item.remove();
                     }
-                });
-            }
-        });
+
+                    const remainingItems = document.querySelectorAll('.saved-job-item').length;
+                    const container = document.querySelector('.saved-jobs-container');
+                    if (container && remainingItems === 0) {
+                        container.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">No saved jobs found.</div>';
+                    }
+                } else {
+                    alert((window.lang && window.lang.remove_error ? window.lang.remove_error : 'Error removing job:') + ' ' + (response.message || 'Unknown error'));
+                    console.error('Remove saved job error:', response.error || response.message);
+                }
+            })
+            .catch(function (error) {
+                console.error('Remove saved job request failed:', error);
+                alert(window.lang && window.lang.remove_failed ? window.lang.remove_failed : 'An error occurred while trying to remove the job.');
+            });
     });
+});

@@ -30,8 +30,25 @@ if ($job_type === '') {
   exit;
 }
 
-// Map lại tên job_type nếu cần (ví dụ: Partime => Parttime)
-if ($job_type === 'partime') $job_type = 'parttime';
+// Map các giá trị job_type tiếng Việt/không chuẩn về giá trị dữ liệu trong DB
+$jobTypeMap = [
+  'full-time' => 'full-time',
+  'full time' => 'full-time',
+  'toàn thời gian' => 'full-time',
+  'bán thời gian' => 'part-time',
+  'part-time' => 'part-time',
+  'part time' => 'part-time',
+  'thực tập' => 'internship',
+  'internship' => 'internship',
+  'thời vụ' => 'freelance',
+  'freelance' => 'freelance',
+  'làm việc từ xa' => 'remote',
+  'remote' => 'remote',
+];
+
+if (isset($jobTypeMap[$job_type])) {
+  $job_type = $jobTypeMap[$job_type];
+}
 
 // Query lấy job theo job_type
 $stmt = $conn->prepare("SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration 

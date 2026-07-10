@@ -10,7 +10,7 @@ if (!isset($_SESSION['lang'])) {
 }
 
 // Load file ngôn ngữ tương ứng
-include 'lang/' . $_SESSION['lang'] . '.php';
+include '../lang/' . $_SESSION['lang'] . '.php';
 $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
 $user_data = null;
 if ($jobseeker_id > 0) {
@@ -160,29 +160,29 @@ if ($jobseeker_id > 0) {
 
 <div class="header">
     <div style="display: flex; align-items: center;">
-        <a href="index.php">
-            <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
+        <a href="../index.php">
+            <img src="../image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
     <div style="display: flex; gap: 30px; margin-left: 50px;">
         <a href="#" style="text-decoration: none; color: #333;">
             <?= $lang['create_cv']; ?>
         </a>
-        <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
+        <a href="../contactus_jobseeker.php" style="text-decoration: none; color: #333;">
             <?= $lang['contact_us']; ?>
         </a>
-        <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">
+        <a href="../feedback_jobseeker.php" style="text-decoration: none; color: #333;">
             <?= $lang['feedback']; ?>
         </a>
     </div>
 
     <div class="loggined_option">
         <?php if (isset($_SESSION['username'])): ?>
-            <a class="ra_trang_ntd" href="employerpage.php"><?= $lang['Ra_trang_nha_tuyen_dung']; ?></a>
+            <a class="ra_trang_ntd" href="../employerpage.php"><?= $lang['Ra_trang_nha_tuyen_dung']; ?></a>
             <div class="user-dropdown">
                 <div class="user-info">
                     <?php
-                    $profilePic = "image/defaultavatar.jpg"; // ảnh mặc định
+                    $profilePic = "../image/defaultavatar.jpg"; // ảnh mặc định
                     if (isset($_SESSION['jobseeker_id'])) {
                         $conn = new mysqli("localhost", "root", "", "jobhive");
 
@@ -193,8 +193,7 @@ if ($jobseeker_id > 0) {
                             $stmt->execute();
                             $stmt->bind_result($pic);
                             if ($stmt->fetch() && !empty($pic)) {
-                                // Nếu ảnh đã có 'uploads/' ở đầu thì giữ nguyên, nếu không thì thêm vào
-                                $profilePic = (strpos($pic, 'uploads/') === 0) ? $pic : 'uploads/' . basename($pic);
+                                $profilePic = (strpos($pic, 'uploads/') === 0) ? '../' . $pic : '../uploads/' . basename($pic);
                             }
                             $stmt->close();
                         }

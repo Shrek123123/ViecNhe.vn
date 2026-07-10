@@ -61,7 +61,7 @@ function t($key, $replace = [])
                 $row = $result_job->fetch_assoc();
 
                 // Xử lý dữ liệu
-                $logo = !empty($row['company_logo']) ? htmlspecialchars($row['company_logo']) : 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=cover&w=120&q=80';
+                $logo = !empty($row['company_logo']) ? $row['company_logo'] : 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=cover&w=120&q=80';
                 $created_at = new DateTime($row['created_at']);
                 $duration = intval($row['post_duration']);
                 $expire_at = clone $created_at;
@@ -89,7 +89,7 @@ function t($key, $replace = [])
                     style="background: #fff; border-radius: 10px; padding: 18px 18px 18px 0; display: flex; align-items: flex-start; box-shadow: 0 2px 8px #0001; border: 1.5px solid #222;">
                     <a href="jobdetail.php?id=<?php echo $jobid; ?>"
                         style="text-decoration: none; color: inherit; display: flex; flex: 1;">
-                        <img src="<?php echo $logo; ?>" alt="job"
+                        <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $logo) ? $logo : '../' . ltrim($logo, '/')); ?>" alt="job"
                             style="width: 120px; height: 70px; border-radius: 8px; object-fit: cover; margin-right: 18px;">
                         <div style="flex: 1;">
                             <div style="font-weight: bold; font-size: 18px;"><?php echo $job_title; ?></div>

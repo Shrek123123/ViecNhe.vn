@@ -1,7 +1,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 <?php
 // Đặt ở ĐẦU file jobs.php (hoặc index.php)
-require_once('config.php'); // Đảm bảo file này chứa kết nối $conn
+require_once(__DIR__ . '/../config.php'); // Đảm bảo file này chứa kết nối $conn
 function t($key, $replace = [])
 {
   global $lang;
@@ -392,11 +392,11 @@ $savedJobIdsJson = json_encode($savedJobIds);
     <div class="main-content">
       <div class="left-menu">
         <ul>
-          <li id="filter-fulltime" class="job-type-filter"><?= $lang['job_type_filters']['full_time']; ?></li>
-          <li id="filter-parttime" class="job-type-filter"><?= $lang['job_type_filters']['part_time']; ?></li>
-          <li id="filter-internship" class="job-type-filter"><?= $lang['job_type_filters']['internship']; ?></li>
-          <li id="filter-freelance" class="job-type-filter"><?= $lang['job_type_filters']['freelance']; ?></li>
-          <li id="filter-remote" class="job-type-filter"><?= $lang['job_type_filters']['remote']; ?></li>
+          <li id="filter-fulltime" class="job-type-filter" data-job-type="Full-time"><?= $lang['job_type_filters']['full_time']; ?></li>
+          <li id="filter-parttime" class="job-type-filter" data-job-type="Part-time"><?= $lang['job_type_filters']['part_time']; ?></li>
+          <li id="filter-internship" class="job-type-filter" data-job-type="Internship"><?= $lang['job_type_filters']['internship']; ?></li>
+          <li id="filter-freelance" class="job-type-filter" data-job-type="Freelance"><?= $lang['job_type_filters']['freelance']; ?></li>
+          <li id="filter-remote" class="job-type-filter" data-job-type="Remote"><?= $lang['job_type_filters']['remote']; ?></li>
         </ul>
 
 
@@ -416,33 +416,34 @@ $savedJobIdsJson = json_encode($savedJobIds);
           }
         </style>
         <script>
-          // Toggle active class for job-type-filter with full width highlight
-          document.querySelectorAll('.job-type-filter').forEach(function (item) {
-            item.addEventListener('click', function () {
-              document.querySelectorAll('.job-type-filter').forEach(function (el) {
-                el.classList.remove('active');
-              });
-              this.classList.add('active');
+          function buildJobsUrl(overrides) {
+            const params = new URLSearchParams(window.location.search);
+            Object.entries(overrides).forEach(function ([key, value]) {
+              if (value === null || value === '') {
+                params.delete(key);
+              } else {
+                params.set(key, value);
+              }
             });
-          });
-        </script>
-        <script>
-          //Ajax filter job by type
-          document.querySelectorAll('.job-type-filter').forEach(function (item) {
-            item.addEventListener('click', function () {
-              const type = this.textContent.trim().toLowerCase();
-              // Gọi hàm filterJobByType trong job_filter/job_type_filter.php qua AJAX
-              fetch('job_filter/job_type_filter.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'job_type=' + encodeURIComponent(type)
-              })
-                .then(response => response.text())
-                .then(data => {
-                  // Xử lý kết quả trả về, ví dụ: hiển thị danh sách công việc đã lọc
-                  // Bạn có thể thay đổi selector '.job-grid' nếu muốn hiển thị ở nơi khác
-                  document.querySelector('.job-grid').innerHTML = data;
+            const query = params.toString();
+            return (query ? '?' + query : '?') + '#job-grid';
+          }
+
+          document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeType = (urlParams.get('job_type') || '').toLowerCase();
+
+            document.querySelectorAll('.job-type-filter').forEach(function (item) {
+              const itemType = (item.getAttribute('data-job-type') || '').toLowerCase();
+              item.classList.toggle('active', itemType === activeType);
+
+              item.addEventListener('click', function () {
+                const selectedType = this.getAttribute('data-job-type') || '';
+                window.location.href = buildJobsUrl({
+                  page: '1',
+                  job_type: selectedType,
                 });
+              });
             });
           });
         </script>
@@ -501,47 +502,96 @@ $savedJobIdsJson = json_encode($savedJobIds);
         });
         document.querySelectorAll('.job-category-filter').forEach(function (btn) {
           btn.addEventListener('click', function () {
-            const category = btn.getAttribute('data-category');
-            window.location.href = '?category=' + encodeURIComponent(category) + '&page=1#job-grid';
+            const category = btn.getAttribute('data-category') || '';
+            const params = new URLSearchParams(window.location.search);
+            params.set('page', '1');
+            if (category) {
+              params.set('category', category);
+            } else {
+              params.delete('category');
+            }
+            const query = params.toString();
+            window.location.href = (query ? '?' + query : '?') + '#job-grid';
           });
         });
       </script>
 
-      <div class="job-grid">
+      <div class="job-grid" id="job-grid">
         <?php
         // Pagination logic
         $jobs_per_page = 9;
         $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
         $category = isset($_GET['category']) ? trim($_GET['category']) : '';
+        $job_type = isset($_GET['job_type']) ? trim($_GET['job_type']) : '';
+
+        $jobTypeMap = [
+          'full-time' => 'full-time',
+          'full time' => 'full-time',
+          'toàn thời gian' => 'full-time',
+          'bán thời gian' => 'part-time',
+          'part-time' => 'part-time',
+          'part time' => 'part-time',
+          'thực tập' => 'internship',
+          'internship' => 'internship',
+          'thời vụ' => 'freelance',
+          'freelance' => 'freelance',
+          'làm việc từ xa' => 'remote',
+          'remote' => 'remote',
+        ];
+        $normalized_job_type = strtolower($job_type);
+        if ($job_type !== '' && isset($jobTypeMap[$normalized_job_type])) {
+          $job_type = $jobTypeMap[$normalized_job_type];
+        } elseif ($job_type !== '') {
+          $job_type = strtolower($job_type);
+        }
 
         // Get total APPROVED jobs count
         $count_sql = "SELECT COUNT(*) as total FROM job WHERE status = 'approved'";
+        $count_bind_types = '';
+        $count_params = [];
         if ($category !== '') {
           $count_sql .= " AND job_category = ?";
+          $count_bind_types .= 's';
+          $count_params[] = $category;
+        }
+        if ($job_type !== '') {
+          $count_sql .= " AND LOWER(job_type) = ?";
+          $count_bind_types .= 's';
+          $count_params[] = $job_type;
         }
         $stmt_count = $conn->prepare($count_sql);
-        if ($category !== '') {
-          $stmt_count->bind_param("s", $category);
+        if (!empty($count_params)) {
+          $stmt_count->bind_param($count_bind_types, ...$count_params);
         }
         $stmt_count->execute();
         $result_count = $stmt_count->get_result();
         $total_jobs = $result_count ? (int) $result_count->fetch_assoc()['total'] : 0;
-        $total_pages = ceil($total_jobs / $jobs_per_page);
+        $total_pages = max(1, (int) ceil($total_jobs / $jobs_per_page));
 
         // Fetch APPROVED jobs for current page
         $offset = ($page - 1) * $jobs_per_page;
         $sql = "SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration 
                         FROM job 
                         WHERE status = 'approved'";
+        $bind_types = '';
+        $params = [];
         if ($category !== '') {
           $sql .= " AND job_category = ?";
+          $bind_types .= 's';
+          $params[] = $category;
+        }
+        if ($job_type !== '') {
+          $sql .= " AND LOWER(job_type) = ?";
+          $bind_types .= 's';
+          $params[] = $job_type;
         }
         $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        $bind_types .= 'ii';
+        $params[] = $jobs_per_page;
+        $params[] = $offset;
         $stmt = $conn->prepare($sql);
-        if ($category !== '') {
-          $stmt->bind_param("sii", $category, $jobs_per_page, $offset);
-        } else {
-          $stmt->bind_param("ii", $jobs_per_page, $offset);
+        if (!empty($params)) {
+          $stmt->bind_param($bind_types, ...$params);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -722,19 +772,19 @@ $savedJobIdsJson = json_encode($savedJobIds);
       </script>
 
       <div class="pagination" id="job-pagination">
-        <a href="<?php echo $page > 1 ? '?page=' . ($page - 1) . ($category ? '&category=' . urlencode($category) : '') : 'javascript:void(0);'; ?>" class="arrow<?php if ($page <= 1)
+        <a href="<?php echo $page > 1 ? '?page=' . ($page - 1) . ($category ? '&category=' . urlencode($category) : '') . ($job_type ? '&job_type=' . urlencode($job_type) : '') : 'javascript:void(0);'; ?>" class="arrow<?php if ($page <= 1)
                        echo ' disabled'; ?>" <?php if ($page <= 1)
                            echo 'tabindex="-1" aria-disabled="true"'; ?>
           data-scroll="1">
           &larr;
         </a>
         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-          <a href="?page=<?php echo $i; ?><?php if ($category) echo '&category=' . urlencode($category); ?>" class="page-number<?php if ($i == $page)
+          <a href="?page=<?php echo $i; ?><?php if ($category) echo '&category=' . urlencode($category); ?><?php if ($job_type) echo '&job_type=' . urlencode($job_type); ?>" class="page-number<?php if ($i == $page)
                echo ' active'; ?>" data-scroll="1">
             <?php echo $i; ?>
           </a>
         <?php endfor; ?>
-        <a href="<?php echo $page < $total_pages ? '?page=' . ($page + 1) . ($category ? '&category=' . urlencode($category) : '') : 'javascript:void(0);'; ?>" class="arrow<?php if ($page >= $total_pages)
+        <a href="<?php echo $page < $total_pages ? '?page=' . ($page + 1) . ($category ? '&category=' . urlencode($category) : '') . ($job_type ? '&job_type=' . urlencode($job_type) : '') : 'javascript:void(0);'; ?>" class="arrow<?php if ($page >= $total_pages)
                        echo ' disabled'; ?>" <?php if ($page >= $total_pages)
                            echo 'tabindex="-1" aria-disabled="true"'; ?> data-scroll="1">&rarr;
         </a>

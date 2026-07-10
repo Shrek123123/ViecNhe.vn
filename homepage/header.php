@@ -11,7 +11,7 @@ if (!isset($_SESSION['lang'])) {
 }
 
 // Load file ngôn ngữ tương ứng
-include 'lang/' . $_SESSION['lang'] . '.php';
+include __DIR__ . '/../lang/' . $_SESSION['lang'] . '.php';
 $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
 $user_data = null;
 if ($jobseeker_id > 0) {
@@ -207,7 +207,7 @@ if ($jobseeker_id > 0) {
                     <?php
                     $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
                     ?>
-                    <a href="ho_so_ung_vien.php">
+                    <a href="jobseekerprofile/ho_so_ung_vien.php">
                         <?= $lang['profile']; ?>
                     </a>
                     <a href="jobseekerlogout.php">

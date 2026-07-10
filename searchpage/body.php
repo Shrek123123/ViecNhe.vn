@@ -837,13 +837,13 @@ $savedJobIdsJson = json_encode($savedJobIds);
                     heartPath.setAttribute('fill', '#e74c3c');
                     btn.setAttribute('aria-pressed', 'true');
                     currentSavedJobs.push(jobId);
-                    showPopup('Job saved successfully!');
+                    showPopup(<?php echo json_encode($lang['job_saved_successfully']); ?>);
                     action = 'save';
                 } else { // Đã lưu -> Hủy lưu
                     heartPath.setAttribute('fill', '#fff');
                     btn.setAttribute('aria-pressed', 'false');
                     currentSavedJobs = currentSavedJobs.filter(id => id !== jobId);
-                    showPopup('Job unsaved successfully.');
+                    showPopup(<?php echo json_encode($lang['job_unsaved_successfully']); ?>);
                     action = 'unsave';
                 }
                 localStorage.setItem('savedJobs', JSON.stringify(currentSavedJobs));

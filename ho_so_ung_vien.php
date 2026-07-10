@@ -93,10 +93,19 @@ $stmt->fetch();
 $stmt->close();
 
 if ($cv_file_path) {
-    $filename = basename($cv_file_path); // chỉ tên file hiển thị
-    // Hiển thị link để mở file trong tab mới
-    $fileUrl = htmlspecialchars($cv_file_path, ENT_QUOTES, 'UTF-8');
-    $uploadedFile = '<a href="'.$fileUrl.'" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'</a>';
+    $filename = basename($cv_file_path);
+    $normalizedCvPath = $cv_file_path;
+
+    if (preg_match('#^(https?://|data:)#i', $normalizedCvPath)) {
+        $normalizedCvPath = $normalizedCvPath;
+    } elseif (strpos($normalizedCvPath, 'uploads/') === 0) {
+        $normalizedCvPath = '../' . $normalizedCvPath;
+    } elseif (strpos($normalizedCvPath, '/') !== 0) {
+        $normalizedCvPath = '../' . ltrim($normalizedCvPath, '/');
+    }
+
+    $fileUrl = htmlspecialchars($normalizedCvPath, ENT_QUOTES, 'UTF-8');
+    $uploadedFile = '<a href="' . $fileUrl . '" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">' . htmlspecialchars($filename, ENT_QUOTES, 'UTF-8') . '</a>';
 }
 ?>
 <!DOCTYPE html>

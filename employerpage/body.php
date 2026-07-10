@@ -445,8 +445,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </tr>
         <tr>
           <td><label for="jobExperience"><?= $lang['post_job_form_job_experience']; ?>:</label></td>
-          <td><input type="text" id="jobExperience" name="jobExperience" placeholder="<?= $lang['optional']; ?>"
-              required></td>
+          <td>
+            <select id="jobExperience" name="jobExperience" required>
+              <option value=""><?= $lang['post_job_form_experience_placeholder']; ?></option>
+              <?php foreach ($lang['post_job_form_experience_options'] as $value => $label): ?>
+                <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($label) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </td>
         </tr>
         <tr>
           <td><label for="jobRequirementText"><?= $lang['post_job_form_job_requirement']; ?>:</label></td>

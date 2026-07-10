@@ -696,9 +696,16 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                 // Lấy đường dẫn từ DB (ví dụ: uploads/abc.jpg)
                                 $db_logo = $row['company_logo'];
 
-                                // Nếu không trống, thêm ../ để thoát khỏi thư mục employerprofile
                                 if (!empty($db_logo)) {
-                                    $logo = htmlspecialchars($db_logo);
+                                    if (preg_match('#^(https?://|data:)#i', $db_logo)) {
+                                        $logo = htmlspecialchars($db_logo);
+                                    } elseif (strpos($db_logo, 'uploads/') === 0) {
+                                        $logo = '../' . htmlspecialchars($db_logo);
+                                    } elseif (strpos($db_logo, '/') === 0) {
+                                        $logo = htmlspecialchars($db_logo);
+                                    } else {
+                                        $logo = '../uploads/' . htmlspecialchars(basename($db_logo));
+                                    }
                                 } else {
                                     $logo = 'https://placehold.co/120x70/cccccc/333333?text=No+Logo';
                                 }
@@ -730,7 +737,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                 <div
                                     style="background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 18px; display: flex; align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                                     <img src="<?= $logo ?>" alt="logo"
-                                        style="width: 120px; height: 70px; border-radius: 8px; object-fit: cover; margin-right: 18px; border: 1px solid #eee;">
+                                        style="width: 120px; height: auto; max-height: 140px; border-radius: 8px; object-fit: contain; margin-right: 18px; border: 1px solid #eee; background: #fff;">
 
                                     <div style="flex: 1;">
                                         <div style="font-weight: bold; font-size: 18px; margin-bottom: 4px;">

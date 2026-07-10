@@ -280,7 +280,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
     background: white;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 15px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -313,15 +313,17 @@ $savedJobIdsJson = json_encode($savedJobIds);
   .job-body {
     display: flex;
     gap: 10px;
-    align-items: center;
+    align-items: flex-start;
     margin-top: 10px;
   }
 
   .company-logo {
-    width: 50px;
-    height: 50px;
+    width: 90px;
+    height: 80px;
     object-fit: contain;
-    border-radius: 5px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    margin-right: 12px;
   }
 
   .job-info {
@@ -331,10 +333,29 @@ $savedJobIdsJson = json_encode($savedJobIds);
   .job-info .company-name {
     font-weight: bold;
     margin-bottom: 5px;
+    color: #818080;
   }
 
-  .icon {
-    margin-right: 5px;
+  .job-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .job-meta-item {
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+    color: #d45a5a;
+  }
+
+  .job-meta-divider {
+    width: 1px;
+    height: 12px;
+    background-color: #ccc;
+    display: inline-block;
   }
 
   .divider {
@@ -343,9 +364,52 @@ $savedJobIdsJson = json_encode($savedJobIds);
   }
 
   .job-footer {
-    font-size: 13px;
-    color: #999;
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .job-footer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .job-footer-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #555;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .save-btn {
+    background: #fff1f3;
+    border: 1px #e74c3c;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-left: auto;
+    flex-shrink: 0;
+    position: static;
+  }
+
+  .save-btn .heart-icon {
+    width: 18px;
+    height: 18px;
   }
 
   @media (max-width: 992px) {
@@ -570,7 +634,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
         // Fetch APPROVED jobs for current page
         $offset = ($page - 1) * $jobs_per_page;
-        $sql = "SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration 
+        $sql = "SELECT id, job_title, company_logo, company_name, salary, job_location, job_type, job_experience, created_at, post_duration 
                         FROM job 
                         WHERE status = 'approved'";
         $bind_types = '';
@@ -619,31 +683,37 @@ $savedJobIdsJson = json_encode($savedJobIds);
             ?>
             <div class="job-card">
               <a href="jobdetail.php?id=<?php echo $job_id; ?>" style="text-decoration:none;color:inherit;">
-                <div class="job-header">
-                  <h3><?php echo htmlspecialchars($row['job_title']); ?></h3>
-                </div>
                 <div class="job-body">
                   <img src="<?php echo htmlspecialchars($row['company_logo']); ?>" alt="Company Logo" class="company-logo">
                   <div class="job-info">
+                    <div class="job-header">
+                    <h3><?php echo htmlspecialchars($row['job_title']); ?></h3>
+                    </div>
                     <div class="company-name"><?php echo htmlspecialchars($row['company_name']); ?></div>
-                    <div><span class="icon">💰</span> <?php echo htmlspecialchars($row['salary']); ?></div>
-                    <div><span class="icon">📍</span> <?php echo htmlspecialchars($row['job_location']); ?></div>
+                    <div class="job-meta-row">
+                      <div class="job-meta-item"><?php echo htmlspecialchars($row['salary']); ?></div>
+                      <span class="job-meta-divider" aria-hidden="true"></span>
+                      <div class="job-meta-item"><?php echo htmlspecialchars($row['job_location']); ?></div>
+                    </div>
                   </div>
                 </div>
-                <div class="divider"></div>
-                <div class="job-footer">
-                  <div class="deadline"><?php echo $days_left_text; ?></div>
-                </div>
               </a>
-              <button class="save-btn" aria-pressed="<?php echo $isJobAlreadySaved ? 'true' : 'false'; ?>"
-                title="Save job" data-job-id="<?php echo $job_id; ?>">
-                <svg class="heart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M12 21s-6.5-5.5-8.5-8.5C1.5 9.5 3.5 6 7 6c1.7 0 3.4 1.1 4.1 2.7C11.6 7.1 13.3 6 15 6c3.5 0 5.5 3.5 3.5 6.5C18.5 15.5 12 21 12 21z"
-                    fill="<?php echo $isJobAlreadySaved ? '#e74c3c' : '#fff'; ?>" />
-                </svg>
-              </button>
+              <div class="job-footer">
+                <div class="job-footer-meta">
+                  <div class="job-footer-pill"><?php echo htmlspecialchars($row['job_type'] ?? ''); ?></div>
+                  <div class="job-footer-pill"><?php echo htmlspecialchars($row['job_experience'] ?? ''); ?></div>
+                  <div class="job-footer-pill"><?php echo $days_left_text; ?></div>
+                </div>
+                <button class="save-btn" aria-pressed="<?php echo $isJobAlreadySaved ? 'true' : 'false'; ?>"
+                  title="Save job" data-job-id="<?php echo $job_id; ?>">
+                  <svg class="heart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M12 21s-6.5-5.5-8.5-8.5C1.5 9.5 3.5 6 7 6c1.7 0 3.4 1.1 4.1 2.7C11.6 7.1 13.3 6 15 6c3.5 0 5.5 3.5 3.5 6.5C18.5 15.5 12 21 12 21z"
+                      fill="<?php echo $isJobAlreadySaved ? '#e74c3c' : '#fff'; ?>" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <?php
           endwhile;

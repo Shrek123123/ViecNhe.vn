@@ -139,6 +139,16 @@ $lang = [
     "post_job_form_job_category" => "Job Category",
     "post_job_form_required_certification" => "Required Certification",
     "post_job_form_job_experience" => "Required Experience",
+    "post_job_form_experience_placeholder" => "-- Select experience --",
+    "post_job_form_experience_options" => [
+        "under_1_year" => "Under 1 year",
+        "1_year" => "1 year",
+        "2_years" => "2 years",
+        "3_years" => "3 years",
+        "4_years" => "4 years",
+        "5_years_plus" => "5 years or more",
+        "no_experience" => "No experience required"
+    ],
     "post_job_form_job_requirement" => "Job Requirements",
     "post_job_form_job_benefit" => "Benefits",
     "post_job_form_company_logo" => "Company Logo",

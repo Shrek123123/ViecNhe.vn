@@ -1136,8 +1136,12 @@ if ($employerid > 0 && isset($conn) && $conn->ping()) {
                                     <!-- Experience -->
                                     <div class="form-group">
                                         <label><?= $lang['post_job_form_job_experience']; ?></label>
-                                        <input type="text" name="jobExperience" placeholder="<?= $lang['optional']; ?>"
-                                            required>
+                                        <select name="jobExperience" required>
+                                            <option value=""><?= $lang['post_job_form_experience_placeholder']; ?></option>
+                                            <?php foreach ($lang['post_job_form_experience_options'] as $value => $label): ?>
+                                                <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($label) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
 
                                     <!-- Requirement -->

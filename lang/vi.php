@@ -142,6 +142,16 @@ $lang = [
     "post_job_form_job_category" => "Ngành nghề",
     "post_job_form_required_certification" => "Yêu cầu chứng chỉ",
     "post_job_form_job_experience" => "Kinh nghiệm yêu cầu",
+    "post_job_form_experience_placeholder" => "-- Chọn kinh nghiệm --",
+    "post_job_form_experience_options" => [
+        "under_1_year" => "Dưới 1 năm",
+        "1_year" => "1 năm",
+        "2_years" => "2 năm",
+        "3_years" => "3 năm",
+        "4_years" => "4 năm",
+        "5_years_plus" => "5 năm trở lên",
+        "no_experience" => "Không yêu cầu kinh nghiệm"
+    ],
     "post_job_form_job_requirement" => "Yêu cầu công việc",
     "post_job_form_job_benefit" => "Phúc lợi",
     "post_job_form_company_logo" => "Logo công ty",

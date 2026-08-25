@@ -82,7 +82,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS job (
     job_requirement TEXT,
     job_location VARCHAR(100) NOT NULL,
     no_employee_needed INT UNSIGNED NOT NULL,
-    employee_gender VARCHAR(10) DEFAULT 'not_required',
+    employee_gender VARCHAR(20) NULL,
     salary VARCHAR(30) NOT NULL,
     post_duration INT UNSIGNED NOT NULL,
     contact_email VARCHAR(100) NOT NULL,

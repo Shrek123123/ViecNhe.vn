@@ -581,7 +581,7 @@ if ($cv_file_path) {
                 <div
                     style="background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 20px; max-width: 800px; margin-left: auto; margin-right: auto;">
                     <div style="flex-shrink: 0; text-align: center;">
-                        <form id="uploadAvatarForm" action="jobseekerprofile/upload-avatar.php" method="POST"
+                        <form id="uploadAvatarForm" action="upload-avatar.php" method="POST"
                             enctype="multipart/form-data">
                             <input type="file" name="avatar" id="avatarInput" accept=".jpg,.jpeg,.png,.svg,.pdf"
                                 style="display: none;" onchange="handleAvatarChange(event)">
@@ -1074,7 +1074,7 @@ if ($cv_file_path) {
             const formData = new FormData(form);
 
             // Gửi ảnh qua fetch đến PHP
-            fetch('jobseekerprofile/upload-avatar.php', {
+            fetch('upload-avatar.php', {
                 method: 'POST',
                 body: formData
             })

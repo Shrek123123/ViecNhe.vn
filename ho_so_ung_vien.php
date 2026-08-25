@@ -31,7 +31,7 @@ $profile_data = null; // Khởi tạo biến profile_data
 $user_email = "Email not available"; // Giá trị mặc định
 $is_email_verified = false; // Giá trị mặc định
 
-$sql_user = "SELECT email, verify_email, username FROM user WHERE id = ?";
+$sql_user = "SELECT email, verified, username FROM user WHERE id = ?";
 $stmt_user = $conn->prepare($sql_user);
 $stmt_user->bind_param("i", $jobseeker_id);
 $stmt_user->execute();
@@ -40,7 +40,7 @@ $result_user = $stmt_user->get_result();
 if ($result_user->num_rows > 0) {
     $user_data = $result_user->fetch_assoc();
     $user_email = $user_data['email'];
-    $is_email_verified = (bool) $user_data['verify_email'];
+    $is_email_verified = (bool) $user_data['verified'];
     $user_display_name = htmlspecialchars($user_data['username']);
 }
 

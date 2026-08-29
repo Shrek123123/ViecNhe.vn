@@ -14,6 +14,7 @@ $lang = [
     "admin_login" => "Đăng nhập quản trị viên",
     "Ra_trang_tim_viec" => "Ra trang tìm việc",
     "Ra_trang_nha_tuyen_dung" => "Ra trang nhà tuyển dụng",
+    "employerregister_title" => "Đăng ký tài khoản nhà tuyển dụng - ViecNheVN",
 
     //body
     "job_search" => "Tìm việc nhanh 24/7, việc làm mới nhất toàn quốc.",
@@ -92,6 +93,13 @@ $lang = [
 
     "footer_connect_with_us" => "Kết nối với chúng tôi",
     "footer_download_app" => "Tải ứng dụng",
+    "company_detail_page" => "[Chi tiết công ty]",
+    "add_company" => "Thêm công ty mới",
+    "company_add_title" => "Thêm công ty mới",
+    "company_profile_add_success" => "Thêm công ty thành công.",
+    "company_profile_add_error" => "Thêm công ty thất bại.",
+    "invalid_file_format" => "Chỉ chấp nhận file JPG, JPEG, PNG, GIF, WEBP.",
+    "file_too_large" => "Kích thước file không được vượt quá 5MB.",
 
 
     //employerpage
@@ -140,7 +148,7 @@ $lang = [
     "post_job_form_job_position" => "Vị trí tuyển dụng",
     "post_job_form_job_type" => "Loại hình công việc",
     "post_job_form_job_category" => "Ngành nghề",
-    "post_job_form_required_certification" => "Yêu cầu chứng chỉ",
+    "post_job_form_required_certification" => "Yêu cầu bằng cấp",
     "post_job_form_job_experience" => "Kinh nghiệm yêu cầu",
     "post_job_form_experience_placeholder" => "-- Chọn kinh nghiệm --",
     "post_job_form_experience_options" => [
@@ -151,6 +159,16 @@ $lang = [
         "4_years" => "4 năm",
         "5_years_plus" => "5 năm trở lên",
         "no_experience" => "Không yêu cầu kinh nghiệm"
+    ],
+    "job_experience_labels" => [
+        "under_1_year" => ["en" => "Under 1 year experience", "vi" => "Dưới 1 năm kinh nghiệm"],
+        "1_year" => ["en" => "1 year experience", "vi" => "1 năm kinh nghiệm"],
+        "2_years" => ["en" => "2 years experience", "vi" => "2 năm kinh nghiệm"],
+        "3_years" => ["en" => "3 years experience", "vi" => "3 năm kinh nghiệm"],
+        "4_years" => ["en" => "4 years experience", "vi" => "4 năm kinh nghiệm"],
+        "5_years_plus" => ["en" => "5 years + experience", "vi" => "5 năm kinh nghiệm +"],
+        "6_months" => ["en" => "6 months experience", "vi" => "6 tháng kinh nghiệm"],
+        "no_experience" => ["en" => "No experience required", "vi" => "Không yêu cầu kinh nghiệm"]
     ],
     "post_job_form_job_requirement" => "Yêu cầu công việc",
     "post_job_form_job_benefit" => "Phúc lợi",
@@ -533,12 +551,16 @@ $lang = [
 
     //company_profile.php
     'company_profile' => 'Hồ sơ công ty',
+    'company_edit_title' => 'Chỉnh sửa công ty',
+    'edit_company_button' => 'Chỉnh sửa công ty',
+    'cancel_button' => 'Hủy',
     'detail_company_link' => 'Trang Chi Tiết Thông Tin Công Ty',
     'company_name_label' => 'Tên công ty',
     'company_address_label' => 'Địa chỉ công ty',
     'industry_label' => 'Ngành công nghiệp',
     'company_information_label' => 'Thông tin công ty',
-    'banner_logo_label' => 'Banner / Logo',
+    'company_logo_label' => 'Logo công ty',
+    'banner_logo_label' => 'Ảnh bìa công ty',
     'current_file' => 'File hiện tại',
     'supported_image_formats' => 'Định dạng hỗ trợ: JPG, JPEG, PNG, GIF, WEBP. Kích thước tối đa: 5MB',
     'company_update_button' => 'Cập nhật',

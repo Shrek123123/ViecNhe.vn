@@ -29,7 +29,41 @@ if ($result_check->num_rows === 0) {
 }
 $stmt_check->close();
 
-// Handle file upload
+// Handle file uploads
+$company_logo = '';
+if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
+    $file = $_FILES['company_logo'];
+    $allowed_ext = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $max_size = 5 * 1024 * 1024; // 5MB
+
+    $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($file_ext, $allowed_ext)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid file format. Only JPG, JPEG, PNG, GIF, WEBP are allowed.']);
+        exit();
+    }
+
+    if ($file['size'] > $max_size) {
+        echo json_encode(['success' => false, 'message' => 'File size exceeds 5MB limit.']);
+        exit();
+    }
+
+    $upload_dir = '../uploads/companylogo/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    $new_filename = 'company_logo_' . $employerid . '_' . time() . '.' . $file_ext;
+    $upload_path = $upload_dir . $new_filename;
+
+    if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+        $company_logo = '../uploads/companylogo/' . $new_filename;
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to upload company logo.']);
+        exit();
+    }
+}
+
 $banner_logo = '';
 if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_ERR_OK) {
     $file = $_FILES['banner_logo'];
@@ -38,32 +72,26 @@ if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_
     
     $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     
-    // Validate file extension
     if (!in_array($file_ext, $allowed_ext)) {
         echo json_encode(['success' => false, 'message' => 'Invalid file format. Only JPG, JPEG, PNG, GIF, WEBP are allowed.']);
         exit();
     }
     
-    // Validate file size
     if ($file['size'] > $max_size) {
         echo json_encode(['success' => false, 'message' => 'File size exceeds 5MB limit.']);
         exit();
     }
     
-    // Create uploads directory if it doesn't exist
-    $upload_dir = '../uploads/company_banner/';
+    $upload_dir = '../uploads/companylogo/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0755, true);
     }
     
-    // Generate unique filename
     $new_filename = 'banner_' . $employerid . '_' . time() . '.' . $file_ext;
     $upload_path = $upload_dir . $new_filename;
     
-    // Move uploaded file
     if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-        // Convert to relative path for storage in database
-        $banner_logo = '../uploads/company_banner/' . $new_filename;
+        $banner_logo = '../uploads/companylogo/' . $new_filename;
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to upload file.']);
         exit();
@@ -74,6 +102,12 @@ if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_
 $sql_update = "UPDATE company SET company_name = ?, company_address = ?, industry = ?, information = ?";
 $params = [$company_name, $company_address, $industry, $information];
 $types = "ssss";
+
+if (!empty($company_logo)) {
+    $sql_update .= ", company_logo = ?";
+    $params[] = $company_logo;
+    $types .= "s";
+}
 
 if (!empty($banner_logo)) {
     $sql_update .= ", banner_logo = ?";

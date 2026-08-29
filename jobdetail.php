@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'helpers.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -160,8 +161,15 @@ require_once 'config.php';
                     }
                     ?>
                     <div class="bg-white p-3 mb-4 shadow rounded ">
-                        <h5 class="fw-bold"><?= htmlspecialchars($job['job_title'] ?? 'Không có mô tả') ?></h5>
-                        <small class="text-muted"><?= sprintf($lang['jobdetail_interested'], $interest_count) ?></small>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="<?= htmlspecialchars($job['company_logo'] ?? 'image/logo1.png') ?>"
+                                 alt="Company Logo"
+                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 14px; border: 1px solid #ececec; background: #fff;">
+                            <div>
+                                <h5 class="fw-bold mb-1"><?= htmlspecialchars($job['job_title'] ?? 'Không có mô tả') ?></h5>
+                                <small class="text-muted"><?= sprintf($lang['jobdetail_interested'], $interest_count) ?></small>
+                            </div>
+                        </div>
                         <hr>
                         <div class="row mb-3">
                             <div class="col-md-4 d-flex align-items-center">
@@ -183,7 +191,7 @@ require_once 'config.php';
                                 <i class="bi bi-person-workspace me-2"></i>
                                 <strong><?= $lang['jobdetail_experience'] ?></strong>
                             </div>
-                            <div class="col-md-8"><?= htmlspecialchars($job['job_experience'] ?? $lang['jobdetail_no_data']) ?>
+                            <div class="col-md-8"><?= htmlspecialchars(translateJobExperience($job['job_experience'] ?? '', $lang) ?: $lang['jobdetail_no_data']) ?>
                             </div>
                         </div>
                         <div class="text-muted mb-3">
@@ -270,16 +278,22 @@ require_once 'config.php';
                 <div class="bg-white p-3 mb-4 shadow rounded">
                     <?php if ($job): ?>
                         <div class="d-flex align-items-center mb-3">
-                            <img src="<?= htmlspecialchars($job['company_logo'] ?? 'image/logo1.png') ?>" alt="Company Logo"
-                                class="me-3 rounded" style="width: 80px; height: 80px;">
                             <div class="sidebar-title mb-0">
                                 <h4 style="color: #000 !important;">
                                     <?= htmlspecialchars($job['company_name'] ?? 'Company Name') ?>
                                 </h4>
+
+                                <p style="margin-top: 8px; margin-bottom: 10px;">
+                                    <a href="companyprofile.php?company_id=<?= (int) ($job['company_id'] ?? 0) ?>"
+                                       style="color: #d91616; font-weight: 600; text-decoration: none;">
+                                        <?= $lang['company_detail_page'] ?>
+                                    </a>
+                                </p>
+
                                 <p><strong><?= $lang['jobdetail_company_size'] ?></strong>
                                     <?= htmlspecialchars($job['company_size'] ?? $lang['jobdetail_unknown']) ?></p>
                                 <p><strong><?= $lang['jobdetail_industry'] ?></strong>
-                                    <?= htmlspecialchars($job['job_category'] ?? $lang['jobdetail_unknown']) ?></p>
+                                    <?= htmlspecialchars(translateIndustryDisplay($job['job_category'] ?? '', $lang) ?: $lang['jobdetail_unknown']) ?></p>
                                 <p><strong><?= $lang['jobdetail_address'] ?></strong>
                                     <?= htmlspecialchars($job['job_detailed_location'] ?? $lang['jobdetail_unknown']) ?></p>
                             </div>

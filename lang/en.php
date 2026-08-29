@@ -12,6 +12,7 @@ $lang = [
     "admin_login" => "Admin Login",
     "Ra_trang_tim_viec" => "Go to Job Search Page",
     "Ra_trang_nha_tuyen_dung" => "Go to Employer Page",
+    "employerregister_title" => "Employer Registration - ViecNheVN",
 
     //body
     "job_search" => "Find jobs 24/7, latest jobs nationwide.",
@@ -90,6 +91,13 @@ $lang = [
 
     "footer_connect_with_us" => "Connect with Us",
     "footer_download_app" => "Download App",
+    "company_detail_page" => "[Company details]",
+    "add_company" => "Add company",
+    "company_add_title" => "Register a new company",
+    "company_profile_add_success" => "Company added successfully.",
+    "company_profile_add_error" => "Failed to add company.",
+    "invalid_file_format" => "Only JPG, JPEG, PNG, GIF, WEBP files are allowed.",
+    "file_too_large" => "File size must not exceed 5MB.",
 
     //employerpage
     "hero_section" => "Post Jobs & Find Candidates Effectively",
@@ -137,7 +145,7 @@ $lang = [
     "post_job_form_job_position" => "Job Position",
     "post_job_form_job_type" => "Job Type",
     "post_job_form_job_category" => "Job Category",
-    "post_job_form_required_certification" => "Required Certification",
+    "post_job_form_required_certification" => "Education Level",
     "post_job_form_job_experience" => "Required Experience",
     "post_job_form_experience_placeholder" => "-- Select experience --",
     "post_job_form_experience_options" => [
@@ -148,6 +156,16 @@ $lang = [
         "4_years" => "4 years",
         "5_years_plus" => "5 years or more",
         "no_experience" => "No experience required"
+    ],
+    "job_experience_labels" => [
+        "under_1_year" => ["en" => "Under 1 year experience", "vi" => "Dưới 1 năm kinh nghiệm"],
+        "1_year" => ["en" => "1 year experience", "vi" => "1 năm kinh nghiệm"],
+        "2_years" => ["en" => "2 years experience", "vi" => "2 năm kinh nghiệm"],
+        "3_years" => ["en" => "3 years experience", "vi" => "3 năm kinh nghiệm"],
+        "4_years" => ["en" => "4 years experience", "vi" => "4 năm kinh nghiệm"],
+        "5_years_plus" => ["en" => "5 years + experience", "vi" => "5 năm kinh nghiệm +"],
+        "6_months" => ["en" => "6 months experience", "vi" => "6 tháng kinh nghiệm"],
+        "no_experience" => ["en" => "No experience required", "vi" => "Không yêu cầu kinh nghiệm"]
     ],
     "post_job_form_job_requirement" => "Job Requirements",
     "post_job_form_job_benefit" => "Benefits",
@@ -537,12 +555,16 @@ $lang = [
 
     //company_profile.php
     'company_profile' => 'Company Profile',
+    'company_edit_title' => 'Edit Company',
+    'edit_company_button' => 'Edit Company',
+    'cancel_button' => 'Cancel',
     'detail_company_link' => 'Detailed Company Information Page',
     'company_name_label' => 'Company Name',
     'company_address_label' => 'Company Address',
     'industry_label' => 'Industry',
     'company_information_label' => 'Company Information',
-    'banner_logo_label' => 'Banner / Logo',
+    'company_logo_label' => 'Company Logo',
+    'banner_logo_label' => 'Company Banner Logo',
     'current_file' => 'Current file',
     'supported_image_formats' => 'Supported formats: JPG, JPEG, PNG, GIF, WEBP. Maximum size: 5MB',
     'company_update_button' => 'Update',

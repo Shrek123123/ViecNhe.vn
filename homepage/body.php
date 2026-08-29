@@ -1,7 +1,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 <?php
 // Đặt ở ĐẦU file jobs.php (hoặc index.php)
-require_once(__DIR__ . '/../config.php'); // Đảm bảo file này chứa kết nối $conn
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../helpers.php');
+
 function t($key, $replace = [])
 {
   global $lang;
@@ -674,6 +676,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
               ? t('dayleft', ['d' => $days_left])
               : t('expired');
             $job_id = (int) $row['id'];
+            $jobExperienceLabel = translateJobExperience($row['job_experience'] ?? '', $lang);
             $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds);
             if ($isJobAlreadySaved) {
               $savedClass = 'active';
@@ -701,7 +704,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
               <div class="job-footer">
                 <div class="job-footer-meta">
                   <div class="job-footer-pill"><?php echo htmlspecialchars($row['job_type'] ?? ''); ?></div>
-                  <div class="job-footer-pill"><?php echo htmlspecialchars($row['job_experience'] ?? ''); ?></div>
+                  <div class="job-footer-pill"><?php echo htmlspecialchars($jobExperienceLabel); ?></div>
                   <div class="job-footer-pill"><?php echo $days_left_text; ?></div>
                 </div>
                 <button class="save-btn" aria-pressed="<?php echo $isJobAlreadySaved ? 'true' : 'false'; ?>"

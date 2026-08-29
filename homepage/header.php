@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Nếu người dùng bấm đổi ngôn ngữ
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];

@@ -1,10 +1,19 @@
+<?php
+session_start();
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
+?>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employer Register - JobHive</title>
+    <title><?php echo $lang['employerregister_title']; ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -140,6 +149,23 @@
             right: 0;
             text-align: left;
         }
+
+        .image-preview-box {
+            display: none;
+            margin-top: 12px;
+            padding: 10px;
+            border: 1px solid #e6d2d2;
+            border-radius: 8px;
+            background: #fff8f8;
+        }
+
+        .image-preview-box img {
+            max-width: 180px;
+            max-height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
     </style>
 </head>
 
@@ -152,7 +178,7 @@
         <div class="register-form-container">
             <h2><?php echo $lang['employerregister_title']; ?></h2>
             <p><?php echo $lang['employerregister_subtitle']; ?></p>
-            <form action="employerregister.php" method="post">
+            <form action="employerregister.php" method="post" enctype="multipart/form-data">
                 <h3><?php echo $lang['account_information']; ?></h3>
                 <div class="form-group">
                     <label><?php echo $lang['username']; ?></label>
@@ -212,6 +238,18 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label><?php echo $lang['company_logo_label']; ?></label>
+                    <input type="file" id="companyLogoInput" name="company_logo" accept=".jpg,.jpeg,.png,.gif,.webp">
+                    <div id="companyLogoPreview" class="image-preview-box"></div>
+                </div>
+
+                <div class="form-group">
+                    <label><?php echo $lang['banner_logo_label']; ?></label>
+                    <input type="file" id="bannerLogoInput" name="banner_logo" accept=".jpg,.jpeg,.png,.gif,.webp">
+                    <div id="bannerLogoPreview" class="image-preview-box"></div>
+                </div>
+
                 <div class="terms-container" style="align-items: center;">
                     <label style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" name="terms" value="accepted" required style="margin: 0;">
@@ -249,6 +287,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $companyname = $_POST['companyname'];
     $companyaddress = $_POST['companyaddress'];
     $industry = $_POST['industry'];
+
+    $company_logo_path = '';
+    if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
+        $company_logo_file = $_FILES['company_logo'];
+        $company_logo_ext = strtolower(pathinfo($company_logo_file['name'], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $max_size = 5 * 1024 * 1024;
+
+        if (!in_array($company_logo_ext, $allowed_ext)) {
+            echo "<script>alert('" . addslashes($lang['invalid_file_format']) . "'); window.history.back();</script>";
+            exit;
+        }
+
+        if ($company_logo_file['size'] > $max_size) {
+            echo "<script>alert('" . addslashes($lang['file_too_large']) . "'); window.history.back();</script>";
+            exit;
+        }
+
+        $company_logo_dir = __DIR__ . '/uploads/companylogo/';
+        if (!is_dir($company_logo_dir)) {
+            mkdir($company_logo_dir, 0777, true);
+        }
+
+        $company_logo_name = 'company_logo_' . time() . '_' . uniqid() . '.' . $company_logo_ext;
+        $company_logo_target = $company_logo_dir . $company_logo_name;
+        if (move_uploaded_file($company_logo_file['tmp_name'], $company_logo_target)) {
+            $company_logo_path = '../uploads/companylogo/' . $company_logo_name;
+        }
+    }
+
+    $banner_logo_path = '';
+    if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_ERR_OK) {
+        $banner_logo_file = $_FILES['banner_logo'];
+        $banner_logo_ext = strtolower(pathinfo($banner_logo_file['name'], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $max_size = 5 * 1024 * 1024;
+
+        if (!in_array($banner_logo_ext, $allowed_ext)) {
+            echo "<script>alert('" . addslashes($lang['invalid_file_format']) . "'); window.history.back();</script>";
+            exit;
+        }
+
+        if ($banner_logo_file['size'] > $max_size) {
+            echo "<script>alert('" . addslashes($lang['file_too_large']) . "'); window.history.back();</script>";
+            exit;
+        }
+
+        $banner_logo_dir = __DIR__ . '/uploads/companylogo/';
+        if (!is_dir($banner_logo_dir)) {
+            mkdir($banner_logo_dir, 0777, true);
+        }
+
+        $banner_logo_name = 'company_banner_' . time() . '_' . uniqid() . '.' . $banner_logo_ext;
+        $banner_logo_target = $banner_logo_dir . $banner_logo_name;
+        if (move_uploaded_file($banner_logo_file['tmp_name'], $banner_logo_target)) {
+            $banner_logo_path = '../uploads/companylogo/' . $banner_logo_name;
+        }
+    }
 
     // Validate input
     if (empty($username) || empty($email) || empty($password) || empty($retypepass) || empty($companyname) || empty($companyaddress) || empty($industry)) {
@@ -309,8 +405,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Only insert into the company table if user_type is 'employer'
     if ($user_id) {
-        $stmt_company = $conn->prepare("INSERT INTO company (employer_id, company_name, company_address, industry) VALUES (?, ?, ?, ?)");
-        $stmt_company->bind_param("isss", $user_id, $companyname, $companyaddress, $industry);
+        $stmt_company = $conn->prepare("INSERT INTO company (employer_id, company_name, company_address, industry, company_logo, banner_logo) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt_company->bind_param("isssss", $user_id, $companyname, $companyaddress, $industry, $company_logo_path, $banner_logo_path);
         $stmt_company->execute();
         $stmt_company->close();
     }

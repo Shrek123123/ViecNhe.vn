@@ -26,10 +26,11 @@ if (!isset($_SESSION['lang'])) {
 include '../lang/' . $_SESSION['lang'] . '.php';
 
 require_once '../config.php';
+require_once '../helpers.php';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 $employername = $_SESSION['usernameemployer'] ?? 'Employer';
-
+$employer_id = $_SESSION['employerid'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -452,11 +453,103 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             text-decoration: underline;
         }
 
+        .company-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 10px 24px rgba(138, 56, 56, 0.08);
+            padding: 20px;
+            margin-bottom: 18px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .company-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(138, 56, 56, 0.12);
+        }
+
+        .company-logo-wrap {
+            width: 160px;
+            min-width: 160px;
+        }
+
+        .company-logo {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: #f8f8f8;
+        }
+
+        .company-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .company-card-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #b23b3b;
+            margin-bottom: 8px;
+        }
+
+        .company-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .company-description {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #333;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+
+        .company-card-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
+        .edit-company-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #b23b3b, #8a2f2f);
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: opacity 0.16s ease, transform 0.16s ease;
+        }
+
+        .edit-company-btn:hover {
+            opacity: 0.96;
+            transform: translateY(-1px);
+        }
+
+        .company-empty-state {
+            padding: 30px 18px;
+            text-align: center;
+            color: #666;
+            background: #fafafa;
+            border: 1px dashed #d1d5db;
+            border-radius: 12px;
+        }
+
         /* ===== CONTENT ===== */
         .dashboard-content {
             flex: 1;
             background: #fff;
-            padding: 20px;
         }
 
         /* ===== POSTING OPTIONS BUTTONS===== */
@@ -652,106 +745,86 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
             <!-- CONTENT -->
             <div class="dashboard-content">
-                <!-- Content load sau -->
-                <div style="padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 400px;">
-                    <div style="max-width: 600px; width: 100%;">
-                    
-                    <?php
-                    $employerid = $_SESSION['employerid'] ?? 0;
-                    $company_data = null;
-                    
-                    if ($employerid > 0 && isset($conn) && $conn->ping()) {
-                        $sql = "SELECT id, company_name, company_address, industry, information, banner_logo FROM company WHERE employer_id = ? LIMIT 1";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param("i", $employerid);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-                        $company_data = $result->fetch_assoc();
-                        $stmt->close();
-                    }
-                    
-                    if ($company_data):
-                    ?>
-                    <h2 style="color: #b23b3b; margin-bottom: 20px;"><?= $lang['company_profile'] ?></h2>
-                    
-                    <h3 style="color: #b23b3b; margin-bottom: 20px; font-size: 16px;"><a href="#" onclick="document.getElementById('companyDetailsForm').submit(); return false;"><?= $lang['detail_company_link'] ?></a></h3>
-                    
-                    <form id="companyDetailsForm" method="POST" action="../company_information.php" style="display: none;">
-                        <input type="hidden" name="company_id" value="<?= $company_data['id'] ?>">
-                    </form>
-                    
-                    <form id="companyProfileForm" enctype="multipart/form-data">
-                        <input type="hidden" name="company_id" value="<?= htmlspecialchars($company_data['id']); ?>">
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label for="companyName" style="display: block; font-weight: bold; margin-bottom: 5px;"><?= $lang['company_name_label'] ?></label>
-                            <input type="text" id="companyName" name="company_name" value="<?= htmlspecialchars($company_data['company_name'] ?? ''); ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-
-                        <div style="margin-bottom: 15px;">
-                            <label for="companyAddress" style="display: block; font-weight: bold; margin-bottom: 5px;"><?= $lang['company_address_label'] ?></label>
-                            <input type="text" id="companyAddress" name="company_address" value="<?= htmlspecialchars($company_data['company_address'] ?? ''); ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-
-                        <div style="margin-bottom: 15px;">
-                            <label for="industry" style="display: block; font-weight: bold; margin-bottom: 5px;"><?= $lang['industry_label'] ?></label>
-                            <input type="text" id="industry" name="industry" value="<?= htmlspecialchars($company_data['industry'] ?? ''); ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-
-                        <div style="margin-bottom: 15px;">
-                            <label for="information" style="display: block; font-weight: bold; margin-bottom: 5px;"><?= $lang['company_information_label'] ?></label>
-                            <textarea id="information" name="information" rows="6" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: Arial, sans-serif;"><?= htmlspecialchars($company_data['information'] ?? ''); ?></textarea>
-                        </div>
-
-                        <div style="margin-bottom: 15px;">
-                            <label for="bannerLogo" style="display: block; font-weight: bold; margin-bottom: 5px;"><?= $lang['banner_logo_label'] ?></label>
-                            <?php if (!empty($company_data['banner_logo'])): ?>
-                                <div style="margin-bottom: 10px;">
-                                    <p style="font-size: 14px; color: #666;"><?= $lang['current_file'] ?>: <?= htmlspecialchars(basename($company_data['banner_logo'])); ?></p>
-                                    <img src="<?= htmlspecialchars($company_data['banner_logo']); ?>" alt="Banner Logo" style="max-width: 200px; max-height: 150px; border-radius: 4px;">
-                                </div>
-                            <?php endif; ?>
-                            <input type="file" id="bannerLogo" name="banner_logo" accept=".jpg,.jpeg,.png,.gif,.webp" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box;">
-                            <small style="color: #666; display: block; margin-top: 5px;"><?= $lang['supported_image_formats'] ?></small>
-                        </div>
-
-                        <div style="text-align: right;">
-                            <button type="submit" style="background: #b23b3b; color: white; border: none; padding: 10px 25px; border-radius: 4px; cursor: pointer; font-size: 15px;"><?= $lang['company_update_button'] ?></button>
-                        </div>
-                    </form>
-
-                    <script>
-                        document.getElementById('companyProfileForm').onsubmit = function(e) {
-                            e.preventDefault();
-                            
-                            const formData = new FormData(this);
-                            
-                            fetch('update_company_profile.php', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    alert('<?php echo $lang['company_profile_update_success']; ?>');
-                                    location.reload();
-                                } else {
-                                    alert('<?php echo $lang['company_profile_update_error']; ?>: ' + (data.message || '<?php echo $lang['unknown_error']; ?>'));
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                alert('<?php echo $lang['company_profile_update_error']; ?>');
-                            });
-                        }
-                    </script>
-                    <?php
-                    else:
-                        echo '<div style="text-align: center; color: #888; padding: 40px;">' . ($lang['no_company_profile'] ?? 'No company profile found.') . '</div>';
-                    endif;
-                    ?>
+                <div style="padding: 30px; border-radius: 8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+                        <h2 style="color: #b23b3b; margin: 0;">
+                            <?= $lang['company_profile'] ?>
+                        </h2>
+                        <a href="company_profile_add.php" style="display:inline-flex; align-items:center; justify-content:center; padding:10px 18px; background:#b23b3b; color:#fff; text-decoration:none; border-radius:10px; font-weight:600;">
+                            <?= $lang['add_company'] ?? 'Add company' ?>
+                        </a>
                     </div>
+
+                    <?php
+                    $company_rows = [];
+                    $employerid = (int) ($_SESSION['employerid'] ?? 0);
+                    if ($employerid > 0 && isset($conn) && $conn->ping()) {
+                        $company_sql = "SELECT * FROM company WHERE employer_id = ? ORDER BY id DESC";
+                        $stmt_company = $conn->prepare($company_sql);
+                        if ($stmt_company) {
+                            $stmt_company->bind_param("i", $employerid);
+                            $stmt_company->execute();
+                            $company_result = $stmt_company->get_result();
+                            while ($company_row = $company_result->fetch_assoc()) {
+                                $company_rows[] = $company_row;
+                            }
+                            $stmt_company->close();
+                        }
+                    }
+
+                    if (!empty($company_rows)):
+                        foreach ($company_rows as $company):
+                            $logo = trim((string) ($company['company_logo'] ?? ''));
+                            if ($logo === '') {
+                                $logo = trim((string) ($company['banner_logo'] ?? ''));
+                            }
+                            if ($logo === '') {
+                                $logo = '../image/logo.png';
+                            }
+                            $company_name = htmlspecialchars($company['company_name'] ?? '');
+                            $company_address = htmlspecialchars($company['company_address'] ?? '');
+                            $industry = htmlspecialchars(translateCompanyIndustry($company['industry'] ?? '', $lang));
+                            $information = htmlspecialchars($company['information'] ?? '');
+                            ?>
+                            <div class="company-card">
+                                <div class="company-logo-wrap">
+                                    <img src="<?= htmlspecialchars($logo) ?>" alt="Company logo" class="company-logo">
+                                </div>
+
+                                <div class="company-card-body">
+                                    <div class="company-card-title">
+                                        <?= $company_name ?>
+                                    </div>
+
+                                    <div class="company-meta">
+                                        <strong><?= $lang['company_address_label'] ?? 'Address' ?>:</strong> <?= $company_address ?: '—' ?>
+                                    </div>
+
+                                    <div class="company-meta">
+                                        <strong><?= $lang['industry_label'] ?? 'Industry' ?>:</strong> <?= $industry ?: '—' ?>
+                                    </div>
+
+                                    <div class="company-description">
+                                        <?= $information ?: ($lang['company_information_label'] ?? 'No company information provided.') ?>
+                                    </div>
+
+                                    <div class="company-card-actions">
+                                        <a href="company_profile_edit.php?company_id=<?= (int) ($company['id'] ?? 0) ?>" class="edit-company-btn">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                            <?= $lang['edit_company_button'] ?? 'Edit Company' ?>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="company-empty-state">
+                            <?= $lang['no_company_profile'] ?? 'No company profile found for this employer.' ?>
+                        </div>
+                    <?php endif; ?>
+
                 </div>
+
             </div>
 
         </div>

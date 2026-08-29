@@ -9,6 +9,156 @@ function trans($key, $replace = []) {
     return $text;
 }
 
+function normalizeIndustryKey($value) {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '';
+    }
+
+    $key = strtolower($raw);
+    $key = str_replace(['/', '&', '-', '.', ','], ' ', $key);
+    $key = preg_replace('/[^a-z0-9_\s]+/u', '', $key);
+    $key = preg_replace('/\s+/', '_', trim($key));
+    $key = preg_replace('/_+/', '_', $key);
+    return trim($key, '_');
+}
+
+function translateIndustryDisplay($value, $lang = []) {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '';
+    }
+
+    if (isset($lang[$raw]) && is_string($lang[$raw])) {
+        return $lang[$raw];
+    }
+
+    $key = normalizeIndustryKey($raw);
+    if ($key === '') {
+        return trim(preg_replace('/_+/', ' ', $raw) ?? $raw);
+    }
+
+    if (isset($lang[$key]) && is_string($lang[$key])) {
+        return $lang[$key];
+    }
+
+    $mappedKey = [
+        'kinh_doanh_ban_hang' => 'kinh_doanh_ban_hang',
+        'marketing_truyen_thong' => 'marketing_truyen_thong',
+        'tai_chinh_ke_toan_ngan_hang' => 'tai_chinh_ke_toan_ngan_hang',
+        'cong_nghe_thong_tin' => 'cong_nghe_thong_tin',
+        'nhan_su' => 'nhan_su',
+        'hanh_chinh_van_phong' => 'hanh_chinh_van_phong',
+        'ky_thuat' => 'ky_thuat',
+        'san_xuat_van_hanh_day_chuyen' => 'san_xuat_van_hanh_day_chuyen',
+        'van_tai_logistics' => 'van_tai_logistics',
+        'bat_dong_san' => 'bat_dong_san',
+        'bao_hiem' => 'bao_hiem',
+        'xay_dung_kien_truc' => 'xay_dung_kien_truc',
+        'y_te_duoc_pham' => 'y_te_duoc_pham',
+        'giao_duc_dao_tao' => 'giao_duc_dao_tao',
+        'du_lich_khach_san_nha_hang' => 'du_lich_khach_san_nha_hang',
+        'luat' => 'luat',
+        'thiet_ke_nghe_thuat' => 'thiet_ke_nghe_thuat',
+        'lao_dong_pho_thong' => 'lao_dong_pho_thong',
+        'nong_nghiep' => 'nong_nghiep',
+        'food_beverage' => 'food_beverage',
+        'nha_nuoc_cong_vu' => 'nha_nuoc_cong_vu',
+        'khac' => 'khac',
+    ];
+
+    if (isset($mappedKey[$key]) && isset($lang[$mappedKey[$key]]) && is_string($lang[$mappedKey[$key]])) {
+        return $lang[$mappedKey[$key]];
+    }
+
+    $pretty = preg_replace('/_+/', ' ', $raw);
+    $pretty = preg_replace('/\s+/', ' ', $pretty);
+    $pretty = trim((string) $pretty);
+
+    return $pretty === '' ? $raw : $pretty;
+}
+
+function translateCompanyIndustry($value, $lang = []) {
+    return translateIndustryDisplay($value, $lang);
+}
+
+function normalizeJobExperienceKey($value) {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '';
+    }
+
+    $normalized = strtolower($raw);
+    $normalized = preg_replace('/[_\-]+/', ' ', $normalized);
+    $normalized = preg_replace('/\s+/', ' ', $normalized);
+    $normalized = trim($normalized);
+
+    $aliases = [
+        'none' => 'no_experience',
+        'no experience' => 'no_experience',
+        'no experience required' => 'no_experience',
+        'not required' => 'no_experience',
+        'khong yeu cau kinh nghiem' => 'no_experience',
+        'under 1 year' => 'under_1_year',
+        'under 1 year experience' => 'under_1_year',
+        'under 1 year kinh nghiem' => 'under_1_year',
+        'duoi 1 nam' => 'under_1_year',
+        '1 year' => '1_year',
+        '1 year experience' => '1_year',
+        '1 year kinh nghiem' => '1_year',
+        '1 nam' => '1_year',
+        '2 years' => '2_years',
+        '2 years experience' => '2_years',
+        '2 years kinh nghiem' => '2_years',
+        '2 nam' => '2_years',
+        '3 years' => '3_years',
+        '3 years experience' => '3_years',
+        '3 years kinh nghiem' => '3_years',
+        '3 nam' => '3_years',
+        '4 years' => '4_years',
+        '4 years experience' => '4_years',
+        '4 years kinh nghiem' => '4_years',
+        '4 nam' => '4_years',
+        '5 years' => '5_years_plus',
+        '5 years plus' => '5_years_plus',
+        '5 years or more' => '5_years_plus',
+        '5 years or more experience' => '5_years_plus',
+        '5 years kinh nghiem' => '5_years_plus',
+        '5 nam' => '5_years_plus',
+        '6 months' => '6_months',
+        '6 month' => '6_months',
+        '6 months experience' => '6_months',
+        '6 months kinh nghiem' => '6_months',
+        '6 thang' => '6_months',
+    ];
+
+    if (isset($aliases[$normalized])) {
+        return $aliases[$normalized];
+    }
+
+    $canonicalKey = str_replace(' ', '_', $normalized);
+    $canonicalKey = preg_replace('/_+/', '_', $canonicalKey);
+    return trim($canonicalKey, '_');
+}
+
+function translateJobExperience($value, $lang) {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '';
+    }
+
+    $canonicalKey = normalizeJobExperienceKey($raw);
+
+    if (isset($lang['job_experience_labels'][$canonicalKey])) {
+        $currentLang = $_SESSION['lang'] ?? 'en';
+        return $lang['job_experience_labels'][$canonicalKey][$currentLang]
+            ?? $lang['job_experience_labels'][$canonicalKey]['en']
+            ?? $lang['job_experience_labels'][$canonicalKey];
+    }
+
+    return $raw;
+}
+
 // format ngày theo session ngôn ngữ
 function formatDateByLocale($datetime) {
     $created_at = new DateTime($datetime);

@@ -183,69 +183,95 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
   $new_job_number = $last_number + 1;
 
-  $stmt = $conn->prepare("INSERT INTO job (
-    posted_by_employer_id, job_post_number_by_employer, company_name, job_title, job_description, job_location, salary, post_duration, contact_email, contact_phone, job_type, job_category, required_certification, job_experience, company_logo, job_requirement, job_benefit, company_size, no_employee_needed, job_position, job_detailed_location, job_location_district, status
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-  if (!$stmt) {
-    echo "<script>alert('Error preparing statement: {$conn->error}');</script>";
-    exit;
+  $company_id = null;
+  $company_check_sql = "SELECT id FROM company WHERE employer_id = ? LIMIT 1";
+  $stmt_company_check = $conn->prepare($company_check_sql);
+  if ($stmt_company_check) {
+    $stmt_company_check->bind_param("i", $employerid);
+    $stmt_company_check->execute();
+    $company_result = $stmt_company_check->get_result();
+    $company_row = $company_result ? $company_result->fetch_assoc() : null;
+    $company_id = $company_row['id'] ?? null;
+    $stmt_company_check->close();
   }
 
-  $stmt->bind_param(
-    "iisssssissssssssssissss",
-    $employerid,
-    $new_job_number,
-    $companyName,
-    $jobTitle,
-    $jobDescription,
-    $jobLocation,
-    $salary,
-    $post_duration,
-    $contactEmail,
-    $contactPhone,
-    $jobType,
-    $jobCategory,
-    $requiredcertification,
-    $jobExperience,
-    $targetFile,
-    $jobRequirementText,
-    $jobBenefit,
-    $companySize,
-    $noEmplpoyeeNeeeded,
-    $jobPosition,
-    $jobDetailedLocation,
-    $jobLocationDistrict,
-    $jobStatus
-  );
-
-  //   if ($stmt->execute()) {
-//     echo "<script>alert('Job posted successfully!');</script>";
-//   } else {
-//     echo "<script>alert('Error posting job: {$stmt->error}');</script>";
-//   }
-//   $stmt->close();
-// }
-  if ($stmt->execute()) {
-    // Insert or update company info
-    $sql_company = "INSERT INTO company (employer_id, company_name, company_address, industry) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE company_name = VALUES(company_name), company_address = VALUES(company_address), industry = VALUES(industry)";
-    $stmt_company = $conn->prepare($sql_company);
-    if ($stmt_company) {
-      $stmt_company->bind_param("isss", $employerid, $companyName, $jobLocation, $jobCategory);
-      $stmt_company->execute();
-      $stmt_company->close();
+  if (!$company_id) {
+    $company_insert_sql = "INSERT INTO company (employer_id, company_name, company_address, industry, information, company_logo, banner_logo) VALUES (?, ?, ?, ?, '', '', '')";
+    $stmt_company_insert = $conn->prepare($company_insert_sql);
+    if (!$stmt_company_insert) {
+      echo "<script>alert('Error creating company record: {$conn->error}');</script>";
+      exit;
     }
-    // Thay đổi thông báo và cách thoát ra
-    echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
-    // window.location.href = window.location.href; sẽ tải lại trang hiện tại (body.php)
-    // và đóng modal, làm mới trạng thái
-  } else {
-    echo "<script>alert('Error posting job: {$stmt->error}');</script>";
+
+    $stmt_company_insert->bind_param("isss", $employerid, $companyName, $jobLocation, $jobCategory);
+    if (!$stmt_company_insert->execute()) {
+      echo "<script>alert('Error creating company record: {$stmt_company_insert->error}');</script>";
+      exit;
+    }
+    $company_id = $stmt_company_insert->insert_id;
+    $stmt_company_insert->close();
   }
-  $stmt->close();
-  // Đảm bảo kết nối được đóng sau khi xử lý POST
-  $conn->close(); // Nếu bạn không đóng ở config.php
-  exit; // Quan trọng: dừng script sau khi xử lý POST
+
+  $job_insert_sql = "INSERT INTO job (
+    posted_by_employer_id,
+    company_id,
+    job_post_number_by_employer,
+    company_name,
+    job_title,
+    job_description,
+    job_location,
+    salary,
+    post_duration,
+    contact_email,
+    contact_phone,
+    job_type,
+    job_category,
+    required_certification,
+    job_experience,
+    company_logo,
+    job_requirement,
+    job_benefit,
+    company_size,
+    no_employee_needed,
+    job_position,
+    job_detailed_location,
+    job_location_district,
+    status
+  ) VALUES (
+    " . (int)$employerid . ",
+    " . (int)$company_id . ",
+    " . (int)$new_job_number . ",
+    '" . $conn->real_escape_string($companyName) . "',
+    '" . $conn->real_escape_string($jobTitle) . "',
+    '" . $conn->real_escape_string($jobDescription) . "',
+    '" . $conn->real_escape_string($jobLocation) . "',
+    '" . $conn->real_escape_string($salary) . "',
+    " . (int)$post_duration . ",
+    '" . $conn->real_escape_string($contactEmail) . "',
+    '" . $conn->real_escape_string($contactPhone) . "',
+    '" . $conn->real_escape_string($jobType) . "',
+    '" . $conn->real_escape_string($jobCategory) . "',
+    '" . $conn->real_escape_string($requiredcertification) . "',
+    '" . $conn->real_escape_string($jobExperience) . "',
+    '" . $conn->real_escape_string($targetFile) . "',
+    '" . $conn->real_escape_string($jobRequirementText) . "',
+    '" . $conn->real_escape_string($jobBenefit) . "',
+    '" . $conn->real_escape_string($companySize) . "',
+    " . (int)$noEmplpoyeeNeeeded . ",
+    '" . $conn->real_escape_string($jobPosition) . "',
+    '" . $conn->real_escape_string($jobDetailedLocation) . "',
+    '" . $conn->real_escape_string($jobLocationDistrict) . "',
+    '" . $conn->real_escape_string($jobStatus) . "'
+  )";
+
+  if ($conn->query($job_insert_sql) === TRUE) {
+    echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
+  } else {
+    echo "<script>alert('Error posting job: {$conn->error}');</script>";
+  }
+
+  $conn->close();
+  exit;
 }
 ?>
 <!DOCTYPE html>

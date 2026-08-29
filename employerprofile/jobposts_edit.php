@@ -24,6 +24,7 @@ if (!isset($_SESSION['lang'])) {
 
 // Load file ngôn ngữ tương ứng
 include '../lang/' . $_SESSION['lang'] . '.php';
+include '../helpers.php';
 
 require_once '../config.php';
 
@@ -681,43 +682,42 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                 $message = "";
                 $message_type = ""; // 'success' hoặc 'error'
                 
-                if (isset($_FILES['companylogo']) && $_FILES['companylogo']['error'] == 0) {
+                $company_logo_existing = $job_data['company_logo'] ?? '';
+
+                if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
                     $targetDir = "uploads/companylogo/";
                     if (!is_dir($targetDir)) {
                         mkdir($targetDir, 0777, true);
                     }
-                    $fileName = basename($_FILES["companylogo"]["name"]);
+                    $fileName = basename($_FILES["company_logo"]["name"]);
                     $targetFile = $targetDir . uniqid() . "_" . $fileName;
                     $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-                    // Check file size (1MB limit)
-                    if ($_FILES["companylogo"]["size"] > 1000000) {
+                    if ($_FILES["company_logo"]["size"] > 1000000) {
                         echo "<script>alert('Sorry, your file is too large.');</script>";
                         exit;
                     }
 
-                    // Allow certain file formats
-                    $allowedTypes = ['jpg', 'png', 'jpeg', 'gif'];
+                    $allowedTypes = ['jpg', 'png', 'jpeg', 'gif', 'webp'];
                     if (!in_array($fileType, $allowedTypes)) {
                         echo "<script>
-      alert('Sorry, only JPG, JPEG, PNG & GIF files are allowed.');
+      alert('Sorry, only JPG, JPEG, PNG, GIF & WEBP files are allowed.');
       window.history.back();
       </script>";
                         exit;
                     }
 
-                    // Upload file
-                    if (!move_uploaded_file($_FILES["companylogo"]["tmp_name"], $targetFile)) {
+                    if (!move_uploaded_file($_FILES["company_logo"]["tmp_name"], $targetFile)) {
                         echo "<script>alert('Sorry, there was an error uploading your file.');
       window.history.back();
       </script>";
                         exit;
                     }
                 } else {
-                    $targetFile = ""; // No file uploaded
+                    $targetFile = $_POST['company_logo_existing'] ?? $company_logo_existing;
                 }
                 if (empty($targetFile)) {
-                    $targetFile = "uploads/default.png"; // Default image if no upload
+                    $targetFile = "uploads/default.png";
                 }
 
                 // --- 3. XỬ LÝ UPDATE KHI NGƯỜI DÙNG NHẤN NÚT LƯU ---
@@ -740,7 +740,11 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     $job_category = $_POST['job_category'] ?? '';
                     $required_certification = $_POST['required_certification'] ?? '';
                     $job_experience = $_POST['job_experience'] ?? '';
-                    $company_logo = $_POST['company_logo'] ?? '';
+                    $company_logo = $_POST['company_logo_existing'] ?? $_POST['company_logo'] ?? $job_data['company_logo'] ?? '';
+
+                    if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
+                        $company_logo = $targetFile;
+                    }
 
                     // Validate
                     if ($job_id <= 0 || $posted_by_employer_id <= 0 || empty($company_name) || empty($job_title) || empty($job_description) || empty($job_location) || $no_employee_needed <= 0 || empty($salary) || empty($contact_email)) {
@@ -908,9 +912,10 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     <?php endif; ?>
 
                     <?php if ($job_data): ?>
-                        <form method="POST" action="">
+                        <form method="POST" action="" enctype="multipart/form-data">
                             <input type="hidden" name="posted_by_employer_id"
                                 value="<?= htmlspecialchars($job_data['posted_by_employer_id']) ?>">
+                            <input type="hidden" name="company_logo_existing" value="<?= htmlspecialchars($job_data['company_logo'] ?? '') ?>">
 
                             <div class="form-grid">
                                 <div class="full-row">
@@ -997,8 +1002,12 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
                                 <div>
                                     <label><?= $lang['edit_job_post_modal_job_category'] ?>*</label>
+                                    <?php
+                                    $job_category_value = trim((string) ($job_data['job_category'] ?? ''));
+                                    $job_category_display = $job_category_value !== '' ? translateCompanyIndustry($job_category_value, $lang) : '';
+                                    ?>
                                     <input type="text" name="job_category"
-                                        value="<?= htmlspecialchars($job_data['job_category']) ?>" required>
+                                        value="<?= htmlspecialchars($job_category_display) ?>" required>
                                 </div>
 
                                 <div>
@@ -1009,14 +1018,50 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
                                 <div>
                                     <label><?= $lang['edit_job_post_modal_job_experience'] ?></label>
-                                    <input type="text" name="job_experience"
-                                        value="<?= htmlspecialchars($job_data['job_experience']) ?>">
+                                    <?php
+                                    $job_experience_value = trim((string) ($job_data['job_experience'] ?? ''));
+                                    $job_experience_key = normalizeJobExperienceKey($job_experience_value);
+                                    ?>
+                                    <select name="job_experience" required>
+                                        <option value="" <?= $job_experience_key === '' ? 'selected' : '' ?>>
+                                            <?= $lang['post_job_form_experience_placeholder']; ?>
+                                        </option>
+                                        <?php foreach ($lang['post_job_form_experience_options'] as $value => $label): ?>
+                                            <option value="<?= htmlspecialchars($value) ?>" <?= $job_experience_key === $value ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($label) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
 
                                 <div class="full-row">
                                     <label><?= $lang['edit_job_post_modal_company_logo'] ?></label>
-                                    <input type="file" name="company_logo" accept="image/*">
+                                    <?php if (!empty($job_data['company_logo'])): ?>
+                                        <?php
+                                        $db_logo = trim((string) ($job_data['company_logo'] ?? ''));
+                                        $logo_src = '';
 
+                                        if ($db_logo !== '') {
+                                            if (preg_match('#^(https?://|data:)#i', $db_logo)) {
+                                                $logo_src = $db_logo;
+                                            } elseif (strpos($db_logo, 'uploads/') === 0) {
+                                                $logo_src = '../' . $db_logo;
+                                            } elseif (strpos($db_logo, '../uploads/') === 0) {
+                                                $logo_src = $db_logo;
+                                            } elseif (strpos($db_logo, '/') === 0) {
+                                                $logo_src = $db_logo;
+                                            } else {
+                                                $logo_src = '../uploads/' . basename($db_logo);
+                                            }
+                                        }
+                                        ?>
+                                        <?php if ($logo_src !== ''): ?>
+                                            <div style="margin-bottom: 10px;">
+                                                <img src="<?= htmlspecialchars($logo_src) ?>" alt="Current Company Logo" style="max-width: 140px; max-height: 90px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; background: #fafafa;">
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    <input type="file" name="company_logo" accept="image/*">
                                 </div>
                             </div>
 

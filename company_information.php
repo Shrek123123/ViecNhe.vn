@@ -15,6 +15,7 @@ if (!isset($_SESSION['lang'])) {
 include 'lang/' . $_SESSION['lang'] . '.php';
 
 require_once 'config.php';
+require_once 'helpers.php';
 
 $company_id = $_POST['company_id'] ?? 0;
 $company_data = null;
@@ -45,7 +46,7 @@ if (!$company_data) {
     <h1>Company Details</h1>
     <p><strong>Name:</strong> <?= htmlspecialchars($company_data['company_name']) ?></p>
     <p><strong>Address:</strong> <?= htmlspecialchars($company_data['company_address']) ?></p>
-    <p><strong>Industry:</strong> <?= htmlspecialchars($company_data['industry']) ?></p>
+    <p><strong>Industry:</strong> <?= htmlspecialchars(translateCompanyIndustry($company_data['industry'] ?? '', $lang)) ?></p>
     <p><strong>Information:</strong> <?= htmlspecialchars($company_data['information']) ?></p>
     <?php if ($company_data['banner_logo']): ?>
         <img src="<?= htmlspecialchars($company_data['banner_logo']) ?>" alt="Banner" style="max-width: 300px;">

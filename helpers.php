@@ -141,6 +141,28 @@ function normalizeJobExperienceKey($value) {
     return trim($canonicalKey, '_');
 }
 
+function normalizeAssetPath($path) {
+    $raw = trim((string) $path);
+    if ($raw === '') {
+        return '';
+    }
+
+    if (preg_match('#^(https?://|data:|//)#i', $raw)) {
+        return $raw;
+    }
+
+    $hasUploadsSegment = stripos($raw, 'uploads/') !== false || stripos($raw, 'companylogo/') !== false;
+    if (!$hasUploadsSegment) {
+        return $raw;
+    }
+
+    $normalized = preg_replace('#^(?:\./)+#', '', $raw);
+    $normalized = preg_replace('#^(?:\.\./)+#', '', $normalized);
+    $normalized = preg_replace('#^/+#', '', $normalized);
+
+    return $normalized;
+}
+
 function translateJobExperience($value, $lang) {
     $raw = trim((string) $value);
     if ($raw === '') {

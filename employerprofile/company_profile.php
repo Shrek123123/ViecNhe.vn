@@ -784,7 +784,11 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                             $company_name = htmlspecialchars($company['company_name'] ?? '');
                             $company_address = htmlspecialchars($company['company_address'] ?? '');
                             $industry = htmlspecialchars(translateCompanyIndustry($company['industry'] ?? '', $lang));
-                            $information = htmlspecialchars($company['information'] ?? '');
+                            $information_raw = (string) ($company['information'] ?? '');
+                            $information = htmlspecialchars($information_raw);
+                            if (mb_strlen($information_raw, 'UTF-8') > 200) {
+                                $information = htmlspecialchars(mb_substr($information_raw, 0, 200, 'UTF-8') . '...');
+                            }
                             ?>
                             <div class="company-card">
                                 <div class="company-logo-wrap">

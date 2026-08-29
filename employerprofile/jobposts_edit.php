@@ -28,6 +28,40 @@ include '../helpers.php';
 
 require_once '../config.php';
 
+function normalizeEmployerLogoPath($path) {
+    $raw = trim((string) $path);
+    if ($raw === '') {
+        return '';
+    }
+
+    if (preg_match('#^(https?://|data:|//)#i', $raw)) {
+        return $raw;
+    }
+
+    $normalized = str_replace('\\', '/', $raw);
+    $normalized = preg_replace('#^(?:\./)+#', '', $normalized);
+    $normalized = preg_replace('#^(?:\.\./)+#', '', $normalized);
+    $normalized = preg_replace('#^/+#', '', $normalized);
+
+    if (stripos($normalized, 'uploads/companylogo/') !== false) {
+        return '../' . ltrim($normalized, './');
+    }
+
+    if (stripos($normalized, 'companylogo/') !== false) {
+        return '../uploads/' . ltrim(substr($normalized, stripos($normalized, 'companylogo/')), '/');
+    }
+
+    if (stripos($normalized, 'uploads/') === 0) {
+        return '../' . $normalized;
+    }
+
+    if (stripos($normalized, 'companylogo/') === 0) {
+        return '../uploads/' . ltrim(substr($normalized, strlen('companylogo/')), '/');
+    }
+
+    return '../uploads/companylogo/' . ltrim(basename($normalized), '/');
+}
+
 $currentPage = basename($_SERVER['PHP_SELF']);
 $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 ?>
@@ -681,11 +715,11 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
                 $message = "";
                 $message_type = ""; // 'success' hoặc 'error'
-                
-                $company_logo_existing = $job_data['company_logo'] ?? '';
+
+                $company_logo_existing = $_POST['company_logo_existing'] ?? ($job_data['company_logo'] ?? '');
 
                 if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
-                    $targetDir = "uploads/companylogo/";
+                    $targetDir = '../uploads/companylogo/';
                     if (!is_dir($targetDir)) {
                         mkdir($targetDir, 0777, true);
                     }
@@ -714,10 +748,10 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                         exit;
                     }
                 } else {
-                    $targetFile = $_POST['company_logo_existing'] ?? $company_logo_existing;
+                    $targetFile = normalizeEmployerLogoPath($_POST['company_logo_existing'] ?? $company_logo_existing);
                 }
                 if (empty($targetFile)) {
-                    $targetFile = "uploads/default.png";
+                    $targetFile = '../uploads/companylogo/default.png';
                 }
 
                 // --- 3. XỬ LÝ UPDATE KHI NGƯỜI DÙNG NHẤN NÚT LƯU ---
@@ -740,7 +774,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     $job_category = $_POST['job_category'] ?? '';
                     $required_certification = $_POST['required_certification'] ?? '';
                     $job_experience = $_POST['job_experience'] ?? '';
-                    $company_logo = $_POST['company_logo_existing'] ?? $_POST['company_logo'] ?? $job_data['company_logo'] ?? '';
+                    $company_logo = normalizeEmployerLogoPath($_POST['company_logo_existing'] ?? $_POST['company_logo'] ?? ($job_data['company_logo'] ?? ''));
 
                     if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
                         $company_logo = $targetFile;
@@ -1039,21 +1073,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                     <?php if (!empty($job_data['company_logo'])): ?>
                                         <?php
                                         $db_logo = trim((string) ($job_data['company_logo'] ?? ''));
-                                        $logo_src = '';
-
-                                        if ($db_logo !== '') {
-                                            if (preg_match('#^(https?://|data:)#i', $db_logo)) {
-                                                $logo_src = $db_logo;
-                                            } elseif (strpos($db_logo, 'uploads/') === 0) {
-                                                $logo_src = '../' . $db_logo;
-                                            } elseif (strpos($db_logo, '../uploads/') === 0) {
-                                                $logo_src = $db_logo;
-                                            } elseif (strpos($db_logo, '/') === 0) {
-                                                $logo_src = $db_logo;
-                                            } else {
-                                                $logo_src = '../uploads/' . basename($db_logo);
-                                            }
-                                        }
+                                        $logo_src = normalizeEmployerLogoPath($db_logo);
                                         ?>
                                         <?php if ($logo_src !== ''): ?>
                                             <div style="margin-bottom: 10px;">

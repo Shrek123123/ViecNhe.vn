@@ -26,6 +26,7 @@ if (!isset($_SESSION['lang'])) {
 include '../lang/' . $_SESSION['lang'] . '.php';
 
 require_once '../config.php';
+include '../helpers.php';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 
@@ -693,21 +694,26 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                             while ($row = $result->fetch_assoc()):
                                 // Xử lý dữ liệu hiển thị
                                 $job_id = htmlspecialchars($row['id']);
-                                // Lấy đường dẫn từ DB (ví dụ: uploads/abc.jpg)
-                                $db_logo = $row['company_logo'];
+                                // Chuẩn hóa cho file này theo vị trí /employerprofile/my_job_posts.php
+                                $db_logo = $row['company_logo'] ?? '';
 
                                 if (!empty($db_logo)) {
-                                    if (preg_match('#^(https?://|data:)#i', $db_logo)) {
-                                        $logo = htmlspecialchars($db_logo);
-                                    } elseif (strpos($db_logo, 'uploads/') === 0) {
-                                        $logo = '../' . htmlspecialchars($db_logo);
-                                    } elseif (strpos($db_logo, '/') === 0) {
-                                        $logo = htmlspecialchars($db_logo);
+                                    $logo = trim((string) $db_logo);
+                                    $logo = preg_replace('#^(?:\./)+#', '', $logo);
+                                    $logo = preg_replace('#^(?:\.\./)+#', '', $logo);
+                                    $logo = preg_replace('#^/+#', '', $logo);
+
+                                    if (stripos($logo, 'uploads/') === 0) {
+                                        $logo = '../' . $logo;
+                                    } elseif (stripos($logo, 'companylogo/') === 0) {
+                                        $logo = '../uploads/' . $logo;
+                                    } elseif (stripos($logo, 'uploads/companylogo/') === 0) {
+                                        $logo = '../' . $logo;
                                     } else {
-                                        $logo = '../uploads/' . htmlspecialchars(basename($db_logo));
+                                        $logo = '../uploads/companylogo/' . basename($logo);
                                     }
                                 } else {
-                                    $logo = 'https://placehold.co/120x70/cccccc/333333?text=No+Logo';
+                                    $logo = '../uploads/companylogo/no-logo.png';
                                 }
                                 // Tính toán thời gian
                                 $created_at = new DateTime($row['created_at']);

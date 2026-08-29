@@ -168,6 +168,18 @@ if ($cv_file_path) {
             display: flex;
         }
 
+        .profile-description-wrap {
+            padding-right: 20px;
+            margin-top: 10px;
+            color: #000000;
+            line-height: 1.7;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            max-width: 100%;
+        }
+
         .sidebar {
             width: 160px;
             border-right: 1px solid #ccc;
@@ -675,19 +687,16 @@ if ($cv_file_path) {
                         </div>
 
                         <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 15px;">
-                            <div style="font-size: 1.2em; font-weight: bold;"><?= $lang['profile_description'] ?></div>
-                            <p style="margin-top: 10px; color: #6c757d;">
-                            <div class="open-modal" id="display_profile_description">
+                            <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;"><?= $lang['profile_description'] ?></div>
+                            <div class="open-modal profile-description-wrap" id="display_profile_description">
                                 <?php
                                 if (!empty($profile_data['profile_description'])) {
-                                    // Giữ cả ký tự xuống dòng khi hiển thị
                                     echo nl2br(htmlspecialchars($profile_data['profile_description']));
                                 } else {
                                     echo $lang['profile_description_default'];
                                 }
                                 ?>
                             </div>
-                            </p>
                         </div>
                     </div>
                 </div>

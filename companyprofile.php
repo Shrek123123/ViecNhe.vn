@@ -50,17 +50,17 @@ if (!$company) {
     ];
 }
 
-$company_name_for_query = trim((string) ($company['company_name'] ?? ''));
+$company_id_for_query = isset($company['id']) ? (int) $company['id'] : 0;
 $related_jobs = [];
-if ($company_name_for_query !== '' && isset($conn)) {
-    $job_sql = "SELECT id, job_title, job_location, salary, job_experience, company_logo, company_name, created_at
+if ($company_id_for_query > 0 && isset($conn)) {
+    $job_sql = "SELECT id, job_title, job_location, salary, job_experience, company_logo, company_name, company_size, created_at
                 FROM job
-                WHERE company_name = ?
-                ORDER BY created_at DESC
+                WHERE company_id = ?
+                ORDER BY created_at ASC
                 LIMIT 6";
     $job_stmt = $conn->prepare($job_sql);
     if ($job_stmt) {
-        $job_stmt->bind_param('s', $company_name_for_query);
+        $job_stmt->bind_param('i', $company_id_for_query);
         $job_stmt->execute();
         $job_result = $job_stmt->get_result();
         while ($row = $job_result->fetch_assoc()) {
@@ -70,12 +70,12 @@ if ($company_name_for_query !== '' && isset($conn)) {
     }
 }
 
-$company_logo = trim((string) ($company['company_logo'] ?? ''));
+$company_logo = normalizeAssetPath(trim((string) ($company['company_logo'] ?? '')));
 if ($company_logo === '') {
     $company_logo = 'image/logo.png';
 }
 
-$banner_logo = trim((string) ($company['banner_logo'] ?? ''));
+$banner_logo = normalizeAssetPath(trim((string) ($company['banner_logo'] ?? '')));
 if ($banner_logo === '') {
     $banner_logo = 'image/banner.jpg';
 }
@@ -84,6 +84,31 @@ $company_address = htmlspecialchars((string) ($company['company_address'] ?? 'Ch
 $company_industry = htmlspecialchars(translateCompanyIndustry($company['industry'] ?? 'Chưa cập nhật', $lang));
 $company_info = nl2br(htmlspecialchars((string) ($company['information'] ?? 'Chưa có thông tin mô tả.')));
 $company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive Company'));
+$company_size_display = '';
+if (!empty($company['company_size'] ?? '')) {
+    $company_size_display = htmlspecialchars((string) $company['company_size']);
+} else {
+    foreach ($related_jobs as $job) {
+        if (!empty($job['company_size'] ?? '')) {
+            $company_size_display = htmlspecialchars((string) $job['company_size']);
+            break;
+        }
+    }
+}
+
+$company_profile_info_title = $lang['company_profile_info_title'] ?? 'Company information';
+$company_profile_company_name_label = $lang['company_profile_company_name_label'] ?? 'Company name:';
+$company_profile_industry_label = $lang['company_profile_industry_label'] ?? 'Industry:';
+$company_profile_address_label = $lang['company_profile_address_label'] ?? 'Address:';
+$company_profile_company_size_label = $lang['jobdetail_company_size'] ?? 'Company size:';
+$company_profile_introduction_title = $lang['company_profile_introduction_title'] ?? 'Company introduction';
+$company_profile_jobs_title = $lang['company_profile_jobs_title'] ?? 'Job openings at :company_name';
+$company_profile_job_location = $lang['company_profile_job_location'] ?? 'Location:';
+$company_profile_job_salary = $lang['company_profile_job_salary'] ?? 'Salary:';
+$company_profile_job_experience = $lang['company_profile_job_experience'] ?? 'Experience:';
+$company_profile_job_view_details = $lang['company_profile_job_view_details'] ?? 'View details';
+$company_profile_no_jobs = $lang['company_profile_no_jobs'] ?? 'This company does not have any job postings yet.';
+$company_profile_jobs_title = str_replace(':company_name', $company_name, $company_profile_jobs_title);
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($_SESSION['lang']) ?>">
@@ -108,12 +133,24 @@ $company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive 
         .company-hero {
             position: relative;
             height: 260px;
-            background: linear-gradient(135deg, rgba(14, 28, 51, 0.65), rgba(183, 60, 60, 0.55)),
-                url('<?= htmlspecialchars($banner_logo) ?>') center/cover no-repeat;
+            width: min(1200px, 92%);
+            margin: 0 auto;
+            border-radius: 0 0 18px 18px;
+            overflow: hidden;
+            background-color: #d9d9d9;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+        }
+        .company-hero .banner-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            display: block;
+            background-color: #d9d9d9;
         }
         .company-hero::after {
             content: "";
@@ -129,22 +166,28 @@ $company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive 
             align-items: center;
             gap: 20px;
             color: white;
+            justify-content: flex-start;
         }
         .hero-logo {
             width: 120px;
             height: 120px;
             background: white;
             border-radius: 18px;
-            padding: 10px;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
             box-shadow: 0 12px 28px rgba(0,0,0,0.2);
         }
         .hero-logo img {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: 100%;
+            display: block;
             object-fit: contain;
+            object-position: center;
+            border-radius: 18px;
+            background: white;
         }
         .hero-text h1 {
             margin: 0 0 8px;
@@ -280,15 +323,19 @@ $company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive 
 
     <div class="company-page">
         <section class="company-hero">
+            <img class="banner-image" src="<?= htmlspecialchars($banner_logo) ?>" alt="<?= $company_name ?> banner">
             <div class="hero-content">
-                <div class="hero-logo">
+                <div class="hero-logo" style="margin-left: 20px;">
                     <img src="<?= htmlspecialchars($company_logo) ?>" alt="<?= $company_name ?> logo">
                 </div>
-                <div class="hero-text">
+                <div class="hero-text" style="margin-left: 8px;">
                     <h1><?= $company_name ?></h1>
                     <div class="hero-meta">
                         <span><i class="fa-solid fa-building"></i> <?= $company_industry ?></span>
                         <span><i class="fa-solid fa-location-dot"></i> <?= $company_address ?></span>
+                        <?php if ($company_size_display !== ''): ?>
+                            <span><i class="fa-solid fa-users"></i> <?= $company_size_display ?></span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -296,33 +343,39 @@ $company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive 
 
         <div class="company-shell">
             <aside class="info-card">
-                <h3>Thông tin công ty</h3>
+                <h3><?= $company_profile_info_title ?></h3>
                 <div class="info-list">
                     <div class="info-item">
                         <i class="fa-solid fa-building"></i>
-                        <div><strong>Tên công ty:</strong><br><?= $company_name ?></div>
+                        <div><strong><?= $company_profile_company_name_label ?></strong><br><?= $company_name ?></div>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-industry"></i>
-                        <div><strong>Ngành nghề:</strong><br><?= $company_industry ?></div>
+                        <div><strong><?= $company_profile_industry_label ?></strong><br><?= $company_industry ?></div>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-location-dot"></i>
-                        <div><strong>Địa chỉ:</strong><br><?= $company_address ?></div>
+                        <div><strong><?= $company_profile_address_label ?></strong><br><?= $company_address ?></div>
                     </div>
+                    <?php if ($company_size_display !== ''): ?>
+                        <div class="info-item">
+                            <i class="fa-solid fa-users"></i>
+                            <div><strong><?= $company_profile_company_size_label ?></strong><br><?= $company_size_display ?></div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </aside>
 
             <main class="main-section">
                 <section class="company-summary info-card">
-                    <h2 class="section-title">Giới thiệu công ty</h2>
+                    <h2 class="section-title"><?= $company_profile_introduction_title ?></h2>
                     <div class="summary-text">
                         <?= $company_info ?>
                     </div>
                 </section>
 
                 <section class="jobs-box info-card">
-                    <h2 class="section-title">Tin tuyển dụng của <?= $company_name ?></h2>
+                    <h2 class="section-title"><?= $company_profile_jobs_title ?></h2>
 
                     <?php if (!empty($related_jobs)): ?>
                         <div class="jobs-grid">
@@ -331,8 +384,8 @@ $company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive 
                                 $job_title = htmlspecialchars((string) ($job['job_title'] ?? ''));
                                 $job_location = htmlspecialchars((string) ($job['job_location'] ?? ''));
                                 $job_salary = htmlspecialchars((string) ($job['salary'] ?? 'Thỏa thuận'));
-                                $job_experience = htmlspecialchars((string) ($job['job_experience'] ?? 'Không yêu cầu'));
-                                $job_logo = trim((string) ($job['company_logo'] ?? ''));
+                                $job_experience = htmlspecialchars(translateJobExperience($job['job_experience'] ?? '', $lang) ?: ($lang['jobdetail_no_data'] ?? 'No data'));
+                                $job_logo = normalizeAssetPath(trim((string) ($job['company_logo'] ?? '')));
                                 if ($job_logo === '') {
                                     $job_logo = $company_logo;
                                 }
@@ -343,15 +396,15 @@ $company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive 
                                         <div style="font-size:13px;color:#666;"><?= $company_name ?></div>
                                     </div>
                                     <div class="job-title"><?= $job_title ?></div>
-                                    <div class="job-meta"><strong>Địa điểm:</strong> <?= $job_location ?></div>
-                                    <div class="job-meta"><strong>Mức lương:</strong> <?= $job_salary ?></div>
-                                    <div class="job-meta"><strong>Kinh nghiệm:</strong> <?= $job_experience ?></div>
-                                    <a href="jobdetail.php?id=<?= (int) ($job['id'] ?? 0) ?>" class="job-link">Xem chi tiết</a>
+                                    <div class="job-meta"><strong><?= $company_profile_job_location ?></strong> <?= $job_location ?></div>
+                                    <div class="job-meta"><strong><?= $company_profile_job_salary ?></strong> <?= $job_salary ?></div>
+                                    <div class="job-meta"><strong><?= $company_profile_job_experience ?></strong> <?= $job_experience ?></div>
+                                    <a href="jobdetail.php?id=<?= (int) ($job['id'] ?? 0) ?>" class="job-link"><?= $company_profile_job_view_details ?></a>
                                 </article>
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <div class="empty-state">Hiện công ty chưa có tin tuyển dụng nào.</div>
+                        <div class="empty-state"><?= $company_profile_no_jobs ?></div>
                     <?php endif; ?>
                 </section>
             </main>

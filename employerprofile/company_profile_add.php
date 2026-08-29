@@ -916,7 +916,7 @@ if (!$company_data && $company_id > 0) {
 
                             <div class="form-actions">
                                 <a href="company_profile.php" class="secondary-btn"><?= $lang['cancel_button'] ?? 'Cancel' ?></a>
-                                <button type="submit" class="primary-btn"><?= $lang['company_update_button'] ?></button>
+                                <button type="submit" class="primary-btn"><?= $lang['add_more_button'] ?></button>
                             </div>
                         </form>
                     </div>

@@ -96,6 +96,7 @@ $lang = [
     "company_add_title" => "Register a new company",
     "company_profile_add_success" => "Company added successfully.",
     "company_profile_add_error" => "Failed to add company.",
+    "add_more_button" => "Create New",
     "invalid_file_format" => "Only JPG, JPEG, PNG, GIF, WEBP files are allowed.",
     "file_too_large" => "File size must not exceed 5MB.",
 
@@ -571,5 +572,16 @@ $lang = [
     'company_profile_update_success' => 'Company profile updated successfully!',
     'company_profile_update_error' => 'An error occurred while updating the company profile',
     'no_company_profile' => 'No company profile found.',
+    'company_profile_info_title' => 'Company information',
+    'company_profile_company_name_label' => 'Company name:',
+    'company_profile_industry_label' => 'Industry:',
+    'company_profile_address_label' => 'Address:',
+    'company_profile_introduction_title' => 'Company introduction',
+    'company_profile_jobs_title' => 'Job openings at :company_name',
+    'company_profile_job_location' => 'Location:',
+    'company_profile_job_salary' => 'Salary:',
+    'company_profile_job_experience' => 'Experience:',
+    'company_profile_job_view_details' => 'View details',
+    'company_profile_no_jobs' => 'This company does not have any job postings yet.',
 
 ];

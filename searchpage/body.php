@@ -19,6 +19,36 @@ function refValues($arr){
     return $arr; // Đối với PHP < 5.3, không cần thiết phải làm gì đặc biệt
 }
 
+function normalizeCompanyLogoPath($path)
+{
+    $value = trim((string) $path);
+    if ($value === '') {
+        return 'image/logo1.png';
+    }
+
+    $value = preg_replace('#^(?:\./)+#', '', $value);
+    $value = preg_replace('#^(?:\.\./)+#', '', $value);
+    $value = preg_replace('#^/+#', '', $value);
+
+    if (stripos($value, 'uploads/companylogo/') === 0) {
+        return $value;
+    }
+
+    if (stripos($value, 'companylogo/') === 0) {
+        return 'uploads/' . $value;
+    }
+
+    if (stripos($value, 'uploads/') === 0) {
+        return $value;
+    }
+
+    if (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0) {
+        return $value;
+    }
+
+    return 'uploads/companylogo/' . basename($value);
+}
+
 
 // Lấy danh sách job_id mà người dùng hiện tại đã lưu từ database
 $savedJobIds = [];
@@ -479,24 +509,27 @@ $savedJobIdsJson = json_encode($savedJobIds);
             $sort_order = $_GET['sort'] ?? 'newest_first'; // Lấy tham số sắp xếp
 
             // Bắt đầu xây dựng câu truy vấn SQL
-            $sql_base = "SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration FROM job";
-            $sql_count_base = "SELECT COUNT(*) as total FROM job";
+            $sql_base = "SELECT j.id, j.job_title, COALESCE(c.company_logo, j.company_logo) AS company_logo,
+                COALESCE(c.company_name, j.company_name) AS company_name,
+                j.salary, j.job_location, j.created_at, j.post_duration
+                FROM job j
+                LEFT JOIN company c ON c.id = j.company_id";
+            $sql_count_base = "SELECT COUNT(*) as total FROM job j LEFT JOIN company c ON c.id = j.company_id";
 
-            $conditions[] = "status = 'approved'";
+            $conditions[] = "j.status = 'approved'";
             $params = [];
             $param_types = '';
 
-            // Thêm điều kiện cho job_category
+            // Thêm điều kiện cho industry của công ty
             if (!empty($search_category)) {
-                $conditions[] = "job_category = ?";
-                $params[] = $search_category;
+                $conditions[] = "LOWER(COALESCE(c.industry, j.job_category)) = ?";
+                $params[] = strtolower(trim($search_category));
                 $param_types .= 's';
             }
 
             // Thêm điều kiện cho job_title hoặc company_name
             if (!empty($search_query)) {
-                // Sử dụng LIKE cho tìm kiếm một phần, %...% để tìm bất kỳ đâu trong chuỗi
-                $conditions[] = "(job_title LIKE ? OR company_name LIKE ?)";
+                $conditions[] = "(j.job_title LIKE ? OR COALESCE(c.company_name, j.company_name) LIKE ?)";
                 $params[] = '%' . $search_query . '%';
                 $params[] = '%' . $search_query . '%';
                 $param_types .= 'ss';
@@ -504,7 +537,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
             // Thêm điều kiện cho job_location
             if (!empty($search_location)) {
-                $conditions[] = "job_location LIKE ?";
+                $conditions[] = "j.job_location LIKE ?";
                 $params[] = '%' . $search_location . '%';
                 $param_types .= 's';
             }
@@ -633,6 +666,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
                     $days_left = (int) $interval->format('%r%a');
                     $days_left_text = $days_left > 0 ? sprintf($lang['days_left'], $days_left) : $lang['expired'];
                     $job_id = (int) $row['id'];
+                    $companyLogo = normalizeCompanyLogoPath($row['company_logo'] ?? 'image/logo1.png');
                     $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds);
                     ?>
                     <a href="jobdetail.php?id=<?php echo $job_id; ?>" style="text-decoration:none;color:inherit;">
@@ -653,7 +687,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
                             <div class="job-body">
                                 <div class="company-logo">
-                                    <img src="<?php echo htmlspecialchars($row['company_logo']); ?>" alt="Company Logo">
+                                    <img src="<?php echo htmlspecialchars($companyLogo); ?>" alt="Company Logo">
                                 </div>
                                 <div class="job-info-right">
                                     <h3 class="job-title-new"><?php echo htmlspecialchars($row['job_title']); ?></h3>

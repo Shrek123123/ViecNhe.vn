@@ -19,15 +19,46 @@ if ($isLoggedIn) {
     $stmt->close();
   }
 }
+
+function normalizeCompanyLogoPath($path)
+{
+  $value = trim((string) $path);
+  if ($value === '') {
+    return 'image/logo1.png';
+  }
+
+  $value = preg_replace('#^(?:\./)+#', '', $value);
+  $value = preg_replace('#^(?:\.\./)+#', '', $value);
+  $value = preg_replace('#^/+#', '', $value);
+
+  if (stripos($value, 'uploads/companylogo/') === 0) {
+    return $value;
+  }
+
+  if (stripos($value, 'companylogo/') === 0) {
+    return 'uploads/' . $value;
+  }
+
+  if (stripos($value, 'uploads/') === 0) {
+    return $value;
+  }
+
+  if (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0) {
+    return $value;
+  }
+
+  return 'uploads/companylogo/' . basename($value);
+}
+
 // Get job category from POST
 $category = isset($_POST['category']) ? trim($_POST['category']) : '';
 $params = [];
-$sql = "SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration, job_category FROM job";
+$sql = "SELECT j.id, j.job_title, COALESCE(c.company_logo, j.company_logo) AS company_logo, COALESCE(c.company_name, j.company_name) AS company_name, j.salary, j.job_location, j.created_at, j.post_duration, COALESCE(c.industry, j.job_category) AS industry FROM job j LEFT JOIN company c ON c.id = j.company_id";
 if ($category !== '') {
-  $sql .= " WHERE job_category = ?";
+  $sql .= " WHERE COALESCE(c.industry, j.job_category) = ?";
   $params[] = $category;
 }
-$sql .= " ORDER BY created_at DESC LIMIT 30";
+$sql .= " ORDER BY j.created_at DESC LIMIT 30";
 
 $stmt = $conn->prepare($sql);
 if ($category !== '') {
@@ -47,6 +78,7 @@ if ($result && $result->num_rows > 0):
     $days_left = (int) $interval->format('%r%a');
     $days_left_text = $days_left > 0 ? $days_left . ' days left' : 'Expired';
     $job_id = (int) $row['id'];
+    $companyLogo = normalizeCompanyLogoPath($row['company_logo'] ?? 'image/logo1.png');
     $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds);
     $savedClass = $isJobAlreadySaved ? 'active' : '';
     ?>
@@ -65,7 +97,7 @@ if ($result && $result->num_rows > 0):
           </button>
         </div>
         <div class="job-body">
-          <img src="<?php echo htmlspecialchars($row['company_logo']); ?>" alt="Company Logo" class="company-logo">
+          <img src="<?php echo htmlspecialchars($companyLogo); ?>" alt="Company Logo" class="company-logo">
           <div class="job-info">
             <div class="company-name"><?php echo htmlspecialchars($row['company_name']); ?></div>
             <div><span class="icon">💰</span> <?php echo htmlspecialchars($row['salary']); ?></div>

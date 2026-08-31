@@ -699,18 +699,21 @@ $employer_id = $_SESSION['employerid'] ?? 0;
 
                                 if (!empty($db_logo)) {
                                     $logo = trim((string) $db_logo);
-                                    $logo = preg_replace('#^(?:\./)+#', '', $logo);
-                                    $logo = preg_replace('#^(?:\.\./)+#', '', $logo);
-                                    $logo = preg_replace('#^/+#', '', $logo);
 
-                                    if (stripos($logo, 'uploads/') === 0) {
-                                        $logo = '../' . $logo;
-                                    } elseif (stripos($logo, 'companylogo/') === 0) {
-                                        $logo = '../uploads/' . $logo;
-                                    } elseif (stripos($logo, 'uploads/companylogo/') === 0) {
-                                        $logo = '../' . $logo;
-                                    } else {
-                                        $logo = '../uploads/companylogo/' . basename($logo);
+                                    if (!preg_match('#^https?://#i', $logo)) {
+                                        $logo = preg_replace('#^(?:\./)+#', '', $logo);
+                                        $logo = preg_replace('#^(?:\.\./)+#', '', $logo);
+                                        $logo = preg_replace('#^/+#', '', $logo);
+
+                                        if (stripos($logo, 'uploads/') === 0) {
+                                            $logo = '../' . $logo;
+                                        } elseif (stripos($logo, 'companylogo/') === 0) {
+                                            $logo = '../uploads/' . $logo;
+                                        } elseif (stripos($logo, 'uploads/companylogo/') === 0) {
+                                            $logo = '../' . $logo;
+                                        } else {
+                                            $logo = '../uploads/companylogo/' . basename($logo);
+                                        }
                                     }
                                 } else {
                                     $logo = '../uploads/companylogo/no-logo.png';

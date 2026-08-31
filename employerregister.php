@@ -213,29 +213,52 @@ include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
                 </div>
                 <div class="form-group">
                     <label><?php echo $lang['field_of_work']; ?></label>
-                    <select name="industry" required>
-                        <option value=""><?php echo $lang['choose_industry']; ?></option>
-                        <option value="IT"><?php echo $lang['industry_it_software']; ?></option>
-                        <option value="Marketing"><?php echo $lang['industry_marketing']; ?></option>
-                        <option value="Finance"><?php echo $lang['industry_finance']; ?></option>
-                        <option value="Healthcare"><?php echo $lang['industry_healthcare']; ?></option>
-                        <option value="Government & Public Sector"><?php echo $lang['industry_government']; ?></option>
-                        <option value="Education"><?php echo $lang['industry_education']; ?></option>
-                        <option value="Manufacturing"><?php echo $lang['industry_manufacturing']; ?></option>
-                        <option value="Retail"><?php echo $lang['industry_retail']; ?></option>
-                        <option value="Hospitality"><?php echo $lang['industry_hospitality']; ?></option>
-                        <option value="Telecommunications"><?php echo $lang['industry_telecommunications']; ?></option>
-                        <option value="Construction"><?php echo $lang['industry_construction']; ?></option>
-                        <option value="Media & Entertainment"><?php echo $lang['industry_media']; ?></option>
-                        <option value="Transportation & Logistics"><?php echo $lang['industry_transportation']; ?>
-                        </option>
-                        <option value="Energy & Utilities"><?php echo $lang['industry_energy']; ?></option>
-                        <option value="Real Estate"><?php echo $lang['industry_real_estate']; ?></option>
-                        <option value="Agriculture"><?php echo $lang['industry_agriculture']; ?></option>
-                        <option value="Consulting"><?php echo $lang['industry_consulting']; ?></option>
-                        <option value="Non-profit"><?php echo $lang['industry_non_profit']; ?></option>
-                        <option value="Others"><?php echo $lang['industry_others']; ?></option>
+                    <select id="jobCategory" name="industry" required>
+                        <option value=""><?php echo $lang['chon_nganh_nghe']; ?></option>
+                        <option value="kinh_doanh_ban_hang"><?php echo $lang['kinh_doanh_ban_hang']; ?></option>
+                        <option value="marketing_truyen_thong"><?php echo $lang['marketing_truyen_thong']; ?></option>
+                        <option value="tai_chinh_ke_toan_ngan_hang"><?php echo $lang['tai_chinh_ke_toan_ngan_hang']; ?></option>
+                        <option value="cong_nghe_thong_tin"><?php echo $lang['cong_nghe_thong_tin']; ?></option>
+                        <option value="nhan_su"><?php echo $lang['nhan_su']; ?></option>
+                        <option value="hanh_chinh_van_phong"><?php echo $lang['hanh_chinh_van_phong']; ?></option>
+                        <option value="ky_thuat"><?php echo $lang['ky_thuat']; ?></option>
+                        <option value="san_xuat_van_hanh_day_chuyen"><?php echo $lang['san_xuat_van_hanh_day_chuyen']; ?></option>
+                        <option value="van_tai_logistics"><?php echo $lang['van_tai_logistics']; ?></option>
+                        <option value="bat_dong_san"><?php echo $lang['bat_dong_san']; ?></option>
+                        <option value="bao_hiem"><?php echo $lang['bao_hiem']; ?></option>
+                        <option value="xay_dung_kien_truc"><?php echo $lang['xay_dung_kien_truc']; ?></option>
+                        <option value="y_te_duoc_pham"><?php echo $lang['y_te_duoc_pham']; ?></option>
+                        <option value="giao_duc_dao_tao"><?php echo $lang['giao_duc_dao_tao']; ?></option>
+                        <option value="du_lich_khach_san_nha_hang"><?php echo $lang['du_lich_khach_san_nha_hang']; ?></option>
+                        <option value="luat"><?php echo $lang['luat']; ?></option>
+                        <option value="thiet_ke_nghe_thuat"><?php echo $lang['thiet_ke_nghe_thuat']; ?></option>
+                        <option value="lao_dong_pho_thong"><?php echo $lang['lao_dong_pho_thong']; ?></option>
+                        <option value="nong_nghiep"><?php echo $lang['nong_nghiep']; ?></option>
+                        <option value="food_beverage"><?php echo $lang['food_beverage']; ?></option>
+                        <option value="nha_nuoc_cong_vu"><?php echo $lang['nha_nuoc_cong_vu']; ?></option>
+                        <option value="khac"><?php echo $lang['khac']; ?></option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="company_size_select"><?php echo $lang['post_job_form_company_size']; ?>:</label>
+                    <select id="company_size_select" onchange="toggleCustomInput()" required>
+                        <option value=""><?php echo $lang['post_job_form_company_size_select']; ?></option>
+                        <option value="1-10"><?php echo $lang['post_job_form_company_size_options']['1-10']; ?></option>
+                        <option value="11-50"><?php echo $lang['post_job_form_company_size_options']['11-50']; ?></option>
+                        <option value="51-200"><?php echo $lang['post_job_form_company_size_options']['51-200']; ?></option>
+                        <option value="201-500"><?php echo $lang['post_job_form_company_size_options']['201-500']; ?></option>
+                        <option value="501-1000"><?php echo $lang['post_job_form_company_size_options']['501-1000']; ?></option>
+                        <option value="1001-5000"><?php echo $lang['post_job_form_company_size_options']['1001-5000']; ?></option>
+                        <option value="5000+"><?php echo $lang['post_job_form_company_size_options']['5000+']; ?></option>
+                        <option value="unknown"><?php echo $lang['post_job_form_company_size_options']['unknown']; ?></option>
+                        <option value="other"><?php echo $lang['post_job_form_company_size_options']['other']; ?></option>
+                    </select>
+                    <input type="hidden" name="company_size" id="company_size">
+                    <div id="custom_input_wrapper" style="display: none; margin-top: 8px;">
+                        <input type="text" id="custom_company_size" name="custom_company_size"
+                            placeholder="<?php echo $lang['custom_companysize_placeholder']; ?>" title="Enter like 10-150 or 5000+">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -287,6 +310,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $companyname = $_POST['companyname'];
     $companyaddress = $_POST['companyaddress'];
     $industry = $_POST['industry'];
+    $company_size = trim((string) ($_POST['company_size'] ?? ''));
+    if (!empty($_POST['custom_company_size'])) {
+        $company_size = trim((string) $_POST['custom_company_size']);
+    }
 
     $company_logo_path = '';
     if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
@@ -347,7 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Validate input
-    if (empty($username) || empty($email) || empty($password) || empty($retypepass) || empty($companyname) || empty($companyaddress) || empty($industry)) {
+    if (empty($username) || empty($email) || empty($password) || empty($retypepass) || empty($companyname) || empty($companyaddress) || empty($industry) || empty($company_size)) {
         echo "<script>
             alert('" . addslashes($lang['all_fields_required']) . "');
             window.history.back();
@@ -388,7 +415,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             setTimeout(() => {
                 errorTooltip.remove();
-            }, 3000);
+            }, 10000);
             </script>";
         exit;
     }
@@ -405,8 +432,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Only insert into the company table if user_type is 'employer'
     if ($user_id) {
-        $stmt_company = $conn->prepare("INSERT INTO company (employer_id, company_name, company_address, industry, company_logo, banner_logo) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt_company->bind_param("isssss", $user_id, $companyname, $companyaddress, $industry, $company_logo_path, $banner_logo_path);
+        $stmt_company = $conn->prepare("INSERT INTO company (employer_id, company_name, company_address, industry, company_size, company_logo, banner_logo) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt_company->bind_param("issssss", $user_id, $companyname, $companyaddress, $industry, $company_size, $company_logo_path, $banner_logo_path);
         $stmt_company->execute();
         $stmt_company->close();
     }
@@ -430,10 +457,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $conn->close();
 ?>
 <script>
+    function toggleCustomInput() {
+        const select = document.getElementById('company_size_select');
+        const hiddenInput = document.getElementById('company_size');
+        const customWrapper = document.getElementById('custom_input_wrapper');
+        const customInput = document.getElementById('custom_company_size');
+
+        if (!select || !hiddenInput || !customWrapper || !customInput) {
+            return;
+        }
+
+        const selectedValue = select.value;
+
+        if (selectedValue === 'other') {
+            customWrapper.style.display = 'block';
+            customInput.required = true;
+            customInput.focus();
+            hiddenInput.value = customInput.value.trim();
+        } else {
+            customWrapper.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+            hiddenInput.value = selectedValue;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.querySelector('form');
         const termsCheckbox = document.querySelector('input[name="terms"]');
         const termsError = document.getElementById('terms-error');
+        const companySizeSelect = document.getElementById('company_size_select');
+        const companySizeHidden = document.getElementById('company_size');
+        const customCompanySize = document.getElementById('custom_company_size');
+
+        if (companySizeSelect) {
+            companySizeSelect.addEventListener('change', function () {
+                toggleCustomInput();
+            });
+        }
+
+        if (customCompanySize && companySizeHidden) {
+            customCompanySize.addEventListener('input', function () {
+                if (companySizeSelect && companySizeSelect.value === 'other') {
+                    companySizeHidden.value = customCompanySize.value.trim();
+                }
+            });
+        }
 
         form.addEventListener('submit', function (event) {
             if (!termsCheckbox.checked) {
@@ -447,6 +516,19 @@ $conn->close();
                 }, 3000);
             } else {
                 termsError.style.display = 'none';
+            }
+
+            if (companySizeSelect && companySizeSelect.value === 'other') {
+                const customValue = customCompanySize ? customCompanySize.value.trim() : '';
+                if (!customValue) {
+                    event.preventDefault();
+                    customCompanySize.focus();
+                    alert('<?php echo addslashes($lang['all_fields_required']); ?>');
+                    return;
+                }
+                if (companySizeHidden) {
+                    companySizeHidden.value = customValue;
+                }
             }
         });
     });

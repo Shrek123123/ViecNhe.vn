@@ -64,6 +64,37 @@ if (!$company_data && $company_id > 0) {
     exit();
 }
 
+$company_logo_preview = trim((string) ($company_data['company_logo'] ?? ''));
+$banner_logo_preview = trim((string) ($company_data['banner_logo'] ?? ''));
+$company_size_value = trim((string) ($company_data['company_size'] ?? ''));
+$company_size_is_custom = $company_size_value !== '' && !in_array($company_size_value, ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001-5000', '5000+', 'unknown'], true);
+
+foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview' => $banner_logo_preview] as $key => $value) {
+    if ($value === '' || preg_match('#^https?://#i', $value)) {
+        continue;
+    }
+
+    $normalized = preg_replace('#^(?:\./)+#', '', $value);
+    $normalized = preg_replace('#^(?:\.\./)+#', '', $normalized);
+    $normalized = preg_replace('#^/+#', '', $normalized);
+
+    if (stripos($normalized, 'uploads/') === 0) {
+        $normalized = '../' . $normalized;
+    } elseif (stripos($normalized, 'companylogo/') === 0) {
+        $normalized = '../uploads/' . $normalized;
+    } elseif (stripos($normalized, 'uploads/companylogo/') === 0) {
+        $normalized = '../' . $normalized;
+    } else {
+        $normalized = '../uploads/companylogo/' . basename($normalized);
+    }
+
+    if ($key === 'company_logo_preview') {
+        $company_logo_preview = $normalized;
+    } else {
+        $banner_logo_preview = $normalized;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -897,6 +928,26 @@ if (!$company_data && $company_id > 0) {
                                 </div>
 
                                 <div class="form-group full-width">
+                                    <label for="company_size_select" class="form-label"><?= $lang['post_job_form_company_size'] ?></label>
+                                    <select id="company_size_select" name="company_size_select" class="form-input" onchange="toggleCustomInput()" required>
+                                        <option value=""><?= $lang['post_job_form_company_size_select'] ?></option>
+                                        <option value="1-10" <?= ($company_size_value === '1-10') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['1-10'] ?></option>
+                                        <option value="11-50" <?= ($company_size_value === '11-50') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['11-50'] ?></option>
+                                        <option value="51-200" <?= ($company_size_value === '51-200') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['51-200'] ?></option>
+                                        <option value="201-500" <?= ($company_size_value === '201-500') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['201-500'] ?></option>
+                                        <option value="501-1000" <?= ($company_size_value === '501-1000') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['501-1000'] ?></option>
+                                        <option value="1001-5000" <?= ($company_size_value === '1001-5000') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['1001-5000'] ?></option>
+                                        <option value="5000+" <?= ($company_size_value === '5000+') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['5000+'] ?></option>
+                                        <option value="unknown" <?= ($company_size_value === 'unknown') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['unknown'] ?></option>
+                                        <option value="other" <?= ($company_size_is_custom || $company_size_value === 'other') ? 'selected' : '' ?>><?= $lang['post_job_form_company_size_options']['other'] ?></option>
+                                    </select>
+                                    <input type="hidden" name="company_size" id="company_size" value="<?= htmlspecialchars((string) $company_size_value, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <div id="custom_input_wrapper" style="display: <?= ($company_size_is_custom || $company_size_value === 'other') ? 'block' : 'none'; ?>; margin-top: 8px;">
+                                        <input type="text" id="custom_company_size" name="custom_company_size" value="<?= htmlspecialchars((string) (($company_size_is_custom || $company_size_value === 'other') ? $company_size_value : ''), ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?= $lang['custom_companysize_placeholder']; ?>" title="Enter like 10-150 or 5000+">
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
                                     <label for="information" class="form-label"><?= $lang['company_information_label'] ?></label>
                                     <textarea id="information" name="information" class="form-textarea"><?= htmlspecialchars((string) ($company_data['information'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
                                 </div>
@@ -905,8 +956,8 @@ if (!$company_data && $company_id > 0) {
                                     <label for="companyLogo" class="form-label"><?= $lang['company_logo_label'] ?></label>
                                     <?php if (!empty($company_data['company_logo'])): ?>
                                         <div class="preview-box">
-                                            <p style="font-size: 14px; color: #666; margin: 0 0 10px;"><?= $lang['current_file'] ?? 'Current file' ?>: <?= htmlspecialchars(basename((string) $company_data['company_logo'])); ?></p>
-                                            <img src="<?= htmlspecialchars((string) $company_data['company_logo']); ?>" alt="Company Logo">
+                                            <p style="font-size: 14px; color: #666; margin: 0 0 10px;"><?= $lang['current_file'] ?? 'Current file' ?>: <?= htmlspecialchars(basename((string) $company_logo_preview)); ?></p>
+                                            <img src="<?= htmlspecialchars((string) $company_logo_preview); ?>" alt="Company Logo">
                                         </div>
                                     <?php endif; ?>
                                     <input type="file" id="companyLogo" name="company_logo" accept=".jpg,.jpeg,.png,.gif,.webp" class="form-file">
@@ -918,8 +969,8 @@ if (!$company_data && $company_id > 0) {
                                     <label for="bannerLogo" class="form-label"><?= $lang['banner_logo_label'] ?></label>
                                     <?php if (!empty($company_data['banner_logo'])): ?>
                                         <div class="preview-box">
-                                            <p style="font-size: 14px; color: #666; margin: 0 0 10px;"><?= $lang['current_file'] ?? 'Current file' ?>: <?= htmlspecialchars(basename((string) $company_data['banner_logo'])); ?></p>
-                                            <img src="<?= htmlspecialchars((string) $company_data['banner_logo']); ?>" alt="Banner Logo">
+                                            <p style="font-size: 14px; color: #666; margin: 0 0 10px;"><?= $lang['current_file'] ?? 'Current file' ?>: <?= htmlspecialchars(basename((string) $banner_logo_preview)); ?></p>
+                                            <img src="<?= htmlspecialchars((string) $banner_logo_preview); ?>" alt="Banner Logo">
                                         </div>
                                     <?php endif; ?>
                                     <input type="file" id="bannerLogo" name="banner_logo" accept=".jpg,.jpeg,.png,.gif,.webp" class="form-file">
@@ -938,6 +989,30 @@ if (!$company_data && $company_id > 0) {
                     <script>
                         const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                         const maxImageSize = 5 * 1024 * 1024;
+
+                        function toggleCustomInput() {
+                            const select = document.getElementById('company_size_select');
+                            const hiddenInput = document.getElementById('company_size');
+                            const customWrapper = document.getElementById('custom_input_wrapper');
+                            const customInput = document.getElementById('custom_company_size');
+
+                            if (!select || !hiddenInput || !customWrapper || !customInput) {
+                                return;
+                            }
+
+                            const selectedValue = select.value;
+                            if (selectedValue === 'other') {
+                                customWrapper.style.display = 'block';
+                                customInput.required = true;
+                                customInput.focus();
+                                hiddenInput.value = customInput.value.trim();
+                            } else {
+                                customWrapper.style.display = 'none';
+                                customInput.required = false;
+                                customInput.value = '';
+                                hiddenInput.value = selectedValue;
+                            }
+                        }
 
                         function attachImagePreview(inputId, previewId) {
                             const input = document.getElementById(inputId);
@@ -980,8 +1055,29 @@ if (!$company_data && $company_id > 0) {
                         attachImagePreview('companyLogo', 'companyLogoPreview');
                         attachImagePreview('bannerLogo', 'bannerLogoPreview');
 
+                        const companySizeSelect = document.getElementById('company_size_select');
+                        const companySizeHidden = document.getElementById('company_size');
+                        const customCompanySize = document.getElementById('custom_company_size');
+
+                        if (companySizeSelect) {
+                            companySizeSelect.addEventListener('change', toggleCustomInput);
+                        }
+
+                        if (customCompanySize && companySizeHidden) {
+                            customCompanySize.addEventListener('input', function () {
+                                if (companySizeSelect && companySizeSelect.value === 'other') {
+                                    companySizeHidden.value = customCompanySize.value.trim();
+                                }
+                            });
+                        }
+
                         document.getElementById('companyProfileForm').onsubmit = function(e) {
                             e.preventDefault();
+
+                            if (!companySizeHidden || !companySizeHidden.value.trim()) {
+                                alert('<?php echo addslashes($lang['post_job_form_company_size_select'] ?? 'Please select company size.'); ?>');
+                                return;
+                            }
 
                             const formData = new FormData(this);
                             const filesToCheck = ['company_logo', 'banner_logo'];

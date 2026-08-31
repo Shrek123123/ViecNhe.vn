@@ -778,8 +778,25 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                             if ($logo === '') {
                                 $logo = trim((string) ($company['banner_logo'] ?? ''));
                             }
-                            if ($logo === '') {
-                                $logo = '../image/logo.png';
+
+                            if (!empty($logo)) {
+                                if (!preg_match('#^https?://#i', $logo)) {
+                                    $logo = preg_replace('#^(?:\./)+#', '', $logo);
+                                    $logo = preg_replace('#^(?:\.\./)+#', '', $logo);
+                                    $logo = preg_replace('#^/+#', '', $logo);
+
+                                    if (stripos($logo, 'uploads/') === 0) {
+                                        $logo = '../' . $logo;
+                                    } elseif (stripos($logo, 'companylogo/') === 0) {
+                                        $logo = '../uploads/' . $logo;
+                                    } elseif (stripos($logo, 'uploads/companylogo/') === 0) {
+                                        $logo = '../' . $logo;
+                                    } else {
+                                        $logo = '../uploads/companylogo/' . basename($logo);
+                                    }
+                                }
+                            } else {
+                                $logo = '../uploads/companylogo/no-logo.png';
                             }
                             $company_name = htmlspecialchars($company['company_name'] ?? '');
                             $company_address = htmlspecialchars($company['company_address'] ?? '');

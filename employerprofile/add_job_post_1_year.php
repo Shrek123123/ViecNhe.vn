@@ -44,12 +44,47 @@ if (!isset($_SESSION['usernameemployer'])) {
   </script>";
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $companyName = $_POST['companyName'];
-    $companySize = $_POST['company_size']; // This will be set by the hidden input
-    if (isset($_POST['custom_company_size']) && !empty($_POST['custom_company_size'])) {
-        $companySize = $_POST['custom_company_size'];
+$employerid = isset($_SESSION['employerid']) ? (int) $_SESSION['employerid'] : 0;
+$company_options = [];
+if ($employerid > 0 && isset($conn)) {
+    $company_options_stmt = $conn->prepare("SELECT id, company_name, company_address, industry, company_size, company_logo FROM company WHERE employer_id = ? ORDER BY company_name ASC");
+    if ($company_options_stmt) {
+        $company_options_stmt->bind_param('i', $employerid);
+        $company_options_stmt->execute();
+        $company_options_result = $company_options_stmt->get_result();
+        while ($company_row = $company_options_result->fetch_assoc()) {
+            $company_options[] = [
+                'id' => (int) $company_row['id'],
+                'company_name' => $company_row['company_name'] ?? '',
+                'company_address' => $company_row['company_address'] ?? '',
+                'industry' => $company_row['industry'] ?? '',
+                'company_size' => $company_row['company_size'] ?? '',
+                'company_logo' => $company_row['company_logo'] ?? '',
+            ];
+        }
+        $company_options_stmt->close();
     }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $selected_company_id = isset($_POST['selected_company_id']) ? (int) $_POST['selected_company_id'] : 0;
+    $company = null;
+    if ($selected_company_id > 0 && isset($conn)) {
+        $selected_company_stmt = $conn->prepare("SELECT id, company_name, company_address, industry, company_size, company_logo FROM company WHERE id = ? AND employer_id = ? LIMIT 1");
+        if ($selected_company_stmt) {
+            $selected_company_stmt->bind_param('ii', $selected_company_id, $employerid);
+            $selected_company_stmt->execute();
+            $selected_company_result = $selected_company_stmt->get_result();
+            $company = $selected_company_result->fetch_assoc();
+            $selected_company_stmt->close();
+        }
+    }
+
+    $companyName = $company['company_name'] ?? '';
+    $companyAddress = $company['company_address'] ?? '';
+    $companySize = $company['company_size'] ?? '';
+    $industry = $company['industry'] ?? '';
+    $companyLogo = $company['company_logo'] ?? '';
     $jobRequirementText = $_POST['jobRequirementText'];
     $jobBenefit = $_POST['jobBenefit'];
     $jobTitle = $_POST['jobTitle'];
@@ -74,65 +109,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $employerid = $_SESSION['employerid'];
 
-    // Handle file upload
-    if (isset($_FILES['companylogo'])) {
-        $error = $_FILES['companylogo']['error'];
-        if ($error == 1) {
-            echo "<script>alert('File quá lớn so với cấu hình server. Vui lòng giảm kích thước ảnh <2MB.'); window.history.back();</script>";
-            exit;
-        } elseif ($error == 2) {
-            echo "<script>alert('File quá lớn so với form. Vui lòng giảm kích thước ảnh <2MB.'); window.history.back();</script>";
-            exit;
-        } elseif ($error != 0) {
-            echo "<script>alert('Lỗi upload file. Mã lỗi: $error'); window.history.back();</script>";
-            exit;
-        }
-    }
-    if (isset($_FILES['companylogo']) && $_FILES['companylogo']['error'] == 0) {
-        $targetDir = "../uploads/companylogo/";
-        if (!is_dir($targetDir)) {
-            if (!mkdir($targetDir, 0777, true)) {
-                echo "<script>alert('Failed to create upload directory.');</script>";
-                exit;
-            }
-        }
-        $fileName = basename($_FILES["companylogo"]["name"]);
-        $fileName = preg_replace("/[^a-zA-Z0-9\.\-_]/", "_", $fileName); // Sanitize file name
-        $targetFile = $targetDir . uniqid() . "_" . $fileName;
-        $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
-
-        // Check file size (2MB limit)
-        if ($_FILES["companylogo"]["size"] > 2000000) {
-            echo "<script>alert('Vui lòng đăng ảnh <2MB đi.');</script>";
-            exit;
-        }
-
-        // Allow certain file formats
-        $allowedTypes = ['jpg', 'png', 'jpeg', 'gif'];
-        if (!in_array($fileType, $allowedTypes)) {
-            echo "<script>
-      alert('Sorry, only JPG, JPEG, PNG & GIF files are allowed.');
-      window.history.back();
-      </script>";
-            exit;
-        }
-
-        // Upload file
-        if (!move_uploaded_file($_FILES["companylogo"]["tmp_name"], $targetFile)) {
-            echo "<script>alert('Sorry, there was an error uploading your file.');
-      window.history.back();
-      </script>";
-            exit;
-        }
-    } else {
-        $targetFile = ""; // No file uploaded
-    }
-    if (empty($targetFile)) {
-        $targetFile = "../uploads/default.png"; // Default image if no upload
-    }
-
-    // Loại bỏ "../" khỏi đường dẫn để lưu đường dẫn gốc vào DB
-    $targetFile = str_replace("../", "", $targetFile);
+// Use the selected company's existing logo instead of uploading a new company logo here.
+  $companyLogo = trim((string) ($company['company_logo'] ?? ''));
+  if ($companyLogo === '') {
+    $companyLogo = 'uploads/default.png';
+  }
+  $companyLogo = preg_replace('#^(?:\./)+#', '', $companyLogo);
+  $companyLogo = preg_replace('#^(?:\.\./)+#', '', $companyLogo);
+  $companyLogo = preg_replace('#^/+#', '', $companyLogo);
 
     // Validate required fields
     // $requiredFields = [
@@ -181,33 +165,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $new_job_number = $last_number + 1;
 
-  $company_id = null;
-  $company_check_sql = "SELECT id FROM company WHERE employer_id = ? LIMIT 1";
-  $stmt_company_check = $conn->prepare($company_check_sql);
-  if ($stmt_company_check) {
-    $stmt_company_check->bind_param("i", $employerid);
-    $stmt_company_check->execute();
-    $company_result = $stmt_company_check->get_result();
-    $company_row = $company_result ? $company_result->fetch_assoc() : null;
-    $company_id = $company_row['id'] ?? null;
-    $stmt_company_check->close();
-  }
-
+  $company_id = $selected_company_id > 0 ? $selected_company_id : null;
   if (!$company_id) {
-    $company_insert_sql = "INSERT INTO company (employer_id, company_name, company_address, industry, information, company_logo, banner_logo) VALUES (?, ?, ?, ?, '', '', '')";
-    $stmt_company_insert = $conn->prepare($company_insert_sql);
-    if (!$stmt_company_insert) {
-      echo "<script>alert('Error creating company record: {$conn->error}');</script>";
-      exit;
-    }
-
-    $stmt_company_insert->bind_param("isss", $employerid, $companyName, $jobLocation, $jobCategory);
-    if (!$stmt_company_insert->execute()) {
-      echo "<script>alert('Error creating company record: {$stmt_company_insert->error}');</script>";
-      exit;
-    }
-    $company_id = $stmt_company_insert->insert_id;
-    $stmt_company_insert->close();
+    echo "<script>alert('Vui lòng chọn công ty đã đăng ký để tạo bài đăng.'); window.history.back();</script>";
+    exit;
   }
 
   $job_insert_sql = "INSERT INTO job (
@@ -251,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     '" . $conn->real_escape_string($jobCategory) . "',
     '" . $conn->real_escape_string($requiredcertification) . "',
     '" . $conn->real_escape_string($jobExperience) . "',
-    '" . $conn->real_escape_string($targetFile) . "',
+    '" . $conn->real_escape_string($companyLogo) . "',
     '" . $conn->real_escape_string($jobRequirementText) . "',
     '" . $conn->real_escape_string($jobBenefit) . "',
     '" . $conn->real_escape_string($companySize) . "',
@@ -765,6 +726,18 @@ if ($employerid > 0 && isset($conn) && $conn->ping()) {
             font-size: 14px;
         }
 
+        .readonly-field {
+            background-color: #e5e7eb !important;
+            color: #4b5563 !important;
+            border-color: #d1d5db !important;
+            cursor: not-allowed;
+        }
+
+        .readonly-field:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
         .form-group textarea {
             min-height: 70px;
             resize: vertical;
@@ -953,54 +926,40 @@ if ($employerid > 0 && isset($conn) && $conn->ping()) {
                                 <!-- CỘT TRÁI -->
                                 <div class="form-column">
 
-                                    <!-- Company Name -->
+                                    <!-- Select company -->
                                     <div class="form-group">
-                                        <label><?= $lang['post_job_form_company_name']; ?></label>
-                                        <input type="text" name="companyName" placeholder="<?= $lang['required']; ?>"
-                                            required>
+                                        <label><?= $lang['choose_company']; ?></label>
+                                        <select id="company_select" name="selected_company_id" required>
+                                            <option value=""><?= $lang['post_job_form_company_name_select'] ?? '-- Chọn công ty --'; ?></option>
+                                            <?php foreach ($company_options as $company_option): ?>
+                                                <option value="<?= (int) $company_option['id']; ?>"
+                                                    data-company_name="<?= htmlspecialchars($company_option['company_name'], ENT_QUOTES); ?>"
+                                                    data-company_address="<?= htmlspecialchars($company_option['company_address'], ENT_QUOTES); ?>"
+                                                    data-company_size="<?= htmlspecialchars($company_option['company_size'], ENT_QUOTES); ?>"
+                                                    data-company_industry="<?= htmlspecialchars($company_option['industry'], ENT_QUOTES); ?>"
+                                                    data-company_logo="<?= htmlspecialchars($company_option['company_logo'], ENT_QUOTES); ?>">
+                                                    <?= htmlspecialchars($company_option['company_name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
 
-                                    <!-- Company Size -->
+                                    <!-- Company Name (readonly display) -->
+                                    <div class="form-group">
+                                        <label><?= $lang['post_job_form_company_name']; ?></label>
+                                        <input type="text" id="company_name_display" class="readonly-field" readonly placeholder="<?= $lang['required']; ?>">
+                                    </div>
+
+                                    <!-- Company Address (readonly display) -->
+                                    <div class="form-group">
+                                        <label><?= $lang['company_address']; ?></label>
+                                        <input type="text" id="company_address_display" class="readonly-field" readonly placeholder="<?= $lang['required']; ?>">
+                                    </div>
+
+                                    <!-- Company Size (readonly display) -->
                                     <div class="form-group">
                                         <label><?= $lang['post_job_form_company_size']; ?></label>
-
-                                        <select id="company_size_select" onchange="toggleCustomInput()" required>
-                                            <option value=""><?= $lang['post_job_form_company_size_select']; ?></option>
-                                            <option value="1-10">
-                                                <?= $lang['post_job_form_company_size_options']['1-10']; ?>
-                                            </option>
-                                            <option value="11-50">
-                                                <?= $lang['post_job_form_company_size_options']['11-50']; ?>
-                                            </option>
-                                            <option value="51-200">
-                                                <?= $lang['post_job_form_company_size_options']['51-200']; ?>
-                                            </option>
-                                            <option value="201-500">
-                                                <?= $lang['post_job_form_company_size_options']['201-500']; ?>
-                                            </option>
-                                            <option value="501-1000">
-                                                <?= $lang['post_job_form_company_size_options']['501-1000']; ?>
-                                            </option>
-                                            <option value="1001-5000">
-                                                <?= $lang['post_job_form_company_size_options']['1001-5000']; ?>
-                                            </option>
-                                            <option value="5000+">
-                                                <?= $lang['post_job_form_company_size_options']['5000+']; ?>
-                                            </option>
-                                            <option value="unknown">
-                                                <?= $lang['post_job_form_company_size_options']['unknown']; ?>
-                                            </option>
-                                            <option value="other">
-                                                <?= $lang['post_job_form_company_size_options']['other']; ?>
-                                            </option>
-                                        </select>
-
-                                        <input type="hidden" name="company_size" id="company_size">
-
-                                        <div id="custom_input_wrapper" style="display:none; margin-top:6px;">
-                                            <input type="text" id="custom_company_size" name="custom_company_size"
-                                                placeholder="<?= $lang['custom_companysize_placeholder']; ?>">
-                                        </div>
+                                        <input type="text" id="company_size_display" class="readonly-field" readonly placeholder="<?= $lang['required']; ?>">
                                     </div>
 
                                     <!-- Job Title -->
@@ -1185,10 +1144,20 @@ if ($employerid > 0 && isset($conn) && $conn->ping()) {
                                             placeholder="<?= $lang['job_benefit_placeholder']; ?>"></textarea>
                                     </div>
 
-                                    <!-- Logo -->
+                                    <!-- Company Industry (readonly display) -->
+                                    <div class="form-group">
+                                        <label><?= $lang['field_of_work']; ?></label>
+                                        <input type="text" id="company_industry_display" class="readonly-field" readonly placeholder="<?= $lang['required']; ?>">
+                                    </div>
+
+                                    <!-- Company Logo (readonly display) -->
                                     <div class="form-group">
                                         <label><?= $lang['post_job_form_company_logo']; ?></label>
-                                        <input type="file" name="companylogo" accept="image/*">
+                                        <div class="company-logo-preview" style="display:flex; align-items:center; justify-content:center; min-height:90px; background:#f7f7f7; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+                                            <a id="company_logo_link" href="" target="_blank" rel="noopener noreferrer" style="display:none;">
+                                                <img id="company_logo_preview" src="" alt="company logo" style="max-width:120px; max-height:90px; object-fit:contain;">
+                                            </a>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -1335,12 +1304,12 @@ if ($employerid > 0 && isset($conn) && $conn->ping()) {
             const customWrapper = document.getElementById('custom_input_wrapper');
             const hiddenInput = document.getElementById('company_size');
 
-            if (select.value === 'other') {
-                customWrapper.style.display = 'block';
-                hiddenInput.value = ''; // chờ người dùng gõ
+            if (select && select.value === 'other') {
+                if (customWrapper) customWrapper.style.display = 'block';
+                if (hiddenInput) hiddenInput.value = '';
             } else {
-                customWrapper.style.display = 'none';
-                hiddenInput.value = select.value;
+                if (customWrapper) customWrapper.style.display = 'none';
+                if (hiddenInput && select) hiddenInput.value = select.value;
             }
         }
 
@@ -1349,20 +1318,98 @@ if ($employerid > 0 && isset($conn) && $conn->ping()) {
             const customWrapper = document.getElementById('custom_input_wrapper2');
             const hiddenInput = document.getElementById('jobCategoryHidden');
 
-            if (select.value === 'khac') {
-                customWrapper.style.display = 'block';
-                hiddenInput.value = ''; // chờ người dùng gõ
+            if (select && select.value === 'khac') {
+                if (customWrapper) customWrapper.style.display = 'block';
+                if (hiddenInput) hiddenInput.value = '';
             } else {
-                customWrapper.style.display = 'none';
-                hiddenInput.value = select.value;
+                if (customWrapper) customWrapper.style.display = 'none';
+                if (hiddenInput && select) hiddenInput.value = select.value;
             }
         }
 
         function updateHiddenInput() {
             const customInput = document.getElementById('custom_company_size');
             const hiddenInput = document.getElementById('company_size');
-            hiddenInput.value = customInput.value;
+            if (customInput && hiddenInput) {
+                hiddenInput.value = customInput.value;
+            }
         }
+
+        function normalizeCompanyLogoUrl(logoValue) {
+            if (!logoValue) return '';
+            const trimmed = logoValue.trim();
+            if (!trimmed) return '';
+            if (/^(https?:)?\/\//i.test(trimmed)) return trimmed;
+            if (trimmed.startsWith('/')) return trimmed;
+            if (trimmed.startsWith('../')) return trimmed;
+            if (trimmed.startsWith('uploads/')) return '../' + trimmed;
+            if (trimmed.startsWith('companylogo/')) return '../' + trimmed;
+            return trimmed;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const companySelect = document.getElementById('company_select');
+            const companyNameDisplay = document.getElementById('company_name_display');
+            const companyAddressDisplay = document.getElementById('company_address_display');
+            const companySizeDisplay = document.getElementById('company_size_display');
+            const companyIndustryDisplay = document.getElementById('company_industry_display');
+            const companyLogoPreview = document.getElementById('company_logo_preview');
+            const companyLogoLink = document.getElementById('company_logo_link');
+
+            if (!companySelect) {
+                return;
+            }
+
+            const companyData = Array.from(companySelect.options).filter(option => option.value).map(option => ({
+                id: option.value,
+                company_name: option.dataset.company_name || '',
+                company_address: option.dataset.company_address || '',
+                company_size: option.dataset.company_size || '',
+                company_industry: option.dataset.company_industry || '',
+                company_logo: option.dataset.company_logo || ''
+            }));
+
+            function fillCompanyInfo() {
+                const selected = companyData.find(item => String(item.id) === String(companySelect.value));
+
+                if (!selected) {
+                    if (companyNameDisplay) companyNameDisplay.value = '';
+                    if (companyAddressDisplay) companyAddressDisplay.value = '';
+                    if (companySizeDisplay) companySizeDisplay.value = '';
+                    if (companyIndustryDisplay) companyIndustryDisplay.value = '';
+                    if (companyLogoPreview) companyLogoPreview.src = '';
+                    if (companyLogoLink) {
+                        companyLogoLink.href = '';
+                        companyLogoLink.style.display = 'none';
+                    }
+                    return;
+                }
+
+                if (companyNameDisplay) companyNameDisplay.value = selected.company_name || '';
+                if (companyAddressDisplay) companyAddressDisplay.value = selected.company_address || '';
+                if (companySizeDisplay) companySizeDisplay.value = selected.company_size || '';
+                if (companyIndustryDisplay) companyIndustryDisplay.value = selected.company_industry || '';
+                if (companyLogoPreview) {
+                    const logoValue = normalizeCompanyLogoUrl(selected.company_logo || '');
+                    if (logoValue) {
+                        companyLogoPreview.src = logoValue;
+                        if (companyLogoLink) {
+                            companyLogoLink.href = logoValue;
+                            companyLogoLink.style.display = 'inline-block';
+                        }
+                    } else {
+                        companyLogoPreview.src = '';
+                        if (companyLogoLink) {
+                            companyLogoLink.href = '';
+                            companyLogoLink.style.display = 'none';
+                        }
+                    }
+                }
+            }
+
+            companySelect.addEventListener('change', fillCompanyInfo);
+            fillCompanyInfo();
+        });
     </script>
 
 </html>

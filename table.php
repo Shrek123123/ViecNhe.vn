@@ -77,6 +77,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS company (
     company_name VARCHAR(100) NOT NULL,
     company_address VARCHAR(255) NOT NULL,
     industry VARCHAR(100) NOT NULL,
+    company_size VARCHAR(50),
     information TEXT,
     company_logo VARCHAR(255),
     banner_logo VARCHAR(255),
@@ -163,6 +164,22 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS feedback (
 )");
 if ($stmt === TRUE) {
     echo "Table feedback created successfully <br>";
+} else {
+    echo "Error creating table: " . $conn->error;
+}
+
+// Tạo bảng company_followers
+$stmt = $conn->query("CREATE TABLE IF NOT EXISTS company_followers (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT UNSIGNED NOT NULL,
+    jobseeker_id INT UNSIGNED NOT NULL,
+    followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (company_id, jobseeker_id),
+    FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE,
+    FOREIGN KEY (jobseeker_id) REFERENCES user(id) ON DELETE CASCADE
+)");
+if ($stmt === TRUE) {
+    echo "Table company_followers created successfully <br>";
 } else {
     echo "Error creating table: " . $conn->error;
 }

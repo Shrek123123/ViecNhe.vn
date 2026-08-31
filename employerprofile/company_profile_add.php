@@ -895,6 +895,26 @@ if (!$company_data && $company_id > 0) {
                                 </div>
 
                                 <div class="form-group full-width">
+                                    <label for="company_size_select" class="form-label"><?= $lang['post_job_form_company_size'] ?></label>
+                                    <select id="company_size_select" name="company_size_select" class="form-input" onchange="toggleCustomInput()" required>
+                                        <option value=""><?= $lang['post_job_form_company_size_select'] ?></option>
+                                        <option value="1-10"><?= $lang['post_job_form_company_size_options']['1-10'] ?></option>
+                                        <option value="11-50"><?= $lang['post_job_form_company_size_options']['11-50'] ?></option>
+                                        <option value="51-200"><?= $lang['post_job_form_company_size_options']['51-200'] ?></option>
+                                        <option value="201-500"><?= $lang['post_job_form_company_size_options']['201-500'] ?></option>
+                                        <option value="501-1000"><?= $lang['post_job_form_company_size_options']['501-1000'] ?></option>
+                                        <option value="1001-5000"><?= $lang['post_job_form_company_size_options']['1001-5000'] ?></option>
+                                        <option value="5000+"><?= $lang['post_job_form_company_size_options']['5000+'] ?></option>
+                                        <option value="unknown"><?= $lang['post_job_form_company_size_options']['unknown'] ?></option>
+                                        <option value="other"><?= $lang['post_job_form_company_size_options']['other'] ?></option>
+                                    </select>
+                                    <input type="hidden" name="company_size" id="company_size">
+                                    <div id="custom_input_wrapper" style="display: none; margin-top: 8px;">
+                                        <input type="text" id="custom_company_size" name="custom_company_size" placeholder="<?= $lang['custom_companysize_placeholder']; ?>" title="Enter like 10-150 or 5000+">
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
                                     <label for="information" class="form-label"><?= $lang['company_information_label'] ?></label>
                                     <textarea id="information" name="information" class="form-textarea"></textarea>
                                 </div>
@@ -924,6 +944,30 @@ if (!$company_data && $company_id > 0) {
                     <script>
                         const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                         const maxImageSize = 5 * 1024 * 1024;
+
+                        function toggleCustomInput() {
+                            const select = document.getElementById('company_size_select');
+                            const hiddenInput = document.getElementById('company_size');
+                            const customWrapper = document.getElementById('custom_input_wrapper');
+                            const customInput = document.getElementById('custom_company_size');
+
+                            if (!select || !hiddenInput || !customWrapper || !customInput) {
+                                return;
+                            }
+
+                            const selectedValue = select.value;
+                            if (selectedValue === 'other') {
+                                customWrapper.style.display = 'block';
+                                customInput.required = true;
+                                customInput.focus();
+                                hiddenInput.value = customInput.value.trim();
+                            } else {
+                                customWrapper.style.display = 'none';
+                                customInput.required = false;
+                                customInput.value = '';
+                                hiddenInput.value = selectedValue;
+                            }
+                        }
 
                         function attachImagePreview(inputId, previewId) {
                             const input = document.getElementById(inputId);
@@ -966,8 +1010,29 @@ if (!$company_data && $company_id > 0) {
                         attachImagePreview('companyLogo', 'companyLogoPreview');
                         attachImagePreview('bannerLogo', 'bannerLogoPreview');
 
+                        const companySizeSelect = document.getElementById('company_size_select');
+                        const companySizeHidden = document.getElementById('company_size');
+                        const customCompanySize = document.getElementById('custom_company_size');
+
+                        if (companySizeSelect) {
+                            companySizeSelect.addEventListener('change', toggleCustomInput);
+                        }
+
+                        if (customCompanySize && companySizeHidden) {
+                            customCompanySize.addEventListener('input', function () {
+                                if (companySizeSelect && companySizeSelect.value === 'other') {
+                                    companySizeHidden.value = customCompanySize.value.trim();
+                                }
+                            });
+                        }
+
                         document.getElementById('companyProfileForm').onsubmit = function(e) {
                             e.preventDefault();
+
+                            if (!companySizeHidden || !companySizeHidden.value.trim()) {
+                                alert('<?php echo addslashes($lang['post_job_form_company_size_select'] ?? 'Please select company size.'); ?>');
+                                return;
+                            }
 
                             const formData = new FormData(this);
                             const filesToCheck = ['company_logo', 'banner_logo'];

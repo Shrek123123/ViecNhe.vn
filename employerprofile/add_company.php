@@ -13,10 +13,14 @@ $employerid = (int) $_SESSION['employerid'];
 $company_name = trim((string) ($_POST['company_name'] ?? ''));
 $company_address = trim((string) ($_POST['company_address'] ?? ''));
 $industry = trim((string) ($_POST['industry'] ?? ''));
+$company_size = trim((string) ($_POST['company_size'] ?? ''));
+if (!empty($_POST['custom_company_size'])) {
+    $company_size = trim((string) $_POST['custom_company_size']);
+}
 $information = trim((string) ($_POST['information'] ?? ''));
 
-if ($company_name === '' || $company_address === '' || $industry === '') {
-    echo json_encode(['success' => false, 'message' => 'Company name, address and industry are required.']);
+if ($company_name === '' || $company_address === '' || $industry === '' || $company_size === '') {
+    echo json_encode(['success' => false, 'message' => 'Company name, address, industry and company size are required.']);
     exit();
 }
 
@@ -88,14 +92,14 @@ if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_
     }
 }
 
-$sql = "INSERT INTO company (employer_id, company_name, company_address, industry, information, company_logo, banner_logo) VALUES (?, ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO company (employer_id, company_name, company_address, industry, company_size, information, company_logo, banner_logo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Prepare failed: ' . $conn->error]);
     exit();
 }
 
-$stmt->bind_param("issssss", $employerid, $company_name, $company_address, $industry, $information, $company_logo, $banner_logo);
+$stmt->bind_param("isssssss", $employerid, $company_name, $company_address, $industry, $company_size, $information, $company_logo, $banner_logo);
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true, 'message' => 'Company added successfully']);

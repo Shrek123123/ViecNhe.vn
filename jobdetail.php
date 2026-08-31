@@ -133,12 +133,20 @@ require_once 'helpers.php';
                     // Lấy thông tin job
                     $job = null;
                     if ($job_id > 0) {
-                        $stmt = $conn->prepare("SELECT * FROM job WHERE id = ?");
+                        $stmt = $conn->prepare(
+                            "SELECT j.*, c.company_name, c.company_logo, c.industry, c.company_size, c.company_address, c.banner_logo " .
+                            "FROM job j LEFT JOIN company c ON c.id = j.company_id WHERE j.id = ?"
+                        );
                         $stmt->bind_param("i", $job_id);
                         $stmt->execute();
                         $result = $stmt->get_result();
                         $job = $result->fetch_assoc();
                         $stmt->close();
+                    }
+
+                    $job_company_logo = normalizeAssetPath(trim((string) ($job['company_logo'] ?? '')));
+                    if ($job_company_logo === '') {
+                        $job_company_logo = 'image/logo1.png';
                     }
 
                     // Lấy số người quan tâm
@@ -162,7 +170,7 @@ require_once 'helpers.php';
                     ?>
                     <div class="bg-white p-3 mb-4 shadow rounded ">
                         <div class="d-flex align-items-center gap-3 mb-3">
-                            <img src="<?= htmlspecialchars($job['company_logo'] ?? 'image/logo1.png') ?>"
+                            <img src="<?= htmlspecialchars($job_company_logo) ?>"
                                  alt="Company Logo"
                                  style="width: 80px; height: 80px; object-fit: cover; border-radius: 14px; border: 1px solid #ececec; background: #fff;">
                             <div>
@@ -280,7 +288,7 @@ require_once 'helpers.php';
                         <div class="d-flex align-items-center mb-3">
                             <div class="sidebar-title mb-0">
                                 <h4 style="color: #000 !important;">
-                                    <?= htmlspecialchars($job['company_name'] ?? 'Company Name') ?>
+                                    <?= htmlspecialchars($job['company_name'] ?? $job['company_name'] ?? 'Company Name') ?>
                                 </h4>
 
                                 <p style="margin-top: 8px; margin-bottom: 10px;">
@@ -293,9 +301,9 @@ require_once 'helpers.php';
                                 <p><strong><?= $lang['jobdetail_company_size'] ?></strong>
                                     <?= htmlspecialchars($job['company_size'] ?? $lang['jobdetail_unknown']) ?></p>
                                 <p><strong><?= $lang['jobdetail_industry'] ?></strong>
-                                    <?= htmlspecialchars(translateIndustryDisplay($job['job_category'] ?? '', $lang) ?: $lang['jobdetail_unknown']) ?></p>
+                                    <?= htmlspecialchars(translateIndustryDisplay($job['industry'] ?? $job['job_category'] ?? '', $lang) ?: $lang['jobdetail_unknown']) ?></p>
                                 <p><strong><?= $lang['jobdetail_address'] ?></strong>
-                                    <?= htmlspecialchars($job['job_detailed_location'] ?? $lang['jobdetail_unknown']) ?></p>
+                                    <?= htmlspecialchars($job['company_address'] ?? $job['job_detailed_location'] ?? $lang['jobdetail_unknown']) ?></p>
                             </div>
                         </div>
                     <?php endif; ?>

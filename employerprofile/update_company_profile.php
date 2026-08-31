@@ -12,10 +12,19 @@ require_once '../config.php';
 
 $employerid = $_SESSION['employerid'];
 $company_id = $_POST['company_id'] ?? 0;
-$company_name = $_POST['company_name'] ?? '';
-$company_address = $_POST['company_address'] ?? '';
-$industry = $_POST['industry'] ?? '';
-$information = $_POST['information'] ?? '';
+$company_name = trim((string) ($_POST['company_name'] ?? ''));
+$company_address = trim((string) ($_POST['company_address'] ?? ''));
+$industry = trim((string) ($_POST['industry'] ?? ''));
+$company_size = trim((string) ($_POST['company_size'] ?? ''));
+if (!empty($_POST['custom_company_size'])) {
+    $company_size = trim((string) $_POST['custom_company_size']);
+}
+$information = trim((string) ($_POST['information'] ?? ''));
+
+if ($company_name === '' || $company_address === '' || $industry === '' || $company_size === '') {
+    echo json_encode(['success' => false, 'message' => 'Company name, address, industry and company size are required.']);
+    exit();
+}
 
 // Validate company_id belongs to this employer
 $sql_check = "SELECT id FROM company WHERE id = ? AND employer_id = ?";
@@ -99,9 +108,9 @@ if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_
 }
 
 // Update database
-$sql_update = "UPDATE company SET company_name = ?, company_address = ?, industry = ?, information = ?";
-$params = [$company_name, $company_address, $industry, $information];
-$types = "ssss";
+$sql_update = "UPDATE company SET company_name = ?, company_address = ?, industry = ?, company_size = ?, information = ?";
+$params = [$company_name, $company_address, $industry, $company_size, $information];
+$types = "sssss";
 
 if (!empty($company_logo)) {
     $sql_update .= ", company_logo = ?";

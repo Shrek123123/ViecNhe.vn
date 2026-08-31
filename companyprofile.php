@@ -51,6 +51,83 @@ if (!$company) {
 }
 
 $company_id_for_query = isset($company['id']) ? (int) $company['id'] : 0;
+$jobseeker_id = isset($_SESSION['jobseeker_id']) ? (int) $_SESSION['jobseeker_id'] : 0;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_follow_company'])) {
+    header('Content-Type: application/json; charset=utf-8');
+
+    if ($jobseeker_id <= 0) {
+        echo json_encode([
+            'success' => false,
+            'message' => $lang['follow_company_login_required'] ?? 'Please login to follow this company.'
+        ]);
+        exit;
+    }
+
+    $company_id_for_toggle = isset($_POST['company_id']) ? (int) $_POST['company_id'] : 0;
+    if ($company_id_for_toggle <= 0) {
+        echo json_encode([
+            'success' => false,
+            'message' => $lang['follow_company_invalid_company'] ?? 'Invalid company.'
+        ]);
+        exit;
+    }
+
+    if (isset($conn)) {
+        $check_stmt = $conn->prepare('SELECT 1 FROM company_followers WHERE company_id = ? AND jobseeker_id = ? LIMIT 1');
+        if ($check_stmt) {
+            $check_stmt->bind_param('ii', $company_id_for_toggle, $jobseeker_id);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+            $is_following = $check_result->num_rows > 0;
+            $check_stmt->close();
+
+            if ($is_following) {
+                $delete_stmt = $conn->prepare('DELETE FROM company_followers WHERE company_id = ? AND jobseeker_id = ?');
+                if ($delete_stmt) {
+                    $delete_stmt->bind_param('ii', $company_id_for_toggle, $jobseeker_id);
+                    $delete_stmt->execute();
+                    $delete_stmt->close();
+                }
+                $is_following = false;
+            } else {
+                $insert_stmt = $conn->prepare('INSERT INTO company_followers (company_id, jobseeker_id) VALUES (?, ?)');
+                if ($insert_stmt) {
+                    $insert_stmt->bind_param('ii', $company_id_for_toggle, $jobseeker_id);
+                    $insert_stmt->execute();
+                    $insert_stmt->close();
+                }
+                $is_following = true;
+            }
+
+            $count_stmt = $conn->prepare('SELECT COUNT(*) AS total FROM company_followers WHERE company_id = ?');
+            if ($count_stmt) {
+                $count_stmt->bind_param('i', $company_id_for_toggle);
+                $count_stmt->execute();
+                $count_result = $count_stmt->get_result()->fetch_assoc();
+                $follower_count = (int) ($count_result['total'] ?? 0);
+                $count_stmt->close();
+            } else {
+                $follower_count = 0;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'following' => $is_following,
+                'follower_count' => $follower_count,
+                'message' => $is_following ? ($lang['follow_company_success'] ?? 'You are now following this company.') : ($lang['unfollow_company_success'] ?? 'You unfollowed this company.')
+            ]);
+            exit;
+        }
+    }
+
+    echo json_encode([
+        'success' => false,
+        'message' => $lang['follow_company_db_error'] ?? 'Unable to update follow status.'
+    ]);
+    exit;
+}
+
 $related_jobs = [];
 if ($company_id_for_query > 0 && isset($conn)) {
     $job_sql = "SELECT id, job_title, job_location, salary, job_experience, company_logo, company_name, company_size, created_at
@@ -67,6 +144,30 @@ if ($company_id_for_query > 0 && isset($conn)) {
             $related_jobs[] = $row;
         }
         $job_stmt->close();
+    }
+}
+
+$follower_count = 0;
+$is_following = false;
+if ($company_id_for_query > 0 && isset($conn)) {
+    $count_stmt = $conn->prepare('SELECT COUNT(*) AS total FROM company_followers WHERE company_id = ?');
+    if ($count_stmt) {
+        $count_stmt->bind_param('i', $company_id_for_query);
+        $count_stmt->execute();
+        $count_result = $count_stmt->get_result()->fetch_assoc();
+        $follower_count = (int) ($count_result['total'] ?? 0);
+        $count_stmt->close();
+    }
+
+    if ($jobseeker_id > 0) {
+        $followed_stmt = $conn->prepare('SELECT 1 FROM company_followers WHERE company_id = ? AND jobseeker_id = ? LIMIT 1');
+        if ($followed_stmt) {
+            $followed_stmt->bind_param('ii', $company_id_for_query, $jobseeker_id);
+            $followed_stmt->execute();
+            $followed_result = $followed_stmt->get_result();
+            $is_following = $followed_result->num_rows > 0;
+            $followed_stmt->close();
+        }
     }
 }
 
@@ -121,7 +222,7 @@ $company_profile_jobs_title = str_replace(':company_name', $company_name, $compa
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
             background: #f5f5f5;
             color: #222;
         }
@@ -132,74 +233,123 @@ $company_profile_jobs_title = str_replace(':company_name', $company_name, $compa
         }
         .company-hero {
             position: relative;
-            height: 260px;
             width: min(1200px, 92%);
             margin: 0 auto;
             border-radius: 0 0 18px 18px;
-            overflow: hidden;
-            background-color: #d9d9d9;
+            overflow: visible;
+            background: transparent;
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
-        }
-        .company-hero .banner-image {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center center;
-            display: block;
-            background-color: #d9d9d9;
-        }
-        .company-hero::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.12);
+            padding: 0 0 12px;
         }
         .hero-content {
             position: relative;
             z-index: 1;
-            width: min(1200px, 92%);
             display: flex;
             align-items: center;
             gap: 20px;
+            width: min(1200px, 92%);
             color: white;
-            justify-content: flex-start;
         }
-        .hero-logo {
-            width: 120px;
-            height: 120px;
-            background: white;
-            border-radius: 18px;
-            padding: 0;
+        .hero-logo-block {
+            flex-shrink: 0;
+            width: 150px;
+            height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: visible;
+            padding: 0;
         }
-        .hero-logo img {
+        .hero-logo-block img {
             width: 100%;
             height: 100%;
             display: block;
             object-fit: contain;
             object-position: center;
+            border-radius: 0;
+            background: transparent;
+        }
+        .hero-text-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            width: 100%;
+            min-width: 0;
+            min-height: 180px;
+            padding: 22px 22px;
             border-radius: 18px;
-            background: white;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        }
+        .hero-text-group::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.52) 35%, rgba(0,0,0,0.28) 68%, rgba(0,0,0,0.16) 100%);
+            z-index: 0;
+        }
+        .hero-text,
+        .follow-company-btn {
+            position: relative;
+            z-index: 1;
+        }
+        .hero-text {
+            min-width: 0;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
         }
         .hero-text h1 {
             margin: 0 0 8px;
-            font-size: 38px;
+            font-size: 32px;
             line-height: 1.2;
+            word-break: break-word;
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: 0.01em;
         }
         .hero-meta {
             display: flex;
             flex-wrap: wrap;
             gap: 14px;
-            font-size: 14px;
-            opacity: 0.95;
+            font-size: 13px;
+            opacity: 1;
+            color: #f3f4f6;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .follow-company-btn {
+            border: none;
+            border-radius: 999px;
+            background: #ffffff;
+            color: #d43d3d;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 12px 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+            margin-left: auto;
+            justify-self: flex-end;
+        }
+        .follow-company-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+        }
+        .follow-company-btn.is-following {
+            background: #d43d3d;
+            color: #ffffff;
         }
         .company-shell {
             width: min(1200px, 92%);
@@ -323,20 +473,42 @@ $company_profile_jobs_title = str_replace(':company_name', $company_name, $compa
 
     <div class="company-page">
         <section class="company-hero">
-            <img class="banner-image" src="<?= htmlspecialchars($banner_logo) ?>" alt="<?= $company_name ?> banner">
             <div class="hero-content">
-                <div class="hero-logo" style="margin-left: 20px;">
+                <div class="hero-logo-block" style="margin-left: 20px;">
                     <img src="<?= htmlspecialchars($company_logo) ?>" alt="<?= $company_name ?> logo">
                 </div>
-                <div class="hero-text" style="margin-left: 8px;">
-                    <h1><?= $company_name ?></h1>
-                    <div class="hero-meta">
-                        <span><i class="fa-solid fa-building"></i> <?= $company_industry ?></span>
-                        <span><i class="fa-solid fa-location-dot"></i> <?= $company_address ?></span>
-                        <?php if ($company_size_display !== ''): ?>
-                            <span><i class="fa-solid fa-users"></i> <?= $company_size_display ?></span>
-                        <?php endif; ?>
+
+                <div class="hero-text-group" style="background-image: url('<?= htmlspecialchars($banner_logo) ?>');">
+                    <div class="hero-text" style="margin-left: 8px;">
+                        <h1><?= $company_name ?></h1>
+                        <div class="hero-meta">
+                            <span><i class="fa-solid fa-building"></i> <?= $company_industry ?></span>
+                            <span><i class="fa-solid fa-location-dot"></i> <?= $company_address ?></span>
+                            <span id="company-follower-meta"><i class="fa-solid fa-user-plus"></i> <?= $lang['company_follower_display_text'] ?>: <span id="company-follower-count"><?= (int) $follower_count ?></span></span>
+                        </div>
                     </div>
+
+                    <?php if ($jobseeker_id > 0): ?>
+                        <button
+                            type="button"
+                            id="follow-company-btn"
+                            class="follow-company-btn <?= $is_following ? 'is-following' : '' ?>"
+                            data-company-id="<?= (int) $company_id_for_query ?>"
+                            data-following="<?= $is_following ? '1' : '0' ?>"
+                            data-follow-text="<?= htmlspecialchars($lang['follow_company_button'] ?? 'Follow') ?>"
+                            data-unfollow-text="<?= htmlspecialchars($lang['unfollow_company_button'] ?? 'Unfollow') ?>"
+                        >
+                            <?= $is_following ? ($lang['unfollow_company_button'] ?? $lang['follow_company_button']) : ($lang['follow_company_button'] ?? 'Follow') ?>
+                        </button>
+                    <?php else: ?>
+                        <a
+                            class="follow-company-btn"
+                            href="jobseekerlogin.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>"
+                            style="display:inline-block; text-align:center;"
+                        >
+                            <?= $lang['follow_company_button'] ?? 'Follow' ?>
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
@@ -412,5 +584,54 @@ $company_profile_jobs_title = str_replace(':company_name', $company_name, $compa
     </div>
 
     <?php include __DIR__ . '/homepage/footer.php'; ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const followButton = document.getElementById('follow-company-btn');
+            if (!followButton) {
+                return;
+            }
+
+            followButton.addEventListener('click', function () {
+                const companyId = Number(followButton.dataset.companyId || 0);
+                if (!companyId) {
+                    return;
+                }
+
+                const formData = new URLSearchParams();
+                formData.append('toggle_follow_company', '1');
+                formData.append('company_id', companyId);
+
+                fetch(window.location.pathname + window.location.search, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData.toString()
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert(data.message || 'Unable to update follow status.');
+                        return;
+                    }
+
+                    const isFollowing = !!data.following;
+                    followButton.dataset.following = isFollowing ? '1' : '0';
+                    followButton.classList.toggle('is-following', isFollowing);
+                    followButton.textContent = isFollowing ? (followButton.dataset.unfollowText || 'Unfollow') : (followButton.dataset.followText || 'Follow');
+
+                    const countNode = document.getElementById('company-follower-count');
+                    if (countNode) {
+                        countNode.textContent = data.follower_count ?? 0;
+                    }
+                })
+                .catch(() => {
+                    alert('Unable to update follow status.');
+                });
+            });
+        });
+    </script>
 </body>
 </html>

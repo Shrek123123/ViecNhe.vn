@@ -23,14 +23,16 @@ if ($isLoggedIn) {
 }
 
 // Lấy job_type từ POST
-$job_type = isset($_POST['job_type']) ? trim(strtolower($_POST['job_type'])) : '';
+$job_type = isset($_POST['job_type']) ? trim((string) $_POST['job_type']) : '';
 if ($job_type === '') {
   echo '<div>No jobs found.</div>';
   $conn->close();
   exit;
 }
 
-// Map các giá trị job_type tiếng Việt/không chuẩn về giá trị dữ liệu trong DB
+$job_type = strtolower($job_type);
+
+// Map các giá trị hiển thị sang đúng giá trị raw trong DB
 $jobTypeMap = [
   'full-time' => 'full-time',
   'full time' => 'full-time',
@@ -51,8 +53,11 @@ if (isset($jobTypeMap[$job_type])) {
 }
 
 // Query lấy job theo job_type
-$stmt = $conn->prepare("SELECT id, job_title, company_logo, company_name, salary, job_location, created_at, post_duration 
-  FROM job WHERE LOWER(job_type) = ? ORDER BY created_at DESC");
+$stmt = $conn->prepare("SELECT j.id, j.job_title, c.company_logo AS company_logo, c.company_name AS company_name, j.salary, j.job_location, j.created_at, j.post_duration
+  FROM job j
+  LEFT JOIN company c ON c.id = j.company_id
+  WHERE LOWER(j.job_type) = ?
+  ORDER BY j.created_at DESC");
 $stmt->bind_param("s", $job_type);
 $stmt->execute();
 $result = $stmt->get_result();

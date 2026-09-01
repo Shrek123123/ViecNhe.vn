@@ -711,61 +711,7 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
 
 
 <body>
-    <div class="header">
-        <div style="display: flex; align-items: center;">
-            <a href="../employerpage.php">
-                <img src="../image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
-            </a>
-        </div>
-        <div style="display: flex; gap: 50px; margin-left: 50px;">
-            <a href="#" style="text-decoration: none; color: #333;"><?php echo $lang['create_cv']; ?></a>
-            <a href="../contactus_employer.php"
-                style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a>
-            <a href="../feedback_employer.php"
-                style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
-        </div>
-        <div style="display: flex; gap: 15px; margin-left: auto;">
-            <?php if (isset($_SESSION['usernameemployer'])): ?>
-                <div class="user-dropdown">
-                    <div class="user-info">
-                        <img src="../image/defaultavatar.jpg" alt="User Avatar">
-                        <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
-                    </div>
-                    <div class="dropdown-menu">
-                        <?php
-                        $employerId = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
-                        ?>
-                        <a href="../employerlogout.php"><?php echo $lang['logout']; ?></a>
-                    </div>
-                </div>
-                <button id="lang-switch-btn"
-                    style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
-                    <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-                </button>
-            <?php else: ?>
-                <div class="guest-options">
-                    <a href="employerlogin.php" class="btn-login"><?php echo $lang['login/register_employer']; ?></a>
-                    <a href="index.php" class="btn-register"><?php echo $lang['jobseeker_redirect']; ?></a>
-                    <a href="admin/adminlogin.php" class="btn-register"><?php echo $lang['admin_login']; ?></a>
-                    <button id="lang-switch-btn"
-                        style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
-                        <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-                    </button>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <script>
-            document.getElementById('lang-switch-btn').onclick = function () {
-                var currentLang = '<?php echo $_SESSION['lang']; ?>';
-                if (currentLang === 'vi') {
-                    window.location.href = '?lang=en';
-                } else {
-                    window.location.href = '?lang=vi';
-                }
-            };
-        </script>
-    </div>
+    <?php include 'header.php'; ?>
     <!-- #region -->
     <div class="employer-dashboard">
 
@@ -793,10 +739,17 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
             <!-- SIDEBAR -->
             <div class="dashboard-sidebar">
                 <button id="btn-postjob"
-                    onclick="window.location.href='add_job_post.php'"><?= $lang['employerprofile_postajob'] ?></button>
-                <button onclick="window.location.href='my_job_posts.php'"><?= $lang['employerprofile_myjobposts'] ?></button>
+                    onclick="window.location.href='add_job_post.php'" class="<?= ($currentPage == 'add_job_post.php') ? 'active' : '' ?>"><?= $lang['employerprofile_postajob'] ?></button>
+                <button onclick="window.location.href='my_job_posts.php'" class="<?= ($currentPage == 'my_job_posts.php') ? 'active' : '' ?>"><?= $lang['employerprofile_myjobposts'] ?></button>
                 <button onclick="window.location.href='company_profile.php'" class="<?= ($currentPage == 'company_profile.php') ? 'active' : '' ?>"><?= $lang['employerprofile_companyprofile'] ?></button>
-                <button><?= $lang['employerprofile_changeinfo'] ?></button>
+                <div class="change-info-wrap">
+                    <button id="btn-changeinfo" type="button" class="<?= in_array($currentPage, ['change_employer_info.php', 'change_password.php', 'change_profile_pic.php'], true) ? 'active' : '' ?>"><?= $lang['employerprofile_changeinfo'] ?></button>
+                    <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
+                        <button type="button" class="change-info-option" data-href="change_employer_info.php"><?= $lang['change_employer_general_info_action'] ?></button>
+                        <button type="button" class="change-info-option" data-href="change_password.php"><?= $lang['change_employer_password_action'] ?></button>
+                        <button type="button" class="change-info-option" data-href="change_profile_pic.php"><?= $lang['change_employer_avatar_action'] ?></button>
+                    </div>
+                </div>
 
                 <?php
                 // Tính tổng số đơn ứng tuyển cho employer hiện tại
@@ -1130,6 +1083,43 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
     </div>
 
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnChangeInfo = document.getElementById('btn-changeinfo');
+            const menu = document.getElementById('changeInfoMenu');
+            if (!btnChangeInfo || !menu) return;
+
+            const activePages = ['change_employer_info.php', 'change_password.php', 'change_profile_pic.php'];
+            const currentPage = window.location.pathname.split('/').pop();
+            const isActivePage = activePages.includes(currentPage);
+
+            menu.classList.remove('show');
+            menu.style.display = 'none';
+            btnChangeInfo.classList.toggle('active', isActivePage);
+
+            btnChangeInfo.addEventListener('click', function (event) {
+                event.stopPropagation();
+                const isOpen = menu.style.display !== 'none';
+                menu.style.display = isOpen ? 'none' : 'flex';
+                menu.classList.toggle('show', !isOpen);
+                btnChangeInfo.classList.toggle('active', !isOpen || isActivePage);
+            });
+
+            menu.querySelectorAll('.change-info-option').forEach((option) => {
+                option.addEventListener('click', function () {
+                    window.location.href = this.dataset.href;
+                });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!btnChangeInfo.contains(event.target) && !menu.contains(event.target)) {
+                    menu.style.display = 'none';
+                    menu.classList.remove('show');
+                    btnChangeInfo.classList.toggle('active', isActivePage);
+                }
+            });
+        });
+    </script>
 </body>
 
 <footer>

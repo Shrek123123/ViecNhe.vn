@@ -181,6 +181,55 @@ function translateJobExperience($value, $lang) {
     return $raw;
 }
 
+function translateJobPosition($value, $lang = [], $displayLanguage = null) {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '';
+    }
+
+    $locale = $displayLanguage ?: ($_SESSION['lang'] ?? 'en');
+    $normalizedKey = strtolower($raw);
+    $normalizedKey = preg_replace('/[\s\-_]+/', '_', $normalizedKey);
+    $normalizedKey = trim((string) $normalizedKey, '_');
+
+    if (isset($lang['job_position_options']) && is_array($lang['job_position_options'])) {
+        $optionMap = $lang['job_position_options'];
+        if (isset($optionMap[$normalizedKey])) {
+            $option = $optionMap[$normalizedKey];
+            if (is_array($option)) {
+                if (isset($option[$locale])) {
+                    return (string) $option[$locale];
+                }
+                if (isset($option['en'])) {
+                    return (string) $option['en'];
+                }
+                return (string) reset($option);
+            }
+            return (string) $option;
+        }
+    }
+
+    $fallbackMap = [
+        'senior' => ['en' => 'Senior', 'vi' => 'Chuyên viên cấp cao'],
+        'junior' => ['en' => 'Junior', 'vi' => 'Chuyên viên'],
+        'cong_tac_vien' => ['en' => 'Associate', 'vi' => 'Công tác viên'],
+        'manager' => ['en' => 'Manager', 'vi' => 'Quản lý'],
+        'director' => ['en' => 'Director', 'vi' => 'Giám đốc'],
+        'lead' => ['en' => 'Team Lead', 'vi' => 'Trưởng nhóm'],
+        'staff' => ['en' => 'Staff', 'vi' => 'Nhân viên'],
+        'specialist' => ['en' => 'Specialist', 'vi' => 'Chuyên gia'],
+        'assistant' => ['en' => 'Assistant', 'vi' => 'Trợ lý'],
+        'executive' => ['en' => 'Executive', 'vi' => 'Chuyên viên cao cấp'],
+        'other' => ['en' => 'Other', 'vi' => 'Khác'],
+    ];
+
+    if (isset($fallbackMap[$normalizedKey])) {
+        return $fallbackMap[$normalizedKey][$locale] ?? $fallbackMap[$normalizedKey]['en'];
+    }
+
+    return ucfirst(str_replace('_', ' ', $normalizedKey));
+}
+
 // format ngày theo session ngôn ngữ
 function formatDateByLocale($datetime) {
     $created_at = new DateTime($datetime);

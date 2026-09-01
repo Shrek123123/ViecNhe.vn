@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_follow_company
 
 $related_jobs = [];
 if ($company_id_for_query > 0 && isset($conn)) {
-    $job_sql = "SELECT id, job_title, job_location, salary, job_experience, company_logo, company_name, company_size, created_at
+    $job_sql = "SELECT id, job_title, job_location, salary, job_experience, created_at
                 FROM job
                 WHERE company_id = ?
                 ORDER BY created_at ASC
@@ -557,14 +557,10 @@ $company_profile_jobs_title = str_replace(':company_name', $company_name, $compa
                                 $job_location = htmlspecialchars((string) ($job['job_location'] ?? ''));
                                 $job_salary = htmlspecialchars((string) ($job['salary'] ?? 'Thỏa thuận'));
                                 $job_experience = htmlspecialchars(translateJobExperience($job['job_experience'] ?? '', $lang) ?: ($lang['jobdetail_no_data'] ?? 'No data'));
-                                $job_logo = normalizeAssetPath(trim((string) ($job['company_logo'] ?? '')));
-                                if ($job_logo === '') {
-                                    $job_logo = $company_logo;
-                                }
                                 ?>
                                 <article class="job-card">
                                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-                                        <img src="<?= htmlspecialchars($job_logo) ?>" alt="<?= $job_title ?>" style="width:42px;height:42px;object-fit:cover;border-radius:10px;border:1px solid #eee;">
+                                        <img src="<?= htmlspecialchars($company_logo) ?>" alt="<?= $job_title ?>" style="width:42px;height:42px;object-fit:cover;border-radius:10px;border:1px solid #eee;">
                                         <div style="font-size:13px;color:#666;"><?= $company_name ?></div>
                                     </div>
                                     <div class="job-title"><?= $job_title ?></div>

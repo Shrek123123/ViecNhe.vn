@@ -1,4 +1,6 @@
 <?php
+require_once '../config.php';
+
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
@@ -9,7 +11,47 @@ if (!isset($_SESSION['lang'])) {
 }
 
 // Load file ngôn ngữ tương ứng
-include 'lang/' . $_SESSION['lang'] . '.php';
+include '../lang/' . $_SESSION['lang'] . '.php';
+
+$header_avatar = '../image/defaultavatar.jpg';
+$normalize_profile_pic = function ($path) {
+    if (empty($path)) {
+        return '../image/defaultavatar.jpg';
+    }
+
+    $normalized = trim($path);
+    if (preg_match('/^(https?:|data:)/i', $normalized)) {
+        return $normalized;
+    }
+
+    $normalized = ltrim($normalized, '/');
+    if (strpos($normalized, '../') === 0) {
+        return $normalized;
+    }
+
+    if (strpos($normalized, 'uploads/') === 0) {
+        return '../' . $normalized;
+    }
+
+    return '../uploads/' . basename($normalized);
+};
+
+if (isset($_SESSION['employerid'])) {
+    $header_employer_id = (int) $_SESSION['employerid'];
+    $header_stmt = $conn->prepare("SELECT profile_pic FROM employer_profile WHERE employer_id = ? LIMIT 1");
+    if ($header_stmt) {
+        $header_stmt->bind_param('i', $header_employer_id);
+        $header_stmt->execute();
+        $header_result = $header_stmt->get_result();
+        if ($header_result && $header_result->num_rows > 0) {
+            $header_row = $header_result->fetch_assoc();
+            if (!empty($header_row['profile_pic'])) {
+                $header_avatar = $normalize_profile_pic($header_row['profile_pic']);
+            }
+        }
+        $header_stmt->close();
+    }
+}
 ?>
 <style>
     .user-info {
@@ -120,8 +162,8 @@ include 'lang/' . $_SESSION['lang'] . '.php';
 
 <div class="header">
     <div style="display: flex; align-items: center;">
-        <a href="employerpage.php">
-            <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
+        <a href="../employerpage.php">
+            <img src="../image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
     <div style="display: flex; gap: 50px; margin-left: 50px;">
@@ -134,7 +176,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
         <?php if (isset($_SESSION['usernameemployer'])): ?>
             <div class="user-dropdown">
                 <div class="user-info">
-                    <img src="image/defaultavatar.jpg" alt="User Avatar">
+                    <img src="<?= htmlspecialchars($header_avatar) ?>" alt="User Avatar">
                     <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
                 </div>
                 <div class="dropdown-menu">

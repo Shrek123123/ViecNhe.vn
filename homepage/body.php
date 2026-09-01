@@ -104,28 +104,40 @@ function resolveIndustryFilterValue($value)
   return trim((string) $directKey, '_');
 }
 
-$industryFilterOptions = [
-  ['value' => 'IT & Software', 'db_key' => 'cong_nghe_thong_tin'],
-  ['value' => 'Marketing', 'db_key' => 'marketing_truyen_thong'],
-  ['value' => 'Finance', 'db_key' => 'tai_chinh_ke_toan_ngan_hang'],
-  ['value' => 'Healthcare', 'db_key' => 'y_te_duoc_pham'],
-  ['value' => 'Government & Public Sector', 'db_key' => 'nha_nuoc_cong_vu'],
-  ['value' => 'Education', 'db_key' => 'giao_duc_dao_tao'],
-  ['value' => 'Manufacturing', 'db_key' => 'san_xuat_van_hanh_day_chuyen'],
-  ['value' => 'Transportation & Logistics', 'db_key' => 'van_tai_logistics'],
-  ['value' => 'Real Estate', 'db_key' => 'bat_dong_san'],
-  ['value' => 'Insurance', 'db_key' => 'bao_hiem'],
-  ['value' => 'Construction', 'db_key' => 'xay_dung_kien_truc'],
-  ['value' => 'Hospitality', 'db_key' => 'du_lich_khach_san_nha_hang'],
-  ['value' => 'Law', 'db_key' => 'luat'],
-  ['value' => 'Design', 'db_key' => 'thiet_ke_nghe_thuat'],
-  ['value' => 'Agriculture', 'db_key' => 'nong_nghiep'],
-  ['value' => 'Food & Beverage', 'db_key' => 'food_beverage'],
-  ['value' => 'Human Resources', 'db_key' => 'nhan_su'],
-  ['value' => 'Administrative & Office', 'db_key' => 'hanh_chinh_van_phong'],
-  ['value' => 'Engineering', 'db_key' => 'ky_thuat'],
-  ['value' => 'Others', 'db_key' => 'khac']
+$industryOptionKeys = [
+  'kinh_doanh_ban_hang',
+  'marketing_truyen_thong',
+  'tai_chinh_ke_toan_ngan_hang',
+  'cong_nghe_thong_tin',
+  'y_te_duoc_pham',
+  'nha_nuoc_cong_vu',
+  'giao_duc_dao_tao',
+  'san_xuat_van_hanh_day_chuyen',
+  'van_tai_logistics',
+  'bat_dong_san',
+  'bao_hiem',
+  'xay_dung_kien_truc',
+  'du_lich_khach_san_nha_hang',
+  'luat',
+  'thiet_ke_nghe_thuat',
+  'nong_nghiep',
+  'food_beverage',
+  'nhan_su',
+  'hanh_chinh_van_phong',
+  'ky_thuat',
+  'khac'
 ];
+
+$industryFilterOptions = [];
+foreach ($industryOptionKeys as $industryKey) {
+  if (isset($lang[$industryKey]) && is_string($lang[$industryKey]) && $lang[$industryKey] !== '') {
+    $industryFilterOptions[] = [
+      'value' => $industryKey,
+      'label' => $lang[$industryKey],
+      'db_key' => $industryKey,
+    ];
+  }
+}
 
 $isLoggedIn = isset($_SESSION['jobseeker_id']) && $_SESSION['jobseeker_id'] > 0;
 $userId = $isLoggedIn ? (int) $_SESSION['jobseeker_id'] : 0;
@@ -551,14 +563,13 @@ $savedJobIdsJson = json_encode($savedJobIds);
     <div class="search-box">
       <form action="searchpage.php" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
 
-        <!-- GIỮ NGUYÊN HTML TĨNH CHO DANH MỤC NGÀNH -->
         <select name="category">
           <option value=""><?php echo $lang['job_category_select_menu']; ?></option>
-          <option value="IT & Software">IT & Software</option>
-          <option value="Marketing">Marketing</option>
-          <option value="Finance">Finance</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Government & Public Sector">Government & Public Sector</option>
+          <?php foreach ($industryFilterOptions as $option): ?>
+            <option value="<?= htmlspecialchars($option['value']) ?>" <?= (isset($_GET['category']) && $_GET['category'] === $option['value']) ? 'selected' : '' ?>>
+              <?= htmlspecialchars($option['label']) ?>
+            </option>
+          <?php endforeach; ?>
         </select>
 
         <input type="text" name="q" placeholder="<?= $lang['job_title']; ?>">
@@ -571,11 +582,11 @@ $savedJobIdsJson = json_encode($savedJobIds);
     <div class="main-content">
       <div class="left-menu">
         <ul>
-          <li id="filter-fulltime" class="job-type-filter" data-job-type="Full-time"><?= $lang['job_type_filters']['full_time']; ?></li>
-          <li id="filter-parttime" class="job-type-filter" data-job-type="Part-time"><?= $lang['job_type_filters']['part_time']; ?></li>
-          <li id="filter-internship" class="job-type-filter" data-job-type="Internship"><?= $lang['job_type_filters']['internship']; ?></li>
-          <li id="filter-freelance" class="job-type-filter" data-job-type="Freelance"><?= $lang['job_type_filters']['freelance']; ?></li>
-          <li id="filter-remote" class="job-type-filter" data-job-type="Remote"><?= $lang['job_type_filters']['remote']; ?></li>
+          <li id="filter-fulltime" class="job-type-filter" data-job-type="full-time"><?= $lang['job_type_filters']['full_time']; ?></li>
+          <li id="filter-parttime" class="job-type-filter" data-job-type="part-time"><?= $lang['job_type_filters']['part_time']; ?></li>
+          <li id="filter-internship" class="job-type-filter" data-job-type="internship"><?= $lang['job_type_filters']['internship']; ?></li>
+          <li id="filter-freelance" class="job-type-filter" data-job-type="freelance"><?= $lang['job_type_filters']['freelance']; ?></li>
+          <li id="filter-remote" class="job-type-filter" data-job-type="remote"><?= $lang['job_type_filters']['remote']; ?></li>
         </ul>
 
 
@@ -610,14 +621,14 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
           document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
-            const activeType = (urlParams.get('job_type') || '').toLowerCase();
+            const activeType = (urlParams.get('job_type') || '').trim().toLowerCase();
 
             document.querySelectorAll('.job-type-filter').forEach(function (item) {
-              const itemType = (item.getAttribute('data-job-type') || '').toLowerCase();
+              const itemType = (item.getAttribute('data-job-type') || '').trim().toLowerCase();
               item.classList.toggle('active', itemType === activeType);
 
               item.addEventListener('click', function () {
-                const selectedType = this.getAttribute('data-job-type') || '';
+                const selectedType = (this.getAttribute('data-job-type') || '').trim().toLowerCase();
                 window.location.href = buildJobsUrl({
                   page: '1',
                   job_type: selectedType,
@@ -647,13 +658,23 @@ $savedJobIdsJson = json_encode($savedJobIds);
           <?= $lang['all_jobs']; ?>
         </button>
 
+        <style>
+          .job-category-filter.active,
+          .industry-filter-item.active {
+            background: #d70018;
+            color: #fff;
+            border-radius: 20px;
+            transition: background 0.2s, color 0.2s;
+          }
+        </style>
+
         <div class="industry-filter-carousel" style="flex: 1; overflow: hidden; position: relative;">
           <button type="button" class="industry-nav-btn" data-direction="prev" aria-label="Previous industries" style="display:none;">&lsaquo;</button>
           <div class="industry-filter-window" style="overflow: hidden; flex: 1;">
             <div class="industry-filter-track" style="display: flex; gap: 10px; transition: transform 0.35s ease; white-space: nowrap;">
               <?php foreach ($industryFilterOptions as $option): ?>
                 <button class="job-category-filter industry-filter-item" data-category="<?= htmlspecialchars($option['value']) ?>" data-db-key="<?= htmlspecialchars($option['db_key']) ?>">
-                  <?= htmlspecialchars($option['value']) ?>
+                  <?= htmlspecialchars($option['label']) ?>
                 </button>
               <?php endforeach; ?>
             </div>
@@ -664,26 +685,30 @@ $savedJobIdsJson = json_encode($savedJobIds);
       <script>
         document.addEventListener('DOMContentLoaded', function () {
           const urlParams = new URLSearchParams(window.location.search);
-          const rawCategory = urlParams.get('category') || '';
-          const categoryValue = (rawCategory || '').trim();
+          const categoryValue = (urlParams.get('category') || '').trim();
 
-          document.querySelectorAll('.industry-filter-item').forEach(function (btn) {
-            const category = btn.getAttribute('data-category') || '';
-            const dbKey = btn.getAttribute('data-db-key') || '';
-            const isActive = categoryValue !== ''
-              ? (category === categoryValue || dbKey === categoryValue || category.toLowerCase() === categoryValue.toLowerCase())
-              : (category === '');
+          function syncIndustryButtons() {
+            const activeValue = (categoryValue || '').trim().toLowerCase();
+            document.querySelectorAll('.industry-filter-item').forEach(function (btn) {
+              const category = (btn.getAttribute('data-category') || '').trim();
+              const dbKey = (btn.getAttribute('data-db-key') || '').trim();
+              const matchValue = (dbKey || category || '').trim().toLowerCase();
+              const isActive = activeValue === ''
+                ? (category === '' && dbKey === '')
+                : (matchValue === activeValue);
 
-            btn.classList.toggle('active', isActive);
-          });
+              btn.classList.toggle('active', isActive);
+            });
+          }
+
+          syncIndustryButtons();
 
           const filterButtons = Array.from(document.querySelectorAll('.industry-filter-item:not(.industry-nav-btn)'));
           const carouselTrack = document.querySelector('.industry-filter-track');
-          const carouselWindow = document.querySelector('.industry-filter-window');
           const prevBtn = document.querySelector('.industry-nav-btn[data-direction="prev"]');
           const nextBtn = document.querySelector('.industry-nav-btn[data-direction="next"]');
 
-          if (carouselTrack && carouselWindow && filterButtons.length > 7) {
+          if (carouselTrack && filterButtons.length > 7) {
             const visibleCount = 7;
             const step = 3;
             let startIndex = 0;
@@ -694,19 +719,23 @@ $savedJobIdsJson = json_encode($savedJobIds);
               const offset = filterButtons[0].offsetWidth + 10;
               carouselTrack.style.transform = 'translateX(' + (-startIndex * offset) + 'px)';
 
-              prevBtn.style.display = startIndex > 0 ? 'inline-flex' : 'none';
-              nextBtn.style.display = startIndex < maxStart ? 'inline-flex' : 'none';
+              if (prevBtn) prevBtn.style.display = startIndex > 0 ? 'inline-flex' : 'none';
+              if (nextBtn) nextBtn.style.display = startIndex < maxStart ? 'inline-flex' : 'none';
             }
 
-            prevBtn.addEventListener('click', function () {
-              startIndex = Math.max(0, startIndex - step);
-              updateCarousel();
-            });
+            if (prevBtn) {
+              prevBtn.addEventListener('click', function () {
+                startIndex = Math.max(0, startIndex - step);
+                updateCarousel();
+              });
+            }
 
-            nextBtn.addEventListener('click', function () {
-              startIndex = Math.min(filterButtons.length - visibleCount, startIndex + step);
-              updateCarousel();
-            });
+            if (nextBtn) {
+              nextBtn.addEventListener('click', function () {
+                startIndex = Math.min(filterButtons.length - visibleCount, startIndex + step);
+                updateCarousel();
+              });
+            }
 
             updateCarousel();
           } else if (carouselTrack) {
@@ -717,17 +746,21 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
           document.querySelectorAll('.industry-filter-item').forEach(function (btn) {
             btn.addEventListener('click', function () {
-              const category = btn.getAttribute('data-category') || '';
-              const dbKey = btn.getAttribute('data-db-key') || '';
+              const btnCategory = (btn.getAttribute('data-category') || '').trim();
+              const btnDbKey = (btn.getAttribute('data-db-key') || '').trim();
+              const selectedValue = (btnDbKey || btnCategory || '').trim();
               const params = new URLSearchParams(window.location.search);
               params.set('page', '1');
-              if (category || dbKey) {
-                params.set('category', dbKey || category);
+
+              if (selectedValue !== '') {
+                params.set('category', selectedValue);
               } else {
                 params.delete('category');
               }
+
               const query = params.toString();
-              window.location.href = (query ? '?' + query : '?') + '#job-grid';
+              const nextUrl = (query ? '?' + query : '?') + '#job-grid';
+              window.location.assign(nextUrl);
             });
           });
         });
@@ -738,16 +771,10 @@ $savedJobIdsJson = json_encode($savedJobIds);
         // Pagination logic
         $jobs_per_page = 9;
         $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
-        $category = isset($_GET['category']) ? trim($_GET['category']) : '';
-        $job_type = isset($_GET['job_type']) ? trim($_GET['job_type']) : '';
-        $resolvedCategory = resolveIndustryFilterValue($category);
-        $categoryMatchValues = array_values(array_unique(array_filter([
-          $resolvedCategory,
-          normalizeIndustryMatchText($category),
-          normalizeIndustryMatchText($resolvedCategory),
-        ], function ($value) {
-          return $value !== '';
-        })));
+        $category = isset($_GET['category']) ? trim((string) $_GET['category']) : '';
+        $job_type = isset($_GET['job_type']) ? trim((string) $_GET['job_type']) : '';
+        $selectedIndustryKey = $category !== '' ? strtolower(preg_replace('/[^a-z0-9_]+/', '', str_replace(['-', ' '], '_', $category))) : '';
+        $selectedIndustryKey = trim((string) $selectedIndustryKey, '_');
 
         $jobTypeMap = [
           'full-time' => 'full-time',
@@ -770,14 +797,16 @@ $savedJobIdsJson = json_encode($savedJobIds);
           $job_type = strtolower($job_type);
         }
 
-        // Get total APPROVED jobs count
-        $count_sql = "SELECT COUNT(*) as total FROM job j LEFT JOIN company c ON c.id = j.company_id WHERE j.status = 'approved'";
+        $count_sql = "SELECT COUNT(*) as total
+            FROM job j
+            LEFT JOIN company c ON c.id = j.company_id
+            WHERE j.status = 'approved'";
         $count_bind_types = '';
         $count_params = [];
-        if ($category !== '') {
-          $count_sql .= " AND REPLACE(LOWER(COALESCE(c.industry, j.job_category)), '&', ' and ') IN (" . implode(',', array_fill(0, count($categoryMatchValues), '?')) . ")";
-          $count_bind_types .= str_repeat('s', count($categoryMatchValues));
-          $count_params = array_merge($count_params, $categoryMatchValues);
+        if ($selectedIndustryKey !== '') {
+          $count_sql .= " AND LOWER(TRIM(c.industry)) = ?";
+          $count_bind_types .= 's';
+          $count_params[] = $selectedIndustryKey;
         }
         if ($job_type !== '') {
           $count_sql .= " AND LOWER(j.job_type) = ?";
@@ -793,26 +822,25 @@ $savedJobIdsJson = json_encode($savedJobIds);
         $total_jobs = $result_count ? (int) $result_count->fetch_assoc()['total'] : 0;
         $total_pages = max(1, (int) ceil($total_jobs / $jobs_per_page));
 
-        // Fetch APPROVED jobs for current page
         $offset = ($page - 1) * $jobs_per_page;
         $sql = "SELECT j.id, j.job_title, j.salary, j.job_location, j.job_type, j.job_experience, j.created_at, j.post_duration,
-                        c.company_name, c.company_logo, COALESCE(c.industry, j.job_category) AS industry
+                        c.company_name, c.company_logo, c.industry AS industry
                         FROM job j
                         LEFT JOIN company c ON c.id = j.company_id
                         WHERE j.status = 'approved'";
         $bind_types = '';
         $params = [];
-        if ($category !== '') {
-          $sql .= " AND REPLACE(LOWER(COALESCE(c.industry, j.job_category)), '&', ' and ') IN (" . implode(',', array_fill(0, count($categoryMatchValues), '?')) . ")";
-          $bind_types .= str_repeat('s', count($categoryMatchValues));
-          $params = array_merge($params, $categoryMatchValues);
+        if ($selectedIndustryKey !== '') {
+          $sql .= " AND LOWER(TRIM(c.industry)) = ?";
+          $bind_types .= 's';
+          $params[] = $selectedIndustryKey;
         }
         if ($job_type !== '') {
           $sql .= " AND LOWER(j.job_type) = ?";
           $bind_types .= 's';
           $params[] = $job_type;
         }
-        $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        $sql .= " ORDER BY j.created_at DESC LIMIT ? OFFSET ?";
         $bind_types .= 'ii';
         $params[] = $jobs_per_page;
         $params[] = $offset;
@@ -839,7 +867,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
             $job_id = (int) $row['id'];
             $companyName = $row['company_name'] ?? 'JobHive';
             $companyLogo = normalizeCompanyLogoPath($row['company_logo'] ?? 'image/logo1.png');
-            $companyIndustry = translateCompanyIndustry($row['industry'] ?? ($row['job_category'] ?? ''), $lang) ?: ($lang['jobdetail_unknown'] ?? 'Unknown');
+            $companyIndustry = translateCompanyIndustry($row['industry'] ?? '', $lang) ?: ($lang['jobdetail_unknown'] ?? 'Unknown');
             $jobExperienceLabel = translateJobExperience($row['job_experience'] ?? '', $lang);
             $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds);
             if ($isJobAlreadySaved) {

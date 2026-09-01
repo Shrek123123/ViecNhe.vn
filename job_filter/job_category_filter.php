@@ -51,11 +51,19 @@ function normalizeCompanyLogoPath($path)
 }
 
 // Get job category from POST
-$category = isset($_POST['category']) ? trim($_POST['category']) : '';
-$params = [];
-$sql = "SELECT j.id, j.job_title, COALESCE(c.company_logo, j.company_logo) AS company_logo, COALESCE(c.company_name, j.company_name) AS company_name, j.salary, j.job_location, j.created_at, j.post_duration, COALESCE(c.industry, j.job_category) AS industry FROM job j LEFT JOIN company c ON c.id = j.company_id";
+$category = isset($_POST['category']) ? trim((string) $_POST['category']) : '';
 if ($category !== '') {
-  $sql .= " WHERE COALESCE(c.industry, j.job_category) = ?";
+  $category = strtolower($category);
+  $category = preg_replace('/[^a-z0-9_]+/', '_', $category);
+  $category = preg_replace('/_+/', '_', $category);
+  $category = trim($category, '_');
+}
+$params = [];
+$sql = "SELECT j.id, j.job_title, c.company_logo AS company_logo, c.company_name AS company_name, j.salary, j.job_location, j.created_at, j.post_duration, c.industry AS industry
+        FROM job j
+        LEFT JOIN company c ON c.id = j.company_id";
+if ($category !== '') {
+  $sql .= " WHERE LOWER(TRIM(c.industry)) = ?";
   $params[] = $category;
 }
 $sql .= " ORDER BY j.created_at DESC LIMIT 30";

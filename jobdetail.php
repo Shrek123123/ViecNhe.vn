@@ -254,9 +254,15 @@ require_once 'helpers.php';
                 <!-- Việc làm liên quan -->
                 <?php
                 $related_jobs = [];
-                if ($job && !empty($job['job_category'])) {
-                    $stmt_related = $conn->prepare("SELECT id, job_title, salary FROM job WHERE job_category = ? AND id != ? LIMIT 5");
-                    $stmt_related->bind_param("si", $job['job_category'], $job_id);
+                if ($job && !empty($job['industry'])) {
+                    $stmt_related = $conn->prepare(
+                        "SELECT j.id, j.job_title, j.salary
+                         FROM job j
+                         INNER JOIN company c ON c.id = j.company_id
+                         WHERE c.industry = ? AND j.id != ?
+                         LIMIT 5"
+                    );
+                    $stmt_related->bind_param("si", $job['industry'], $job_id);
                     $stmt_related->execute();
                     $result_related = $stmt_related->get_result();
                     while ($row = $result_related->fetch_assoc()) {
@@ -301,7 +307,7 @@ require_once 'helpers.php';
                                 <p><strong><?= $lang['jobdetail_company_size'] ?></strong>
                                     <?= htmlspecialchars($job['company_size'] ?? $lang['jobdetail_unknown']) ?></p>
                                 <p><strong><?= $lang['jobdetail_industry'] ?></strong>
-                                    <?= htmlspecialchars(translateIndustryDisplay($job['industry'] ?? $job['job_category'] ?? '', $lang) ?: $lang['jobdetail_unknown']) ?></p>
+                                    <?= htmlspecialchars(translateIndustryDisplay($job['industry'] ?? '', $lang) ?: $lang['jobdetail_unknown']) ?></p>
                                 <p><strong><?= $lang['jobdetail_address'] ?></strong>
                                     <?= htmlspecialchars($job['company_address'] ?? $job['job_detailed_location'] ?? $lang['jobdetail_unknown']) ?></p>
                             </div>
@@ -312,7 +318,7 @@ require_once 'helpers.php';
                 <div class="bg-white p-3 mb-4 shadow rounded">
                     <div class="sidebar-title"><?= $lang['jobdetail_general_info'] ?></div>
                     <p><strong><?= $lang['jobdetail_position_level'] ?></strong>
-                        <?= htmlspecialchars($job['job_position'] ?? 'N/A') ?></p>
+                        <?= htmlspecialchars(translateJobPosition($job['job_position'] ?? '', $lang) ?: 'N/A') ?></p>
                     <p><strong><?= $lang['jobdetail_education'] ?></strong>
                         <?= htmlspecialchars($job['required_certification'] ?? 'N/A') ?></p>
                     <p><strong><?= $lang['jobdetail_quantity'] ?></strong>

@@ -13,16 +13,14 @@ $job = null;
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $jobId = intval($_GET['id']);
 
-    $sql = "SELECT 
-                id, posted_by_employer_id, company_name, company_size, job_title, 
-                job_description, job_benefit, job_requirement, job_location, 
-                no_employee_needed, salary, post_duration, contact_email, 
-                contact_phone, job_type, job_category, required_certification, 
-                job_experience, company_logo, created_at, status, job_detailed_location, job_location_district
-            FROM 
-                job 
-            WHERE 
-                id = ? AND status = 'pending_review'"; // Chỉ lấy job đang chờ duyệt
+    $sql = "SELECT j.id, j.posted_by_employer_id, c.company_name, c.company_size, j.job_title,
+                j.job_description, j.job_benefit, j.job_requirement, j.job_location,
+                j.no_employee_needed, j.salary, j.post_duration, j.contact_email,
+                j.contact_phone, j.job_type, c.industry AS job_category, j.required_certification,
+                j.job_experience, c.company_logo, j.created_at, j.status, j.job_detailed_location, j.job_location_district
+            FROM job j
+            LEFT JOIN company c ON c.id = j.company_id
+            WHERE j.id = ? AND j.status = 'pending_review'"; // Chỉ lấy job đang chờ duyệt
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {

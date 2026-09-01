@@ -28,40 +28,6 @@ include '../helpers.php';
 
 require_once '../config.php';
 
-function normalizeEmployerLogoPath($path) {
-    $raw = trim((string) $path);
-    if ($raw === '') {
-        return '';
-    }
-
-    if (preg_match('#^(https?://|data:|//)#i', $raw)) {
-        return $raw;
-    }
-
-    $normalized = str_replace('\\', '/', $raw);
-    $normalized = preg_replace('#^(?:\./)+#', '', $normalized);
-    $normalized = preg_replace('#^(?:\.\./)+#', '', $normalized);
-    $normalized = preg_replace('#^/+#', '', $normalized);
-
-    if (stripos($normalized, 'uploads/companylogo/') !== false) {
-        return '../' . ltrim($normalized, './');
-    }
-
-    if (stripos($normalized, 'companylogo/') !== false) {
-        return '../uploads/' . ltrim(substr($normalized, stripos($normalized, 'companylogo/')), '/');
-    }
-
-    if (stripos($normalized, 'uploads/') === 0) {
-        return '../' . $normalized;
-    }
-
-    if (stripos($normalized, 'companylogo/') === 0) {
-        return '../uploads/' . ltrim(substr($normalized, strlen('companylogo/')), '/');
-    }
-
-    return '../uploads/companylogo/' . ltrim(basename($normalized), '/');
-}
-
 $currentPage = basename($_SERVER['PHP_SELF']);
 $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 ?>
@@ -414,6 +380,72 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             background: #f2f2f2;
         }
 
+        .dashboard-sidebar button.active {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+            font-weight: bold;
+        }
+
+        .change-info-wrap {
+            position: relative;
+            width: auto;
+            display: block;
+        }
+
+        .change-info-menu {
+            position: absolute;
+            top: 0;
+            left: calc(100% + 10px);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 190px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #e8dede;
+            border-radius: 0;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+            z-index: 50;
+        }
+
+        .change-info-menu.show {
+            display: flex;
+        }
+
+        .change-info-option {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #f0d8d8;
+            background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%);
+            color: #733333;
+            border-radius: 0;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .change-info-option:hover {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+        }
+
+        #btn-changeinfo {
+            border-radius: 0;
+            transition: all 0.2s ease;
+        }
+
+        #btn-changeinfo.active {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+            font-weight: bold;
+            box-shadow: 0 6px 16px rgba(178, 59, 59, 0.2);
+        }
+
         /* ===== APPLICANT CARD ===== */
         .applicant-card {
             background: #b76d6d;
@@ -543,61 +575,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
 
 <body>
-    <div class="header">
-        <div style="display: flex; align-items: center;">
-            <a href="../employerpage.php">
-                <img src="../image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
-            </a>
-        </div>
-        <div style="display: flex; gap: 50px; margin-left: 50px;">
-            <a href="#" style="text-decoration: none; color: #333;"><?php echo $lang['create_cv']; ?></a>
-            <a href="../contactus_employer.php"
-                style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a>
-            <a href="../feedback_employer.php"
-                style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
-        </div>
-        <div style="display: flex; gap: 15px; margin-left: auto;">
-            <?php if (isset($_SESSION['usernameemployer'])): ?>
-                <div class="user-dropdown">
-                    <div class="user-info">
-                        <img src="../image/defaultavatar.jpg" alt="User Avatar">
-                        <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
-                    </div>
-                    <div class="dropdown-menu">
-                        <?php
-                        $employerId = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
-                        ?>
-                        <a href="../employerlogout.php"><?php echo $lang['logout']; ?></a>
-                    </div>
-                </div>
-                <button id="lang-switch-btn"
-                    style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
-                    <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-                </button>
-            <?php else: ?>
-                <div class="guest-options">
-                    <a href="employerlogin.php" class="btn-login"><?php echo $lang['login/register_employer']; ?></a>
-                    <a href="index.php" class="btn-register"><?php echo $lang['jobseeker_redirect']; ?></a>
-                    <a href="admin/adminlogin.php" class="btn-register"><?php echo $lang['admin_login']; ?></a>
-                    <button id="lang-switch-btn"
-                        style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
-                        <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-                    </button>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <script>
-            document.getElementById('lang-switch-btn').onclick = function () {
-                var currentLang = '<?php echo $_SESSION['lang']; ?>';
-                if (currentLang === 'vi') {
-                    window.location.href = '?lang=en';
-                } else {
-                    window.location.href = '?lang=vi';
-                }
-            };
-        </script>
-    </div>
+    <?php include 'header.php'; ?>
     <!-- #region -->
     <div class="employer-dashboard">
 
@@ -625,11 +603,17 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             <!-- SIDEBAR -->
             <div class="dashboard-sidebar">
                 <button id="btn-postjob"
-                    onclick="window.location.href='add_job_post.php'"><?= $lang['employerprofile_postajob'] ?></button>
-                <button
-                    onclick="window.location.href='my_job_posts.php'"><?= $lang['employerprofile_myjobposts'] ?></button>
-                <button onclick="window.location.href='company_profile.php'"><?= $lang['employerprofile_companyprofile'] ?></button>
-                <button><?= $lang['employerprofile_changeinfo'] ?></button>
+                    onclick="window.location.href='add_job_post.php'" class="<?= ($currentPage == 'add_job_post.php') ? 'active' : '' ?>"><?= $lang['employerprofile_postajob'] ?></button>
+                <button onclick="window.location.href='my_job_posts.php'" class="<?= ($currentPage == 'my_job_posts.php') ? 'active' : '' ?>"><?= $lang['employerprofile_myjobposts'] ?></button>
+                <button onclick="window.location.href='company_profile.php'" class="<?= ($currentPage == 'company_profile.php') ? 'active' : '' ?>"><?= $lang['employerprofile_companyprofile'] ?></button>
+                <div class="change-info-wrap">
+                    <button id="btn-changeinfo" type="button" class="<?= in_array($currentPage, ['change_employer_info.php', 'change_password.php', 'change_profile_pic.php'], true) ? 'active' : '' ?>"><?= $lang['employerprofile_changeinfo'] ?></button>
+                    <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
+                        <button type="button" class="change-info-option" data-href="change_employer_info.php"><?= $lang['change_employer_general_info_action'] ?></button>
+                        <button type="button" class="change-info-option" data-href="change_password.php"><?= $lang['change_employer_password_action'] ?></button>
+                        <button type="button" class="change-info-option" data-href="change_profile_pic.php"><?= $lang['change_employer_avatar_action'] ?></button>
+                    </div>
+                </div>
 
                 <?php
                 // Tính tổng số đơn ứng tuyển cho employer hiện tại
@@ -716,51 +700,11 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                 $message = "";
                 $message_type = ""; // 'success' hoặc 'error'
 
-                $company_logo_existing = $_POST['company_logo_existing'] ?? ($job_data['company_logo'] ?? '');
-
-                if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
-                    $targetDir = '../uploads/companylogo/';
-                    if (!is_dir($targetDir)) {
-                        mkdir($targetDir, 0777, true);
-                    }
-                    $fileName = basename($_FILES["company_logo"]["name"]);
-                    $targetFile = $targetDir . uniqid() . "_" . $fileName;
-                    $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
-
-                    if ($_FILES["company_logo"]["size"] > 1000000) {
-                        echo "<script>alert('Sorry, your file is too large.');</script>";
-                        exit;
-                    }
-
-                    $allowedTypes = ['jpg', 'png', 'jpeg', 'gif', 'webp'];
-                    if (!in_array($fileType, $allowedTypes)) {
-                        echo "<script>
-      alert('Sorry, only JPG, JPEG, PNG, GIF & WEBP files are allowed.');
-      window.history.back();
-      </script>";
-                        exit;
-                    }
-
-                    if (!move_uploaded_file($_FILES["company_logo"]["tmp_name"], $targetFile)) {
-                        echo "<script>alert('Sorry, there was an error uploading your file.');
-      window.history.back();
-      </script>";
-                        exit;
-                    }
-                } else {
-                    $targetFile = normalizeEmployerLogoPath($_POST['company_logo_existing'] ?? $company_logo_existing);
-                }
-                if (empty($targetFile)) {
-                    $targetFile = '../uploads/companylogo/default.png';
-                }
-
                 // --- 3. XỬ LÝ UPDATE KHI NGƯỜI DÙNG NHẤN NÚT LƯU ---
                 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
                     // Lấy ID từ session thay vì tin tưởng vào $_POST['job_id'] để bảo mật hơn
                     $posted_by_employer_id = intval($_POST['posted_by_employer_id']);
 
-                    $company_name = $_POST['company_name'] ?? '';
-                    $company_size = $_POST['company_size'] ?? '';
                     $job_title = $_POST['job_title'] ?? '';
                     $job_description = $_POST['job_description'] ?? '';
                     $job_benefit = $_POST['job_benefit'] ?? '';
@@ -771,34 +715,25 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     $contact_email = $_POST['contact_email'] ?? '';
                     $contact_phone = $_POST['contact_phone'] ?? '';
                     $job_type = $_POST['job_type'] ?? '';
-                    $job_category = $_POST['job_category'] ?? '';
                     $required_certification = $_POST['required_certification'] ?? '';
                     $job_experience = $_POST['job_experience'] ?? '';
-                    $company_logo = normalizeEmployerLogoPath($_POST['company_logo_existing'] ?? $_POST['company_logo'] ?? ($job_data['company_logo'] ?? ''));
-
-                    if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] === UPLOAD_ERR_OK) {
-                        $company_logo = $targetFile;
-                    }
 
                     // Validate
-                    if ($job_id <= 0 || $posted_by_employer_id <= 0 || empty($company_name) || empty($job_title) || empty($job_description) || empty($job_location) || $no_employee_needed <= 0 || empty($salary) || empty($contact_email)) {
+                    if ($job_id <= 0 || $posted_by_employer_id <= 0 || empty($job_title) || empty($job_description) || empty($job_location) || $no_employee_needed <= 0 || empty($salary) || empty($contact_email)) {
                         $message = $lang['validation_error'] ?? "Vui lòng điền đầy đủ các thông tin bắt buộc.";
                         $message_type = "error";
                     } else {
                         if (isset($conn) && $conn->ping()) {
                             $sql_update = "UPDATE job SET
-                                company_name = ?, company_size = ?, job_title = ?, job_description = ?,
+                                job_title = ?, job_description = ?,
                                 job_benefit = ?, job_requirement = ?, job_location = ?, no_employee_needed = ?,
                                 salary = ?, contact_email = ?, contact_phone = ?,
-                                job_type = ?, job_category = ?, required_certification = ?, 
-                                job_experience = ?, company_logo = ?, last_updated_at = CURRENT_TIMESTAMP
+                                job_type = ?, required_certification = ?, job_experience = ?, last_updated_at = CURRENT_TIMESTAMP
                             WHERE id = ? AND posted_by_employer_id = ?";
 
                             $stmt = $conn->prepare($sql_update);
                             $stmt->bind_param(
-                                "sssssssissssssssii",
-                                $company_name,
-                                $company_size,
+                                "sssssissssssii",
                                 $job_title,
                                 $job_description,
                                 $job_benefit,
@@ -809,10 +744,8 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                 $contact_email,
                                 $contact_phone,
                                 $job_type,
-                                $job_category,
                                 $required_certification,
                                 $job_experience,
-                                $company_logo,
                                 $job_id,
                                 $posted_by_employer_id
                             );
@@ -946,28 +879,15 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     <?php endif; ?>
 
                     <?php if ($job_data): ?>
-                        <form method="POST" action="" enctype="multipart/form-data">
+                        <form method="POST" action="">
                             <input type="hidden" name="posted_by_employer_id"
                                 value="<?= htmlspecialchars($job_data['posted_by_employer_id']) ?>">
-                            <input type="hidden" name="company_logo_existing" value="<?= htmlspecialchars($job_data['company_logo'] ?? '') ?>">
 
                             <div class="form-grid">
                                 <div class="full-row">
                                     <label><?= $lang['edit_job_post_modal_job_title'] ?>*</label>
                                     <input type="text" name="job_title"
                                         value="<?= htmlspecialchars($job_data['job_title']) ?>" required>
-                                </div>
-
-                                <div>
-                                    <label><?= $lang['edit_job_post_modal_company_name'] ?>*</label>
-                                    <input type="text" name="company_name"
-                                        value="<?= htmlspecialchars($job_data['company_name']) ?>" required>
-                                </div>
-
-                                <div>
-                                    <label><?= $lang['edit_job_post_modal_company_size'] ?></label>
-                                    <input type="text" name="company_size"
-                                        value="<?= htmlspecialchars($job_data['company_size']) ?>">
                                 </div>
 
                                 <div class="full-row">
@@ -1035,16 +955,6 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                 </div>
 
                                 <div>
-                                    <label><?= $lang['edit_job_post_modal_job_category'] ?>*</label>
-                                    <?php
-                                    $job_category_value = trim((string) ($job_data['job_category'] ?? ''));
-                                    $job_category_display = $job_category_value !== '' ? translateCompanyIndustry($job_category_value, $lang) : '';
-                                    ?>
-                                    <input type="text" name="job_category"
-                                        value="<?= htmlspecialchars($job_category_display) ?>" required>
-                                </div>
-
-                                <div>
                                     <label><?= $lang['edit_job_post_modal_required_certification'] ?></label>
                                     <input type="text" name="required_certification"
                                         value="<?= htmlspecialchars($job_data['required_certification']) ?>">
@@ -1067,22 +977,6 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
-                                <div class="full-row">
-                                    <label><?= $lang['edit_job_post_modal_company_logo'] ?></label>
-                                    <?php if (!empty($job_data['company_logo'])): ?>
-                                        <?php
-                                        $db_logo = trim((string) ($job_data['company_logo'] ?? ''));
-                                        $logo_src = normalizeEmployerLogoPath($db_logo);
-                                        ?>
-                                        <?php if ($logo_src !== ''): ?>
-                                            <div style="margin-bottom: 10px;">
-                                                <img src="<?= htmlspecialchars($logo_src) ?>" alt="Current Company Logo" style="max-width: 140px; max-height: 90px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; background: #fafafa;">
-                                            </div>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                    <input type="file" name="company_logo" accept="image/*">
-                                </div>
                             </div>
 
                             <button type="submit" name="submit_update"
@@ -1098,6 +992,43 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
     </div>
 
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnChangeInfo = document.getElementById('btn-changeinfo');
+            const menu = document.getElementById('changeInfoMenu');
+            if (!btnChangeInfo || !menu) return;
+
+            const activePages = ['change_employer_info.php', 'change_password.php', 'change_profile_pic.php'];
+            const currentPage = window.location.pathname.split('/').pop();
+            const isActivePage = activePages.includes(currentPage);
+
+            menu.classList.remove('show');
+            menu.style.display = 'none';
+            btnChangeInfo.classList.toggle('active', isActivePage);
+
+            btnChangeInfo.addEventListener('click', function (event) {
+                event.stopPropagation();
+                const isOpen = menu.style.display !== 'none';
+                menu.style.display = isOpen ? 'none' : 'flex';
+                menu.classList.toggle('show', !isOpen);
+                btnChangeInfo.classList.toggle('active', !isOpen || isActivePage);
+            });
+
+            menu.querySelectorAll('.change-info-option').forEach((option) => {
+                option.addEventListener('click', function () {
+                    window.location.href = this.dataset.href;
+                });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!btnChangeInfo.contains(event.target) && !menu.contains(event.target)) {
+                    menu.style.display = 'none';
+                    menu.classList.remove('show');
+                    btnChangeInfo.classList.toggle('active', isActivePage);
+                }
+            });
+        });
+    </script>
 </body>
 
 <footer>

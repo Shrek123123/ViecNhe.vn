@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once 'config.php';
+
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
@@ -11,6 +13,24 @@ if (!isset($_SESSION['lang'])) {
 
 // Load file ngôn ngữ tương ứng
 include 'lang/' . $_SESSION['lang'] . '.php';
+
+$header_avatar = 'image/defaultavatar.jpg';
+if (isset($_SESSION['employerid'])) {
+    $header_employer_id = (int) $_SESSION['employerid'];
+    $header_stmt = $conn->prepare("SELECT profile_pic FROM employer_profile WHERE employer_id = ? LIMIT 1");
+    if ($header_stmt) {
+        $header_stmt->bind_param('i', $header_employer_id);
+        $header_stmt->execute();
+        $header_result = $header_stmt->get_result();
+        if ($header_result && $header_result->num_rows > 0) {
+            $header_row = $header_result->fetch_assoc();
+            if (!empty($header_row['profile_pic'])) {
+                $header_avatar = $header_row['profile_pic'];
+            }
+        }
+        $header_stmt->close();
+    }
+}
 ?>
 <style>
     .loggined_option {
@@ -147,7 +167,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
             <a class="ra_trang_tim_viec" href="index.php"><?php echo $lang['Ra_trang_tim_viec'] ?></a>
             <div class="user-dropdown">
                 <div class="user-info">
-                    <img src="image/defaultavatar.jpg" alt="User Avatar">
+                    <img src="<?= htmlspecialchars($header_avatar) ?>" alt="User Avatar">
                     <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
                 </div>
                 <div class="dropdown-menu">

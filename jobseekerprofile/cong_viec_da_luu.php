@@ -194,6 +194,65 @@ if ($cv_file_path) {
             background-color: #f2f2f2;
         }
 
+        .change-info-wrap {
+            position: relative;
+            width: auto;
+            display: block;
+        }
+
+        .change-info-menu {
+            position: absolute;
+            top: 0;
+            left: calc(100% + 10px);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 190px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #e8dede;
+            border-radius: 0;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+            z-index: 50;
+        }
+
+        .change-info-menu.show {
+            display: flex;
+        }
+
+        .change-info-option {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #f0d8d8;
+            background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%);
+            color: #733333;
+            border-radius: 0;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .change-info-option:hover {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+        }
+
+        #btn-changeinfo {
+            border-radius: 0;
+            transition: all 0.2s ease;
+        }
+
+        #btn-changeinfo.active {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+            font-weight: bold;
+            box-shadow: 0 6px 16px rgba(178, 59, 59, 0.2);
+        }
+
         .applicant-card {
             background-color: #b76d6d;
             color: white;
@@ -611,7 +670,13 @@ if ($cv_file_path) {
             <button id="btn-myprofile" onclick="window.location.href='ho_so_ung_vien.php'"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications" onclick="window.location.href='don_ung_tuyen.php'"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs" class="active" onclick="window.location.href='cong_viec_da_luu.php'"><?= $lang['btn_savedjobs'] ?></button>
-            <button id="btn-changeinfo" onclick="window.location.href='thay_doi_thong_tin.php'"><?= $lang['btn_changeinfo'] ?></button>
+            <div class="change-info-wrap">
+                <button id="btn-changeinfo" type="button"><?= $lang['btn_changeinfo'] ?></button>
+                <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
+                    <button type="button" class="change-info-option" data-href="thay_doi_email.php"><?= $lang['change_email_action'] ?></button>
+                    <button type="button" class="change-info-option" data-href="thay_doi_mat_khau.php"><?= $lang['change_password_action'] ?></button>
+                </div>
+            </div>
 
             <h3><?= $lang['jobseekerprofile_appliedjobs'] ?></h3>
 
@@ -691,7 +756,27 @@ if ($cv_file_path) {
                             }
                             $row = $result_job->fetch_assoc();
 
-                            $logo = !empty($row['company_logo']) ? $row['company_logo'] : 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=cover&w=120&q=80';
+                            $logo = 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=cover&w=120&q=80';
+                            $company_name = 'Unknown Company';
+                            if (!empty($row['company_id'])) {
+                                $company_sql = "SELECT company_name, company_logo FROM company WHERE id = ? LIMIT 1";
+                                $company_stmt = $conn->prepare($company_sql);
+                                if ($company_stmt) {
+                                    $company_stmt->bind_param('i', $row['company_id']);
+                                    $company_stmt->execute();
+                                    $company_result = $company_stmt->get_result();
+                                    if ($company_result && $company_result->num_rows > 0) {
+                                        $company_row = $company_result->fetch_assoc();
+                                        if (!empty($company_row['company_name'])) {
+                                            $company_name = htmlspecialchars($company_row['company_name']);
+                                        }
+                                        if (!empty($company_row['company_logo'])) {
+                                            $logo = $company_row['company_logo'];
+                                        }
+                                    }
+                                    $company_stmt->close();
+                                }
+                            }
                             $created_at = new DateTime($row['created_at']);
                             $duration = intval($row['post_duration']);
                             $expire_at = clone $created_at;
@@ -703,7 +788,6 @@ if ($cv_file_path) {
                                 ? str_replace(':d', (string) $days_left, $lang['dayleft'] ?? $days_left . ' days left')
                                 : ($lang['expired'] ?? 'Expired');
                             $salary = htmlspecialchars($row['salary']);
-                            $company_name = htmlspecialchars($row['company_name']);
                             $job_title = htmlspecialchars($row['job_title']);
                             $job_location = htmlspecialchars($row['job_location']);
                             $updated = $created_at->diff($now);
@@ -1082,6 +1166,36 @@ if ($cv_file_path) {
     </script>
     <!-- script mở modal -->
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnChangeInfo = document.getElementById('btn-changeinfo');
+            const menu = document.getElementById('changeInfoMenu');
+            if (!btnChangeInfo || !menu) return;
+
+            btnChangeInfo.addEventListener('click', function (event) {
+                event.stopPropagation();
+                const isOpen = menu.classList.contains('show');
+                document.querySelectorAll('.change-info-menu').forEach(item => item.classList.remove('show'));
+                document.querySelectorAll('#btn-changeinfo').forEach(item => item.classList.remove('active'));
+                if (!isOpen) {
+                    menu.classList.add('show');
+                    btnChangeInfo.classList.add('active');
+                }
+            });
+
+            menu.querySelectorAll('.change-info-option').forEach((option) => {
+                option.addEventListener('click', function () {
+                    window.location.href = this.dataset.href;
+                });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!btnChangeInfo.contains(event.target) && !menu.contains(event.target)) {
+                    menu.classList.remove('show');
+                    btnChangeInfo.classList.remove('active');
+                }
+            });
+        });
+
         // Đóng modal
         document.querySelector('.close').addEventListener('click', function () {
             document.getElementById('modalForm').style.display = 'none';

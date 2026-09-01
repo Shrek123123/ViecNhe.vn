@@ -68,6 +68,40 @@ if ($isLoggedIn) {
 }
 $savedJobIdsJson = json_encode($savedJobIds);
 
+$industryOptionKeys = [
+    'kinh_doanh_ban_hang',
+    'marketing_truyen_thong',
+    'tai_chinh_ke_toan_ngan_hang',
+    'cong_nghe_thong_tin',
+    'y_te_duoc_pham',
+    'nha_nuoc_cong_vu',
+    'giao_duc_dao_tao',
+    'san_xuat_van_hanh_day_chuyen',
+    'van_tai_logistics',
+    'bat_dong_san',
+    'bao_hiem',
+    'xay_dung_kien_truc',
+    'du_lich_khach_san_nha_hang',
+    'luat',
+    'thiet_ke_nghe_thuat',
+    'nong_nghiep',
+    'food_beverage',
+    'nhan_su',
+    'hanh_chinh_van_phong',
+    'ky_thuat',
+    'khac'
+];
+
+$industryFilterOptions = [];
+foreach ($industryOptionKeys as $industryKey) {
+    if (isset($lang[$industryKey]) && is_string($lang[$industryKey]) && $lang[$industryKey] !== '') {
+        $industryFilterOptions[] = [
+            'value' => $industryKey,
+            'label' => $lang[$industryKey],
+        ];
+    }
+}
+
 ?>
 <style>
     body {
@@ -456,12 +490,12 @@ $savedJobIdsJson = json_encode($savedJobIds);
             <form action="" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <select name="category">
                     <option value=""><?php echo $lang['job_category_select_menu']; ?></option>
-                    <option value="IT & Software" <?php echo (isset($_GET['category']) && $_GET['category'] == 'IT & Software') ? 'selected' : ''; ?>>IT & Software</option>
-                    <option value="Marketing" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Marketing') ? 'selected' : ''; ?>>Marketing</option>
-                    <option value="Finance" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Finance') ? 'selected' : ''; ?>>Finance</option>
-                    <option value="Healthcare" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Healthcare') ? 'selected' : ''; ?>>Healthcare</option>
-                    <option value="Government & Public Sector" <?php echo (isset($_GET['category']) && $_GET['category'] == 'Government & Public Sector') ? 'selected' : ''; ?>>Government & Public Sector</option>
-                    </select>
+                    <?php foreach ($industryFilterOptions as $option): ?>
+                        <option value="<?= htmlspecialchars($option['value']) ?>" <?= (isset($_GET['category']) && $_GET['category'] === $option['value']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($option['label']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
                 <input type="text" name="q" placeholder="<?php echo $lang['job_title_company_placeholder'] ?? 'Job title, company name'; ?>" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
                 <input type="text" name="location" placeholder="<?php echo $lang['location_placeholder'] ?? 'Location'; ?>" value="<?php echo htmlspecialchars($_GET['location'] ?? ''); ?>">
                 <button type="submit"><?php echo $lang['search']; ?></button>
@@ -477,7 +511,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
         $current_sort = $_GET['sort'] ?? 'newest_first';
         ?>
         <div class="sort-by-container">
-            <form action="" method="get">
+            <form id="jobSortForm" action="" method="get">
                 <?php
                 // Giữ lại tất cả các tham số GET hiện tại (trừ 'sort' và 'page')
                 $hidden_params = $_GET;
@@ -487,7 +521,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
                     echo '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($value) . '">';
                 }
                 ?>
-                <select name="sort" onchange="this.form.submit()">
+                <select id="jobSortSelect" name="sort">
                     <option value="newest_first" <?php echo ($current_sort == 'newest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_newest_first'] ?? 'Date posted: Newest first'; ?></option>
                     <option value="oldest_first" <?php echo ($current_sort == 'oldest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_oldest_first'] ?? 'Date posted: Oldest first'; ?></option>
                     <option value="salary_highest" <?php echo ($current_sort == 'salary_highest') ? 'selected' : ''; ?>><?php echo $lang['sort_salary_highest'] ?? 'Salary: Highest to lowest'; ?></option>
@@ -495,6 +529,33 @@ $savedJobIdsJson = json_encode($savedJobIds);
                 </select>
             </form>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const sortSelect = document.getElementById('jobSortSelect');
+                const sortForm = document.getElementById('jobSortForm');
+
+                if (!sortSelect || !sortForm) {
+                    return;
+                }
+
+                sortSelect.addEventListener('change', function () {
+                    const formData = new FormData(sortForm);
+                    const params = new URLSearchParams();
+
+                    formData.forEach(function (value, key) {
+                        params.append(key, value);
+                    });
+
+                    params.set('sort', sortSelect.value);
+                    params.delete('page');
+
+                    const url = new URL(window.location.href);
+                    url.search = params.toString();
+                    window.location.href = url.toString();
+                });
+            });
+        </script>
 
         <div class="job-section">
             <?php
@@ -509,8 +570,8 @@ $savedJobIdsJson = json_encode($savedJobIds);
             $sort_order = $_GET['sort'] ?? 'newest_first'; // Lấy tham số sắp xếp
 
             // Bắt đầu xây dựng câu truy vấn SQL
-            $sql_base = "SELECT j.id, j.job_title, COALESCE(c.company_logo, j.company_logo) AS company_logo,
-                COALESCE(c.company_name, j.company_name) AS company_name,
+            $sql_base = "SELECT j.id, j.job_title, c.company_logo AS company_logo,
+                c.company_name AS company_name,
                 j.salary, j.job_location, j.created_at, j.post_duration
                 FROM job j
                 LEFT JOIN company c ON c.id = j.company_id";
@@ -522,14 +583,14 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
             // Thêm điều kiện cho industry của công ty
             if (!empty($search_category)) {
-                $conditions[] = "LOWER(COALESCE(c.industry, j.job_category)) = ?";
+                $conditions[] = "LOWER(c.industry) = ?";
                 $params[] = strtolower(trim($search_category));
                 $param_types .= 's';
             }
 
             // Thêm điều kiện cho job_title hoặc company_name
             if (!empty($search_query)) {
-                $conditions[] = "(j.job_title LIKE ? OR COALESCE(c.company_name, j.company_name) LIKE ?)";
+                $conditions[] = "(j.job_title LIKE ? OR c.company_name LIKE ?)";
                 $params[] = '%' . $search_query . '%';
                 $params[] = '%' . $search_query . '%';
                 $param_types .= 'ss';
@@ -549,60 +610,33 @@ $savedJobIdsJson = json_encode($savedJobIds);
             }
 
             // --- Xử lý sắp xếp ---
+            $salary_numeric_order = "
+                CASE
+                    WHEN LOWER(TRIM(j.salary)) LIKE '%usd%' THEN
+                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'usd', 1), ' ', -1), '$', ''), ',', ''), '.', '') AS DECIMAL(20,2)) * 25000
+                    WHEN LOWER(TRIM(j.salary)) LIKE '%vnd%' THEN
+                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'vnd', 1), ' ', -1), ',', ''), '.', ''), '$', '') AS DECIMAL(20,2))
+                    WHEN LOWER(TRIM(j.salary)) LIKE '%triệu%' THEN
+                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'triệu', 1), ' ', -1), ',', ''), '.', ''), 'triệu', '') AS DECIMAL(20,2)) * 1000000
+                    ELSE 0
+                END";
+
             $order_by_clause = "";
             switch ($sort_order) {
                 case 'newest_first':
-                    $order_by_clause = " ORDER BY created_at DESC";
+                    $order_by_clause = " ORDER BY j.created_at DESC";
                     break;
                 case 'oldest_first':
-                    $order_by_clause = " ORDER BY created_at ASC";
+                    $order_by_clause = " ORDER BY j.created_at ASC";
                     break;
                 case 'salary_highest':
-                    // Logic phức tạp cho lương:
-                    // 1. Ưu tiên USD cao nhất.
-                    // 2. Sau đó, chuyển đổi '2 - 3 triệu' thành số (2) để so sánh.
-                    // 3. Xử lý các trường hợp khác không phải số.
-                    // Giả định 1 USD = 25000 VND. Vui lòng điều chỉnh tỷ giá này nếu cần.
-                    $order_by_clause = " ORDER BY
-                        CASE
-                            WHEN salary LIKE '%USD%' THEN 1      -- Ưu tiên USD cao nhất (đưa các job có USD lên trên cùng)
-                            ELSE 0                               -- Các loại khác
-                        END DESC,
-                        CASE
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)?( - [0-9]+([.,][0-9]+)?)? *[Tt]riệu' THEN CAST(REPLACE(SUBSTRING_INDEX(salary, ' ', 1), ',', '.') AS DECIMAL(10,2)) * 1000000 -- Lấy số đầu tiên, nếu có 'triệu'
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)?( - [0-9]+([.,][0-9]+)?)? *[Vv][Nn][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(salary, ' ', 1), ',', '.') AS DECIMAL(10,2)) -- Lấy số đầu tiên, nếu có 'VND'
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)?( - [0-9]+([.,][0-9]+)?)? *[Uu][Ss][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(salary, ' ', 1), ',', '.') AS DECIMAL(10,2)) * 25000 -- Lấy số đầu tiên, nếu có 'USD'
-                            ELSE 0 -- Giá trị mặc định nếu không khớp mẫu, để xuống cuối
-                        END DESC,
-                        -- So sánh số thứ hai nếu số đầu tiên trùng và có khoảng lương (chỉ khi có dấu gạch ngang)
-                        CASE
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)? - ([0-9]+([.,][0-9]+)?) *[Tt]riệu' THEN CAST(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(salary, ' - ', -1), ' ', 1), ',', '.') AS DECIMAL(10,2)) * 1000000
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)? - ([0-9]+([.,][0-9]+)?) *[Vv][Nn][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(salary, ' - ', -1), ' ', 1), ',', '.') AS DECIMAL(10,2))
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)? - ([0-9]+([.,][0-9]+)?) *[Uu][Ss][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(salary, ' - ', -1), ' ', 1), ',', '.') AS DECIMAL(10,2)) * 25000
-                            ELSE 0
-                        END DESC
-                    ";
+                    $order_by_clause = " ORDER BY " . $salary_numeric_order . " DESC, j.created_at DESC";
                     break;
                 case 'salary_lowest':
-                    // Logic tương tự cho lương, nhưng ASC (thấp đến cao)
-                    $order_by_clause = " ORDER BY
-                        CASE
-                            WHEN salary LIKE '%USD%' THEN 1      -- Ưu tiên USD cao nhất (vẫn giữ USD ở trên cùng khi so sánh)
-                            ELSE 0                               -- Các loại khác
-                        END DESC, -- USD vẫn ưu tiên cao nhất, sau đó mới đến sắp xếp tăng dần của các giá trị còn lại
-                        CASE
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)?( - [0-9]+([.,][0-9]+)?)? *[Tt]riệu' THEN CAST(REPLACE(SUBSTRING_INDEX(salary, ' ', 1), ',', '.') AS DECIMAL(10,2)) * 1000000
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)?( - [0-9]+([.,][0-9]+)?)? *[Vv][Nn][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(salary, ' ', 1), ',', '.') AS DECIMAL(10,2))
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)?( - [0-9]+([.,][0-9]+)?)? *[Uu][Ss][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(salary, ' ', 1), ',', '.') AS DECIMAL(10,2)) * 25000
-                            ELSE 9999999999 -- Giá trị mặc định lớn nếu không khớp mẫu, để xuống cuối khi sắp xếp tăng dần
-                        END ASC,
-                        CASE
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)? - ([0-9]+([.,][0-9]+)?) *[Tt]riệu' THEN CAST(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(salary, ' - ', -1), ' ', 1), ',', '.') AS DECIMAL(10,2)) * 1000000
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)? - ([0-9]+([.,][0-9]+)?) *[Vv][Nn][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(salary, ' - ', -1), ' ', 1), ',', '.') AS DECIMAL(10,2))
-                            WHEN salary REGEXP '^[0-9]+([.,][0-9]+)? - ([0-9]+([.,][0-9]+)?) *[Uu][Ss][Dd]?' THEN CAST(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(salary, ' - ', -1), ' ', 1), ',', '.') AS DECIMAL(10,2)) * 25000
-                            ELSE 9999999999
-                        END ASC
-                    ";
+                    $order_by_clause = " ORDER BY " . $salary_numeric_order . " ASC, j.created_at DESC";
+                    break;
+                default:
+                    $order_by_clause = " ORDER BY j.created_at DESC";
                     break;
             }
 

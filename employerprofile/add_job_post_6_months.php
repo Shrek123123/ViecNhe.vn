@@ -33,6 +33,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 ?>
 <?php
 require_once '../config.php';
+require_once '../helpers.php';
 if (!isset($_SESSION['usernameemployer'])) {
   echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -186,7 +187,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     contact_email,
     contact_phone,
     job_type,
-    job_category,
     required_certification,
     job_experience,
     company_logo,
@@ -211,7 +211,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     '" . $conn->real_escape_string($contactEmail) . "',
     '" . $conn->real_escape_string($contactPhone) . "',
     '" . $conn->real_escape_string($jobType) . "',
-    '" . $conn->real_escape_string($jobCategory) . "',
     '" . $conn->real_escape_string($requiredcertification) . "',
     '" . $conn->real_escape_string($jobExperience) . "',
     '" . $conn->real_escape_string($companyLogo) . "',
@@ -584,6 +583,78 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background: #f2f2f2;
         }
 
+        .dashboard-sidebar button.active {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+            font-weight: bold;
+        }
+
+        .change-info-wrap {
+            position: relative;
+            width: auto;
+            display: block;
+        }
+
+        .change-info-menu {
+            position: absolute;
+            top: 0;
+            left: calc(100% + 10px);
+            display: none !important;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 190px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #e8dede;
+            border-radius: 0;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+            z-index: 50;
+        }
+
+        .change-info-menu.show {
+            display: flex !important;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .change-info-option {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #f0d8d8;
+            background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%);
+            color: #733333;
+            border-radius: 0;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .change-info-option:hover {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+        }
+
+        #btn-changeinfo {
+            border-radius: 0;
+            transition: all 0.2s ease;
+        }
+
+        #btn-changeinfo.active {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+            font-weight: bold;
+            box-shadow: 0 6px 16px rgba(178, 59, 59, 0.2);
+        }
+
         /* ===== APPLICANT CARD ===== */
         .applicant-card {
             background: #b76d6d;
@@ -760,61 +831,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
 <body>
-    <div class="header">
-        <div style="display: flex; align-items: center;">
-            <a href="../employerpage.php">
-                <img src="../image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
-            </a>
-        </div>
-        <div style="display: flex; gap: 50px; margin-left: 50px;">
-            <a href="#" style="text-decoration: none; color: #333;"><?php echo $lang['create_cv']; ?></a>
-            <a href="../contactus_employer.php"
-                style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a>
-            <a href="../feedback_employer.php"
-                style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
-        </div>
-        <div style="display: flex; gap: 15px; margin-left: auto;">
-            <?php if (isset($_SESSION['usernameemployer'])): ?>
-                <div class="user-dropdown">
-                    <div class="user-info">
-                        <img src="../image/defaultavatar.jpg" alt="User Avatar">
-                        <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
-                    </div>
-                    <div class="dropdown-menu">
-                        <?php
-                        $employerId = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
-                        ?>
-                        <a href="../employerlogout.php"><?php echo $lang['logout']; ?></a>
-                    </div>
-                </div>
-                <button id="lang-switch-btn"
-                    style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px; margin-right: 50px;">
-                    <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-                </button>
-            <?php else: ?>
-                <div class="guest-options">
-                    <a href="employerlogin.php" class="btn-login"><?php echo $lang['login/register_employer']; ?></a>
-                    <a href="index.php" class="btn-register"><?php echo $lang['jobseeker_redirect']; ?></a>
-                    <a href="admin/adminlogin.php" class="btn-register"><?php echo $lang['admin_login']; ?></a>
-                    <button id="lang-switch-btn"
-                        style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
-                        <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-                    </button>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <script>
-            document.getElementById('lang-switch-btn').onclick = function () {
-                var currentLang = '<?php echo $_SESSION['lang']; ?>';
-                if (currentLang === 'vi') {
-                    window.location.href = '?lang=en';
-                } else {
-                    window.location.href = '?lang=vi';
-                }
-            };
-        </script>
-    </div>
+    <?php include 'header.php'; ?>
     <!-- #region -->
     <div class="employer-dashboard">
 
@@ -843,9 +860,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="dashboard-sidebar">
                 <button id="btn-postjob" onclick="window.location.href='add_job_post.php'"
                     class="<?= ($currentPage == 'add_job_post_6_months.php') ? 'active' : '' ?>"><?= $lang['employerprofile_postajob'] ?></button>
-                <button onclick="window.location.href='my_job_posts.php'"><?= $lang['employerprofile_myjobposts'] ?></button>
-                <button onclick="window.location.href='company_profile.php'"><?= $lang['employerprofile_companyprofile'] ?></button>
-                <button><?= $lang['employerprofile_changeinfo'] ?></button>
+                <button onclick="window.location.href='my_job_posts.php'" class="<?= ($currentPage == 'my_job_posts.php') ? 'active' : '' ?>"><?= $lang['employerprofile_myjobposts'] ?></button>
+                <button onclick="window.location.href='company_profile.php'" class="<?= ($currentPage == 'company_profile.php') ? 'active' : '' ?>"><?= $lang['employerprofile_companyprofile'] ?></button>
+                <div class="change-info-wrap">
+                    <button id="btn-changeinfo" type="button" class="<?= in_array($currentPage, ['change_employer_info.php', 'change_password.php', 'change_profile_pic.php'], true) ? 'active' : '' ?>"><?= $lang['employerprofile_changeinfo'] ?></button>
+                    <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
+                        <button type="button" class="change-info-option" data-href="change_employer_info.php"><?= $lang['change_employer_general_info_action'] ?></button>
+                        <button type="button" class="change-info-option" data-href="change_password.php"><?= $lang['change_employer_password_action'] ?></button>
+                        <button type="button" class="change-info-option" data-href="change_profile_pic.php"><?= $lang['change_employer_avatar_action'] ?></button>
+                    </div>
+                </div>
 
                 <?php
                 // Tính tổng số đơn ứng tuyển cho employer hiện tại
@@ -939,6 +963,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                     data-company_address="<?= htmlspecialchars($company_option['company_address'], ENT_QUOTES); ?>"
                                                     data-company_size="<?= htmlspecialchars($company_option['company_size'], ENT_QUOTES); ?>"
                                                     data-company_industry="<?= htmlspecialchars($company_option['industry'], ENT_QUOTES); ?>"
+                                                    data-company_industry_label="<?= htmlspecialchars(translateIndustryDisplay($company_option['industry'] ?? '', $lang), ENT_QUOTES); ?>"
                                                     data-company_logo="<?= htmlspecialchars($company_option['company_logo'], ENT_QUOTES); ?>">
                                                     <?= htmlspecialchars($company_option['company_name']); ?>
                                                 </option>
@@ -1182,6 +1207,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnChangeInfo = document.getElementById('btn-changeinfo');
+            const menu = document.getElementById('changeInfoMenu');
+            if (!btnChangeInfo || !menu) return;
+
+            const activePages = ['change_employer_info.php', 'change_password.php', 'change_profile_pic.php'];
+            const currentPage = window.location.pathname.split('/').pop();
+            const isActivePage = activePages.includes(currentPage);
+
+            menu.classList.remove('show');
+            menu.style.display = 'none';
+            btnChangeInfo.classList.toggle('active', isActivePage);
+
+            btnChangeInfo.addEventListener('click', function (event) {
+                event.stopPropagation();
+                const isOpen = menu.style.display !== 'none';
+                menu.style.display = isOpen ? 'none' : 'flex';
+                menu.classList.toggle('show', !isOpen);
+                btnChangeInfo.classList.toggle('active', !isOpen || isActivePage);
+            });
+
+            menu.querySelectorAll('.change-info-option').forEach((option) => {
+                option.addEventListener('click', function () {
+                    window.location.href = this.dataset.href;
+                });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!btnChangeInfo.contains(event.target) && !menu.contains(event.target)) {
+                    menu.style.display = 'none';
+                    menu.classList.remove('show');
+                    btnChangeInfo.classList.toggle('active', isActivePage);
+                }
+            });
+        });
+    </script>
 </body>
 
 <footer>
@@ -1368,6 +1430,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 company_address: option.dataset.company_address || '',
                 company_size: option.dataset.company_size || '',
                 company_industry: option.dataset.company_industry || '',
+                company_industry_label: option.dataset.company_industry_label || option.dataset.company_industry || '',
                 company_logo: option.dataset.company_logo || ''
             }));
 
@@ -1390,7 +1453,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if (companyNameDisplay) companyNameDisplay.value = selected.company_name || '';
                 if (companyAddressDisplay) companyAddressDisplay.value = selected.company_address || '';
                 if (companySizeDisplay) companySizeDisplay.value = selected.company_size || '';
-                if (companyIndustryDisplay) companyIndustryDisplay.value = selected.company_industry || '';
+                if (companyIndustryDisplay) {
+                    companyIndustryDisplay.value = selected.company_industry_label || selected.company_industry || '';
+                }
                 if (companyLogoPreview) {
                     const logoValue = normalizeCompanyLogoUrl(selected.company_logo || '');
                     if (logoValue) {

@@ -710,11 +710,13 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                     $job_benefit = $_POST['job_benefit'] ?? '';
                     $job_requirement = $_POST['job_requirement'] ?? '';
                     $job_location = $_POST['job_location'] ?? '';
+                    $job_location_district = $_POST['jobLocationDistrict'] ?? '';
                     $no_employee_needed = intval($_POST['no_employee_needed'] ?? 0);
                     $salary = $_POST['salary'] ?? '';
                     $contact_email = $_POST['contact_email'] ?? '';
                     $contact_phone = $_POST['contact_phone'] ?? '';
                     $job_type = $_POST['job_type'] ?? '';
+                    $job_position = $_POST['jobPosition'] ?? '';
                     $required_certification = $_POST['required_certification'] ?? '';
                     $job_experience = $_POST['job_experience'] ?? '';
 
@@ -726,24 +728,27 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                         if (isset($conn) && $conn->ping()) {
                             $sql_update = "UPDATE job SET
                                 job_title = ?, job_description = ?,
-                                job_benefit = ?, job_requirement = ?, job_location = ?, no_employee_needed = ?,
+                                job_benefit = ?, job_requirement = ?, job_location = ?, job_location_district = ?, no_employee_needed = ?,
                                 salary = ?, contact_email = ?, contact_phone = ?,
-                                job_type = ?, required_certification = ?, job_experience = ?, last_updated_at = CURRENT_TIMESTAMP
+                                job_type = ?, job_position = ?, required_certification = ?, job_experience = ?,
+                                status = 'pending_review', last_updated_at = CURRENT_TIMESTAMP
                             WHERE id = ? AND posted_by_employer_id = ?";
 
                             $stmt = $conn->prepare($sql_update);
                             $stmt->bind_param(
-                                "sssssissssssii",
+                                "ssssssisssssssii",
                                 $job_title,
                                 $job_description,
                                 $job_benefit,
                                 $job_requirement,
                                 $job_location,
+                                $job_location_district,
                                 $no_employee_needed,
                                 $salary,
                                 $contact_email,
                                 $contact_phone,
                                 $job_type,
+                                $job_position,
                                 $required_certification,
                                 $job_experience,
                                 $job_id,
@@ -751,8 +756,8 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                             );
 
                             if ($stmt->execute()) {
-                                $message = $lang['job_update_success'] ?? "Cập nhật thành công!";
-                                $message_type = "success";
+                                echo "<script>alert('" . addslashes($lang['job_post_is_saved_for_review']) . "'); window.location.href = window.location.href;</script>";
+                                exit;
                             } else {
                                 $message = "Lỗi database: " . $stmt->error;
                                 $message_type = "error";
@@ -915,6 +920,13 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                 </div>
 
                                 <div>
+                                    <label for="jobLocationDistrict"><?= $lang['post_job_form_job_location_district']; ?>:</label>
+                                    <input type="text" id="jobLocationDistrict" name="jobLocationDistrict"
+                                        value="<?= htmlspecialchars($job_data['job_location_district'] ?? '') ?>"
+                                        placeholder="<?= $lang['optional']; ?>">
+                                </div>
+
+                                <div>
                                     <label><?= $lang['edit_job_post_modal_salary'] ?>*</label>
                                     <input type="text" name="salary" value="<?= htmlspecialchars($job_data['salary']) ?>"
                                         required>
@@ -951,6 +963,18 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                             <?php
                                         endforeach;
                                         ?>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="jobPosition"><?= $lang['post_job_form_job_position']; ?></label>
+                                    <select id="jobPosition" name="jobPosition" required>
+                                        <option value=""><?= $lang['post_job_form_job_position']; ?></option>
+                                        <?php foreach (['senior', 'junior', 'cong_tac_vien', 'manager', 'director', 'lead', 'staff', 'specialist', 'assistant', 'executive', 'other'] as $positionValue): ?>
+                                            <option value="<?= htmlspecialchars($positionValue) ?>" <?= (($job_data['job_position'] ?? '') === $positionValue) ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars(translateJobPosition($positionValue, $lang)) ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
 

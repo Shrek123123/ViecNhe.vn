@@ -164,8 +164,8 @@ foreach ($industryOptionKeys as $industryKey) {
         padding: 40px 20px;
         border-radius: 10px;
         background-color: #eee;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 20px;
         max-width: 1000px;
         margin: 0 auto;
@@ -193,32 +193,38 @@ foreach ($industryOptionKeys as $industryKey) {
         font-weight: bold;
     }
 
-    /* CSS mới cho nút Sort By */
     .sort-by-container {
-        max-width: 1000px; /* Căn chỉnh với job-section */
-        margin: 0 auto 20px auto; /* Margin dưới để tạo khoảng cách */
+        max-width: 1000px;
+        margin: 0 auto 20px;
         display: flex;
-        justify-content: flex-end; /* Căn phải */
-        padding: 0 20px; /* Đảm bảo padding khớp với job-section */
-        box-sizing: border-box; /* Tính cả padding vào width */
+        justify-content: flex-end;
+        padding: 0 20px;
+        box-sizing: border-box;
     }
 
-    .sort-by-container select {
+    .sort-by-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sort-by-form select,
+    .sort-by-form button {
         padding: 8px 12px;
         border-radius: 8px;
-        border: 1px solid #ccc;
-        background-color: white;
         font-size: 14px;
-        cursor: pointer;
-        outline: none; /* Bỏ viền focus mặc định */
-        min-width: 180px; /* Đảm bảo đủ rộng cho text */
     }
 
-    .sort-dropdown button {
-        background-color: #e0e0e0;
-        border: none;
-        border-radius: 8px;
-        padding: 8px 12px;
+    .sort-by-form select {
+        border: 1px solid #ccc;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .sort-by-form button {
+        border: 0;
+        background: #d70018;
+        color: #fff;
         cursor: pointer;
     }
 
@@ -330,6 +336,10 @@ foreach ($industryOptionKeys as $industryKey) {
         min-height: 120px;
     }
 
+    .job-section > .no-jobs-message {
+        grid-column: 1 / -1;
+    }
+
     .save-btn {
         background: none;
         border: none;
@@ -421,6 +431,7 @@ foreach ($industryOptionKeys as $industryKey) {
         .job-section {
             max-width: 95%;
             padding: 30px 15px;
+            grid-template-columns: 1fr;
         }
         .sort-by-container {
             max-width: 95%;
@@ -435,6 +446,7 @@ foreach ($industryOptionKeys as $industryKey) {
         .job-section {
             max-width: 100%;
             padding: 20px 10px;
+            grid-template-columns: 1fr;
         }
         .sort-by-container {
             max-width: 100%;
@@ -464,14 +476,6 @@ foreach ($industryOptionKeys as $industryKey) {
             min-height: 100px;
         }
     }
-    .sort-by-container {
-         max-width: 1000px;
-        margin: 0 auto 20px auto;
-        display: flex;
-        justify-content: flex-end;
-        padding: 0 20px;
-        box-sizing: border-box;
-    }
     .job-section {
         max-width: 1000px;
         margin: 0 auto;
@@ -498,6 +502,8 @@ foreach ($industryOptionKeys as $industryKey) {
                 </select>
                 <input type="text" name="q" placeholder="<?php echo $lang['job_title_company_placeholder'] ?? 'Job title, company name'; ?>" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
                 <input type="text" name="location" placeholder="<?php echo $lang['location_placeholder'] ?? 'Location'; ?>" value="<?php echo htmlspecialchars($_GET['location'] ?? ''); ?>">
+                <input type="hidden" name="job_type" value="<?php echo htmlspecialchars($_GET['job_type'] ?? ''); ?>">
+                <input type="hidden" name="sort" value="<?php echo htmlspecialchars($_GET['sort'] ?? 'newest_first'); ?>">
                 <button type="submit"><?php echo $lang['search']; ?></button>
             </form>
         </div>
@@ -506,56 +512,22 @@ foreach ($industryOptionKeys as $industryKey) {
 
 <div class="info">
     <section class="section-2">
-        <?php
-        // Lấy giá trị sắp xếp hiện tại từ URL, mặc định là 'newest_first'
-        $current_sort = $_GET['sort'] ?? 'newest_first';
-        ?>
+        <?php $current_sort = $_GET['sort'] ?? 'newest_first'; ?>
         <div class="sort-by-container">
-            <form id="jobSortForm" action="" method="get">
-                <?php
-                // Giữ lại tất cả các tham số GET hiện tại (trừ 'sort' và 'page')
-                $hidden_params = $_GET;
-                unset($hidden_params['sort']);
-                unset($hidden_params['page']);
-                foreach ($hidden_params as $key => $value) {
-                    echo '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($value) . '">';
-                }
-                ?>
-                <select id="jobSortSelect" name="sort">
+            <form class="sort-by-form" action="" method="get">
+                <select name="sort" aria-label="<?php echo htmlspecialchars($lang['sort'] ?? 'Sort jobs'); ?>">
                     <option value="newest_first" <?php echo ($current_sort == 'newest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_newest_first'] ?? 'Date posted: Newest first'; ?></option>
                     <option value="oldest_first" <?php echo ($current_sort == 'oldest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_oldest_first'] ?? 'Date posted: Oldest first'; ?></option>
                     <option value="salary_highest" <?php echo ($current_sort == 'salary_highest') ? 'selected' : ''; ?>><?php echo $lang['sort_salary_highest'] ?? 'Salary: Highest to lowest'; ?></option>
                     <option value="salary_lowest" <?php echo ($current_sort == 'salary_lowest') ? 'selected' : ''; ?>><?php echo $lang['sort_salary_lowest'] ?? 'Salary: Lowest to highest'; ?></option>
                 </select>
+                <input type="hidden" name="category" value="<?php echo htmlspecialchars($_GET['category'] ?? ''); ?>">
+                <input type="hidden" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
+                <input type="hidden" name="location" value="<?php echo htmlspecialchars($_GET['location'] ?? ''); ?>">
+                <input type="hidden" name="job_type" value="<?php echo htmlspecialchars($_GET['job_type'] ?? ''); ?>">
+                <button type="submit"><?php echo $lang['filter'] ?? 'Filter'; ?></button>
             </form>
         </div>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const sortSelect = document.getElementById('jobSortSelect');
-                const sortForm = document.getElementById('jobSortForm');
-
-                if (!sortSelect || !sortForm) {
-                    return;
-                }
-
-                sortSelect.addEventListener('change', function () {
-                    const formData = new FormData(sortForm);
-                    const params = new URLSearchParams();
-
-                    formData.forEach(function (value, key) {
-                        params.append(key, value);
-                    });
-
-                    params.set('sort', sortSelect.value);
-                    params.delete('page');
-
-                    const url = new URL(window.location.href);
-                    url.search = params.toString();
-                    window.location.href = url.toString();
-                });
-            });
-        </script>
 
         <div class="job-section">
             <?php
@@ -567,7 +539,21 @@ foreach ($industryOptionKeys as $industryKey) {
             $search_category = $_GET['category'] ?? '';
             $search_query = $_GET['q'] ?? ''; // job title, company name
             $search_location = $_GET['location'] ?? '';
-            $sort_order = $_GET['sort'] ?? 'newest_first'; // Lấy tham số sắp xếp
+            $search_job_type = strtolower(trim((string) ($_GET['job_type'] ?? '')));
+            $sort_order = $_GET['sort'] ?? 'newest_first';
+
+            $job_type_aliases = [
+                'full time' => 'full-time',
+                'toàn thời gian' => 'full-time',
+                'part time' => 'part-time',
+                'bán thời gian' => 'part-time',
+                'thực tập' => 'internship',
+                'thời vụ' => 'freelance',
+                'làm việc từ xa' => 'remote',
+            ];
+            if (isset($job_type_aliases[$search_job_type])) {
+                $search_job_type = $job_type_aliases[$search_job_type];
+            }
 
             // Bắt đầu xây dựng câu truy vấn SQL
             $sql_base = "SELECT j.id, j.job_title, c.company_logo AS company_logo,
@@ -603,6 +589,12 @@ foreach ($industryOptionKeys as $industryKey) {
                 $param_types .= 's';
             }
 
+            if (in_array($search_job_type, ['full-time', 'part-time', 'internship', 'freelance', 'remote'], true)) {
+                $conditions[] = "LOWER(j.job_type) = ?";
+                $params[] = $search_job_type;
+                $param_types .= 's';
+            }
+
             // Hoàn thiện mệnh đề WHERE
             $where_clause = '';
             if (!empty($conditions)) {
@@ -610,18 +602,33 @@ foreach ($industryOptionKeys as $industryKey) {
             }
 
             // --- Xử lý sắp xếp ---
-            $salary_numeric_order = "
+            $salary_numeric_min = "
                 CASE
                     WHEN LOWER(TRIM(j.salary)) LIKE '%usd%' THEN
-                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'usd', 1), ' ', -1), '$', ''), ',', ''), '.', '') AS DECIMAL(20,2)) * 25000
+                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'usd', 1), '-', ' '), ' ', 1), '$', ''), ',', ''), '.', '') AS DECIMAL(20,2)) * 25000
                     WHEN LOWER(TRIM(j.salary)) LIKE '%vnd%' THEN
-                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'vnd', 1), ' ', -1), ',', ''), '.', ''), '$', '') AS DECIMAL(20,2))
+                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'vnd', 1), '-', ' '), ' ', 1), ',', ''), '.', ''), '$', '') AS DECIMAL(20,2))
                     WHEN LOWER(TRIM(j.salary)) LIKE '%triệu%' THEN
-                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'triệu', 1), ' ', -1), ',', ''), '.', ''), 'triệu', '') AS DECIMAL(20,2)) * 1000000
+                        CAST(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'triệu', 1), '-', ' '), ' ', 1), ',', ''), '.', '') AS DECIMAL(20,2)) * 1000000
                     ELSE 0
                 END";
 
-            $order_by_clause = "";
+            $salary_numeric_max = "
+                CASE
+                    WHEN LOWER(TRIM(j.salary)) LIKE '%usd%' THEN
+                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'usd', 1), '-', ' '), ' ', -1), '$', ''), ',', ''), '.', '') AS DECIMAL(20,2)) * 25000
+                    WHEN LOWER(TRIM(j.salary)) LIKE '%vnd%' THEN
+                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'vnd', 1), '-', ' '), ' ', -1), ',', ''), '.', ''), '$', '') AS DECIMAL(20,2))
+                    WHEN LOWER(TRIM(j.salary)) LIKE '%triệu%' THEN
+                        CAST(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'triệu', 1), '-', ' '), ' ', -1), ',', ''), '.', '') AS DECIMAL(20,2)) * 1000000
+                    ELSE 0
+                END";
+
+            $allowed_sort_orders = ['newest_first', 'oldest_first', 'salary_highest', 'salary_lowest'];
+            if (!in_array($sort_order, $allowed_sort_orders, true)) {
+                $sort_order = 'newest_first';
+            }
+
             switch ($sort_order) {
                 case 'newest_first':
                     $order_by_clause = " ORDER BY j.created_at DESC";
@@ -630,10 +637,10 @@ foreach ($industryOptionKeys as $industryKey) {
                     $order_by_clause = " ORDER BY j.created_at ASC";
                     break;
                 case 'salary_highest':
-                    $order_by_clause = " ORDER BY " . $salary_numeric_order . " DESC, j.created_at DESC";
+                    $order_by_clause = " ORDER BY " . $salary_numeric_max . " DESC, j.created_at DESC";
                     break;
                 case 'salary_lowest':
-                    $order_by_clause = " ORDER BY " . $salary_numeric_order . " ASC, j.created_at DESC";
+                    $order_by_clause = " ORDER BY " . $salary_numeric_min . " ASC, j.created_at DESC";
                     break;
                 default:
                     $order_by_clause = " ORDER BY j.created_at DESC";
@@ -742,7 +749,7 @@ foreach ($industryOptionKeys as $industryKey) {
                     </a>
                 <?php endwhile; ?>
             <?php else: ?>
-                <div style="text-align: center; padding: 20px; font-size: 16px; color: #555;"><?php echo $lang['searchpage_no_jobs_found']; ?></div>
+                <div class="no-jobs-message" style="text-align: center; padding: 20px; font-size: 16px; color: #555;"><?php echo $lang['searchpage_no_jobs_found']; ?></div>
             <?php endif; ?>
         </div>
 

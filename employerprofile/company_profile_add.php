@@ -419,6 +419,53 @@ if (!$company_data && $company_id > 0) {
             color: #fff;
             font-weight: bold;
         }
+
+        .change-info-wrap {
+            position: relative;
+            width: auto;
+            display: block;
+        }
+
+        .change-info-menu {
+            position: absolute;
+            top: 0;
+            left: calc(100% + 10px);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 190px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #e8dede;
+            border-radius: 0;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+            z-index: 50;
+        }
+
+        .change-info-menu.show {
+            display: flex;
+        }
+
+        .change-info-option {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #f0d8d8;
+            background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%);
+            color: #733333;
+            border-radius: 0;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .change-info-option:hover {
+            background: #b23b3b;
+            color: #fff;
+            border-color: #b23b3b;
+        }
+
         .applicant-card {
             background: #b76d6d;
             color: white;

@@ -178,7 +178,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     posted_by_employer_id,
     company_id,
     job_post_number_by_employer,
-    company_name,
     job_title,
     job_description,
     job_location,
@@ -186,13 +185,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     post_duration,
     contact_email,
     contact_phone,
-    job_type,
     required_certification,
     job_experience,
-    company_logo,
     job_requirement,
     job_benefit,
-    company_size,
     no_employee_needed,
     job_position,
     job_detailed_location,
@@ -202,7 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     " . (int)$employerid . ",
     " . (int)$company_id . ",
     " . (int)$new_job_number . ",
-    '" . $conn->real_escape_string($companyName) . "',
     '" . $conn->real_escape_string($jobTitle) . "',
     '" . $conn->real_escape_string($jobDescription) . "',
     '" . $conn->real_escape_string($jobLocation) . "',
@@ -210,13 +205,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     " . (int)$post_duration . ",
     '" . $conn->real_escape_string($contactEmail) . "',
     '" . $conn->real_escape_string($contactPhone) . "',
-    '" . $conn->real_escape_string($jobType) . "',
     '" . $conn->real_escape_string($requiredcertification) . "',
     '" . $conn->real_escape_string($jobExperience) . "',
-    '" . $conn->real_escape_string($companyLogo) . "',
     '" . $conn->real_escape_string($jobRequirementText) . "',
     '" . $conn->real_escape_string($jobBenefit) . "',
-    '" . $conn->real_escape_string($companySize) . "',
     " . (int)$noEmplpoyeeNeeeded . ",
     '" . $conn->real_escape_string($jobPosition) . "',
     '" . $conn->real_escape_string($jobDetailedLocation) . "',
@@ -1011,6 +1003,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             placeholder="<?= $lang['job_city_placeholder']; ?>" required>
                                     </div>
 
+                                    <!-- Job Location District -->
+                                    <div class="form-group">
+                                        <label for="jobLocationDistrict"><?= $lang['post_job_form_job_location_district']; ?>:</label>
+                                        <input type="text" id="jobLocationDistrict" name="jobLocationDistrict"
+                                            placeholder="<?= $lang['optional']; ?>">
+                                    </div>
+
                                     <!-- Salary -->
                                     <div class="form-group">
                                         <label><?= $lang['post_job_form_salary']; ?></label>
@@ -1066,12 +1065,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             required>
                                     </div>
 
-                                    <!-- District
+                                    <!-- Job Type -->
+                                    <!-- Job Position -->
                                     <div class="form-group">
-                                        <label><?= $lang['post_job_form_job_location_district']; ?></label>
-                                        <input type="text" name="jobLocationDistrict"
-                                            placeholder="<?= $lang['optional']; ?>">
-                                    </div> -->
+                                        <label><?= $lang['post_job_form_job_position']; ?></label>
+                                        <select id="jobPosition" name="jobPosition" required>
+                                            <option value=""><?= $lang['post_job_form_job_position']; ?></option>
+                                            <?php foreach (['senior', 'junior', 'cong_tac_vien', 'manager', 'director', 'lead', 'staff', 'specialist', 'assistant', 'executive', 'other'] as $positionValue): ?>
+                                                <option value="<?= htmlspecialchars($positionValue) ?>"><?= htmlspecialchars(translateJobPosition($positionValue, $lang)) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
 
                                     <!-- Job Type -->
                                     <div class="form-group">

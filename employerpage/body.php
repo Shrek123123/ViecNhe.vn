@@ -108,15 +108,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $new_job_number = $last_number + 1;
 
   $stmt = $conn->prepare("INSERT INTO job (
-    posted_by_employer_id, company_id, job_post_number_by_employer, job_title, job_description, job_location, salary, contact_email, contact_phone, job_type, required_certification, job_experience, job_requirement, job_benefit, no_employee_needed, job_position, job_detailed_location, job_location_district, status
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    posted_by_employer_id, company_id, job_post_number_by_employer, job_title, job_description, job_location, salary, contact_email, contact_phone, job_type, required_certification, job_experience, job_requirement, job_benefit, no_employee_needed, job_position, job_detailed_location, job_location_district, post_duration, status
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
   if (!$stmt) {
     echo "<script>alert('Error preparing statement: {$conn->error}');</script>";
     exit;
   }
 
-  $types = "ii" . "i" . str_repeat("s", 11) . "i" . str_repeat("s", 4);
+  $postDuration = 30;
+  $types = "ii" . "i" . str_repeat("s", 11) . "i" . str_repeat("s", 3) . "i" . "s";
   $stmt->bind_param(
     $types,
     $employerid,
@@ -137,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $jobPosition,
     $jobDetailedLocation,
     $jobLocationDistrict,
+    $postDuration,
     $jobStatus
   );
 

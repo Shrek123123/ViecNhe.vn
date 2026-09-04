@@ -99,10 +99,11 @@ if (!isset($_SESSION['usernameadmin'])) { // Giả định 'usernameadmin' là b
         <h1>Job Posts Awaiting Review</h1>
 
         <?php
-        $sql = "SELECT id, job_title, company_name, posted_by_employer_id
-                FROM job
-                WHERE status = 'pending_review'
-                ORDER BY created_at ASC";
+        $sql = "SELECT j.id, j.job_title, c.company_name, j.posted_by_employer_id
+            FROM job j
+            LEFT JOIN company c ON c.id = j.company_id
+            WHERE j.status = 'pending_review'
+            ORDER BY j.created_at ASC";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {

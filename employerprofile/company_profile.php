@@ -398,10 +398,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
             position: absolute;
             top: 0;
             left: calc(100% + 10px);
-            display: none !important;
-            visibility: hidden;
-            opacity: 0;
-            pointer-events: none;
+            display: none;
             flex-direction: column;
             gap: 8px;
             min-width: 190px;
@@ -414,10 +411,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
         }
 
         .change-info-menu.show {
-            display: flex !important;
-            visibility: visible;
-            opacity: 1;
-            pointer-events: auto;
+            display: flex;
         }
 
         .change-info-option {

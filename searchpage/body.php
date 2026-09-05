@@ -1,7 +1,20 @@
 <link href="https://fonts.com/css2?family=Roboto&display=swap" rel="stylesheet">
 <?php
 // Đặt ở ĐẦU file jobs.php (hoặc index.php)
-require_once('config.php'); // Đảm bảo file này chứa kết nối $conn
+require_once(__DIR__ . '/../config.php'); // Đảm bảo file này chứa kết nối $conn
+require_once(__DIR__ . '/../helpers.php');
+
+if (!function_exists('t')) {
+    function t($key, $replace = [])
+    {
+        global $lang;
+        $text = $lang[$key] ?? $key;
+        foreach ($replace as $k => $v) {
+            $text = str_replace(":$k", $v, $text);
+        }
+        return $text;
+    }
+}
 
 $isLoggedIn = isset($_SESSION['jobseeker_id']) && $_SESSION['jobseeker_id'] > 0;
 $userId = $isLoggedIn ? (int) $_SESSION['jobseeker_id'] : 0;
@@ -323,107 +336,177 @@ foreach ($industryOptionKeys as $industryKey) {
     }
 
     .job-card {
-        background: white;
+        background: #fff;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        padding: 20px;
+        padding: 10px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         width: 100%;
         box-sizing: border-box;
         position: relative;
-        min-height: 120px;
     }
 
     .job-section > .no-jobs-message {
         grid-column: 1 / -1;
     }
 
+    .job-card-link {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .job-card-link:hover .job-header h3,
+    .job-card-link:focus-visible .job-header h3 {
+        color: #d70018;
+    }
+
+    .job-card-link:focus-visible {
+        box-shadow: 0 0 0 3px rgba(215, 0, 24, 0.22);
+    }
+
     .save-btn {
-        background: none;
-        border: none;
-        font-size: 20px;
+        background: #fff1f3;
+        border: 1px solid #e74c3c;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin-left: auto;
+        flex-shrink: 0;
         color: #e74c3c;
         cursor: pointer;
-        position: absolute;
-        top: 15px;
-        right: 15px;
         z-index: 10;
+    }
+
+    .save-btn:hover,
+    .save-btn:focus-visible {
+        background: #ffe0e5;
+        outline: 2px solid rgba(231, 76, 60, 0.3);
+        outline-offset: 2px;
     }
 
     .job-body {
         display: flex;
-        gap: 15px;
+        gap: 10px;
         align-items: flex-start;
-        margin-top: 0;
-        padding-right: 40px;
+        margin-top: 10px;
     }
 
     .company-logo {
         width: 90px;
-        height: auto;
-        max-height: 90px;
+        height: 80px;
         object-fit: contain;
-        border-radius: 5px;
+        border-radius: 8px;
         flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-
-    .company-logo img {
-        max-width: 100%;
-        max-height: 100%;
-        display: block;
-    }
-
-    .job-info-right {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-    }
-
-    .job-title-new {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 8px;
-        margin-top: 0;
+        margin-right: 12px;
     }
 
     .job-info {
+        min-width: 0;
         font-size: 14px;
-        line-height: 1.5;
+        line-height: 1.45;
+    }
+
+    .job-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .job-header h3 {
+        font-size: 16px;
+        line-height: 1.35;
+        margin: 0;
+        overflow-wrap: anywhere;
     }
 
     .job-info .company-name {
         font-weight: bold;
-        margin-bottom: 5px;
+        margin: 5px 0;
+        color: #818080;
     }
 
-    .icon {
-        margin-right: 5px;
+    .job-info .company-industry {
+        margin-top: 4px;
+        color: #666;
+        font-size: 12px;
+    }
+
+    .job-meta-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .job-meta-item {
+        display: inline-flex;
+        align-items: center;
+        font-size: 13px;
+        color: #d45a5a;
+        overflow-wrap: anywhere;
+    }
+
+    .job-meta-divider {
+        width: 1px;
+        height: 12px;
+        background-color: #ccc;
+        display: inline-block;
+        flex: 0 0 auto;
     }
 
     .divider {
         border-top: 1px solid #e0e0e0;
-        margin: 15px 0;
+        margin: 10px 0;
     }
 
     .job-footer {
-        font-size: 13px;
-        color: #999;
-        text-align: right;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .job-footer-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .job-footer-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #f3f4f6;
+        color: #555;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* Media queries: Đảm bảo responsive */
     @media (max-width: 1024px) {
-        .job-section {
-            max-width: 90%;
-        }
+        .job-section,
         .sort-by-container {
-             max-width: 90%;
+            max-width: 90%;
         }
     }
 
@@ -433,12 +516,10 @@ foreach ($industryOptionKeys as $industryKey) {
             padding: 30px 15px;
             grid-template-columns: 1fr;
         }
+
         .sort-by-container {
             max-width: 95%;
             padding: 0 15px;
-        }
-        .job-card {
-            min-height: 100px;
         }
     }
 
@@ -448,34 +529,44 @@ foreach ($industryOptionKeys as $industryKey) {
             padding: 20px 10px;
             grid-template-columns: 1fr;
         }
+
         .sort-by-container {
             max-width: 100%;
             padding: 0 10px;
-            justify-content: center; /* Căn giữa trên mobile */
+            justify-content: center;
         }
+
         .job-body {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding-right: 0;
         }
+
         .company-logo {
             width: 70px;
-            max-height: 70px;
-            margin-bottom: 10px;
+            height: 70px;
+            margin: 0 0 10px;
         }
-        .job-info-right {
-            align-items: center;
+
+        .job-info {
+            width: 100%;
             text-align: center;
         }
-        .save-btn {
-            top: 10px;
-            right: 10px;
+
+        .job-meta-row {
+            justify-content: center;
         }
-        .job-card {
-            min-height: 100px;
+
+        .job-footer {
+            align-items: flex-end;
+        }
+
+        .save-btn {
+            width: 28px;
+            height: 28px;
         }
     }
+
     .job-section {
         max-width: 1000px;
         margin: 0 auto;
@@ -557,8 +648,9 @@ foreach ($industryOptionKeys as $industryKey) {
 
             // Bắt đầu xây dựng câu truy vấn SQL
             $sql_base = "SELECT j.id, j.job_title, c.company_logo AS company_logo,
-                c.company_name AS company_name,
-                j.salary, j.job_location, j.created_at, j.post_duration
+                c.company_name AS company_name, c.industry AS industry,
+                j.salary, j.job_location, j.job_type, j.job_experience,
+                j.created_at, j.post_duration
                 FROM job j
                 LEFT JOIN company c ON c.id = j.company_id";
             $sql_count_base = "SELECT COUNT(*) as total FROM job j LEFT JOIN company c ON c.id = j.company_id";
@@ -707,46 +799,69 @@ foreach ($industryOptionKeys as $industryKey) {
                     $days_left = (int) $interval->format('%r%a');
                     $days_left_text = $days_left > 0 ? sprintf($lang['days_left'], $days_left) : $lang['expired'];
                     $job_id = (int) $row['id'];
+                    $companyName = $row['company_name'] ?? 'JobHive';
                     $companyLogo = normalizeCompanyLogoPath($row['company_logo'] ?? 'image/logo1.png');
-                    $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds);
+                    $companyIndustry = translateCompanyIndustry($row['industry'] ?? '', $lang) ?: ($lang['jobdetail_unknown'] ?? 'Unknown');
+                    $jobExperienceLabel = translateJobExperience($row['job_experience'] ?? '', $lang);
+                    $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds, true);
                     ?>
-                    <a href="jobdetail.php?id=<?php echo $job_id; ?>" style="text-decoration:none;color:inherit;">
-                        <div class="job-card" data-job-id="<?php echo $job_id; ?>">
-                            <?php
-                            $isLoggedIn = isset($_SESSION['jobseeker_id']);
-                            $userId = $isLoggedIn ? (int) $_SESSION['jobseeker_id'] : 0;
-                            ?>
-                            <button class="save-btn" aria-pressed="<?php echo $isJobAlreadySaved ? 'true' : 'false'; ?>"
+                    <div class="job-card" data-job-id="<?php echo $job_id; ?>">
+                        <a href="jobdetail.php?id=<?php echo $job_id; ?>" class="job-card-link">
+                            <div class="job-body">
+                                <img src="<?php echo htmlspecialchars($companyLogo, ENT_QUOTES, 'UTF-8'); ?>"
+                                    alt="Company logo" class="company-logo">
+                                <div class="job-info">
+                                    <div class="job-header">
+                                        <h3><?php echo htmlspecialchars((string) $row['job_title'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                    </div>
+                                    <div class="company-name"><?php echo htmlspecialchars((string) $companyName, ENT_QUOTES, 'UTF-8'); ?></div>
+                                    <?php if ($companyIndustry !== ''): ?>
+                                        <div class="company-industry">
+                                            <?php echo htmlspecialchars((string) $companyIndustry, ENT_QUOTES, 'UTF-8'); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="job-meta-row">
+                                        <div class="job-meta-item">
+                                            <?php echo htmlspecialchars((string) ($row['salary'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                        </div>
+                                        <span class="job-meta-divider" aria-hidden="true"></span>
+                                        <div class="job-meta-item">
+                                            <?php echo htmlspecialchars((string) ($row['job_location'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <div class="divider"></div>
+                        <div class="job-footer">
+                            <div class="job-footer-meta">
+                                <div class="job-footer-pill">
+                                    <?php echo htmlspecialchars((string) ($row['job_type'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                                <?php if ($jobExperienceLabel !== ''): ?>
+                                    <div class="job-footer-pill">
+                                        <?php echo htmlspecialchars((string) $jobExperienceLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="job-footer-pill">
+                                    <?php echo htmlspecialchars((string) $days_left_text, ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                            </div>
+                            <button type="button" class="save-btn"
+                                aria-label="Save job: <?php echo htmlspecialchars((string) $row['job_title'], ENT_QUOTES, 'UTF-8'); ?>"
+                                aria-pressed="<?php echo $isJobAlreadySaved ? 'true' : 'false'; ?>"
                                 title="Save job" data-job-id="<?php echo $job_id; ?>">
-                                <svg class="heart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="heart-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    aria-hidden="true">
                                     <path
                                         d="M12 21s-6.5-5.5-8.5-8.5C1.5 9.5 3.5 6 7 6c1.7 0 3.4 1.1 4.1 2.7C11.6 7.1 13.3 6 15 6c3.5 0 5.5 3.5 3.5 6.5C18.5 15.5 12 21 12 21z"
                                         fill="<?php echo $isJobAlreadySaved ? '#e74c3c' : '#fff'; ?>" />
                                 </svg>
                             </button>
-
-                            <div class="job-body">
-                                <div class="company-logo">
-                                    <img src="<?php echo htmlspecialchars($companyLogo); ?>" alt="Company Logo">
-                                </div>
-                                <div class="job-info-right">
-                                    <h3 class="job-title-new"><?php echo htmlspecialchars($row['job_title']); ?></h3>
-                                    <div class="job-info">
-                                        <div class="company-name"><?php echo htmlspecialchars($row['company_name']); ?></div>
-                                        <div><span class="icon">💰</span> <?php echo htmlspecialchars($row['salary']); ?></div>
-                                        <div><span class="icon">📍</span> <?php echo htmlspecialchars($row['job_location']); ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="divider"></div>
-                            <div class="job-footer">
-                                <div class="deadline"><?php echo $days_left_text; ?></div>
-                            </div>
                         </div>
-                    </a>
+                    </div>
                 <?php endwhile; ?>
             <?php else: ?>
                 <div class="no-jobs-message" style="text-align: center; padding: 20px; font-size: 16px; color: #555;"><?php echo $lang['searchpage_no_jobs_found']; ?></div>

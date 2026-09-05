@@ -10,9 +10,10 @@ require_once '../config.php'; // Điều chỉnh đường dẫn đến config.p
 //     exit();
 // }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['job_id']) && isset($_POST['action'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_id'], $_POST['action'])) {
     $jobId = intval($_POST['job_id']);
     $action = $_POST['action'];
+    $adminNote = trim((string) ($_POST['admin_note'] ?? ''));
 
     $newStatus = '';
     if ($action === 'approve') {
@@ -25,9 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['job_id']) && isset($_P
         exit();
     }
 
-    $stmt = $conn->prepare("UPDATE job SET status = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE job SET status = ?, admin_notes = ? WHERE id = ?");
     if ($stmt) {
-        $stmt->bind_param("si", $newStatus, $jobId);
+        $stmt->bind_param("ssi", $newStatus, $adminNote, $jobId);
         if ($stmt->execute()) {
             echo "<script>alert('Job has been " . $newStatus . " successfully!'); window.location.href = 'jobpending.php';</script>";
         } else {

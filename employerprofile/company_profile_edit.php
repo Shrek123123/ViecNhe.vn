@@ -753,6 +753,77 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
             transform: translateY(-3px);
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
         }
+
+        :root {
+            --company-toast-success: #15803d;
+            --company-toast-error: #b91c1c;
+            --company-toast-text: #1f2937;
+            --company-toast-surface: #ffffff;
+            --company-toast-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+        }
+
+        .company-toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 12000;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            width: min(390px, calc(100vw - 32px));
+            padding: 16px 18px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-left: 4px solid var(--company-toast-accent);
+            border-radius: 14px;
+            background: var(--company-toast-surface);
+            color: var(--company-toast-text);
+            box-shadow: var(--company-toast-shadow);
+            opacity: 0;
+            transform: translate3d(0, -14px, 0);
+            transition: opacity 220ms ease, transform 220ms ease;
+            pointer-events: none;
+        }
+
+        .company-toast.is-visible {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            pointer-events: auto;
+        }
+
+        .company-toast--success {
+            --company-toast-accent: var(--company-toast-success);
+        }
+
+        .company-toast--error {
+            --company-toast-accent: var(--company-toast-error);
+        }
+
+        .company-toast__icon {
+            flex: 0 0 auto;
+            margin-top: 1px;
+            color: var(--company-toast-accent);
+            font-size: 20px;
+        }
+
+        .company-toast__message {
+            font-size: 15px;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .company-toast {
+                top: 16px;
+                right: 16px;
+                width: calc(100vw - 32px);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .company-toast {
+                transition: none;
+            }
+        }
     </style>
 </head>
 
@@ -989,6 +1060,44 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
                     <script>
                         const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                         const maxImageSize = 5 * 1024 * 1024;
+                        const companyEditSuccessMessage = <?= json_encode($lang['company_edit_message_success'] ?? 'Edited version of your company is saved for reivewed.', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+                        const companyEditErrorMessage = <?= json_encode($lang['company_profile_update_error'] ?? 'An error occurred while updating the company profile.', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+                        const unknownErrorMessage = <?= json_encode($lang['unknown_error'] ?? 'Unknown error', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+                        const invalidImageTypeMessage = <?= json_encode($lang['invalid_file_format'] ?? 'Only JPG, JPEG, PNG, GIF, WEBP files are allowed.', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+                        const fileTooLargeMessage = <?= json_encode($lang['file_too_large'] ?? 'File size must not exceed 5MB.', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+                        const companySizeRequiredMessage = <?= json_encode($lang['post_job_form_company_size_select'] ?? 'Please select company size.', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+
+                        function showCompanyToast(message, type = 'success') {
+                            const previousToast = document.querySelector('.company-toast');
+                            if (previousToast) {
+                                previousToast.remove();
+                            }
+
+                            const toastType = type === 'error' ? 'error' : 'success';
+                            const toast = document.createElement('div');
+                            toast.className = `company-toast company-toast--${toastType}`;
+                            toast.setAttribute('role', toastType === 'error' ? 'alert' : 'status');
+                            toast.setAttribute('aria-live', toastType === 'error' ? 'assertive' : 'polite');
+
+                            const icon = document.createElement('i');
+                            icon.className = toastType === 'error'
+                                ? 'fas fa-circle-exclamation company-toast__icon'
+                                : 'fas fa-circle-check company-toast__icon';
+                            icon.setAttribute('aria-hidden', 'true');
+
+                            const messageElement = document.createElement('span');
+                            messageElement.className = 'company-toast__message';
+                            messageElement.textContent = message;
+
+                            toast.append(icon, messageElement);
+                            document.body.appendChild(toast);
+                            requestAnimationFrame(() => toast.classList.add('is-visible'));
+
+                            window.setTimeout(() => {
+                                toast.classList.remove('is-visible');
+                                window.setTimeout(() => toast.remove(), 240);
+                            }, 3000);
+                        }
 
                         function toggleCustomInput() {
                             const select = document.getElementById('company_size_select');
@@ -1028,7 +1137,7 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
                                 }
 
                                 if (!allowedImageTypes.includes(file.type)) {
-                                    alert('<?php echo addslashes($lang['invalid_file_format'] ?? 'Only JPG, JPEG, PNG, GIF, WEBP files are allowed.'); ?>');
+                                    showCompanyToast(invalidImageTypeMessage, 'error');
                                     this.value = '';
                                     preview.style.display = 'none';
                                     preview.innerHTML = '';
@@ -1036,7 +1145,7 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
                                 }
 
                                 if (file.size > maxImageSize) {
-                                    alert('<?php echo addslashes($lang['file_too_large'] ?? 'File size must not exceed 5MB.'); ?>');
+                                    showCompanyToast(fileTooLargeMessage, 'error');
                                     this.value = '';
                                     preview.style.display = 'none';
                                     preview.innerHTML = '';
@@ -1075,7 +1184,7 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
                             e.preventDefault();
 
                             if (!companySizeHidden || !companySizeHidden.value.trim()) {
-                                alert('<?php echo addslashes($lang['post_job_form_company_size_select'] ?? 'Please select company size.'); ?>');
+                                showCompanyToast(companySizeRequiredMessage, 'error');
                                 return;
                             }
 
@@ -1088,32 +1197,50 @@ foreach (['company_logo_preview' => $company_logo_preview, 'banner_logo_preview'
                                 if (!file || !(file instanceof File) || file.size === 0) return;
                                 if (!allowedImageTypes.includes(file.type)) {
                                     valid = false;
-                                    alert('<?php echo addslashes($lang['invalid_file_format'] ?? 'Only JPG, JPEG, PNG, GIF, WEBP files are allowed.'); ?>');
+                                    showCompanyToast(invalidImageTypeMessage, 'error');
                                 }
                                 if (file.size > maxImageSize) {
                                     valid = false;
-                                    alert('<?php echo addslashes($lang['file_too_large'] ?? 'File size must not exceed 5MB.'); ?>');
+                                    showCompanyToast(fileTooLargeMessage, 'error');
                                 }
                             });
 
                             if (!valid) return;
-                            
+
+                            const submitButton = this.querySelector('button[type="submit"]');
+                            if (submitButton) {
+                                submitButton.disabled = true;
+                            }
+
                             fetch('update_company_profile.php', {
                                 method: 'POST',
                                 body: formData
                             })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`Request failed with status ${response.status}`);
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 if (data.success) {
-                                    alert('<?php echo $lang['company_profile_update_success']; ?>');
-                                    location.reload();
+                                    showCompanyToast(companyEditSuccessMessage, 'success');
+                                    window.setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1800);
                                 } else {
-                                    alert('<?php echo $lang['company_profile_update_error']; ?>: ' + (data.message || '<?php echo $lang['unknown_error']; ?>'));
+                                    if (submitButton) {
+                                        submitButton.disabled = false;
+                                    }
+                                    showCompanyToast(`${companyEditErrorMessage}: ${data.message || unknownErrorMessage}`, 'error');
                                 }
                             })
                             .catch(error => {
                                 console.error('Error:', error);
-                                alert('<?php echo $lang['company_profile_update_error']; ?>');
+                                if (submitButton) {
+                                    submitButton.disabled = false;
+                                }
+                                showCompanyToast(companyEditErrorMessage, 'error');
                             });
                         }
                     </script>

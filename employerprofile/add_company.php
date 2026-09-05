@@ -92,17 +92,18 @@ if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_
     }
 }
 
-$sql = "INSERT INTO company (employer_id, company_name, company_address, industry, company_size, information, company_logo, banner_logo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+$company_status = 'pending_review';
+$sql = "INSERT INTO company (employer_id, company_name, company_address, industry, company_size, information, company_logo, banner_logo, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Prepare failed: ' . $conn->error]);
     exit();
 }
 
-$stmt->bind_param("isssssss", $employerid, $company_name, $company_address, $industry, $company_size, $information, $company_logo, $banner_logo);
+$stmt->bind_param("issssssss", $employerid, $company_name, $company_address, $industry, $company_size, $information, $company_logo, $banner_logo, $company_status);
 
 if ($stmt->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Company added successfully']);
+    echo json_encode(['success' => true, 'message' => 'Company saved for review.']);
 } else {
     echo json_encode(['success' => false, 'message' => 'Failed to insert company: ' . $stmt->error]);
 }

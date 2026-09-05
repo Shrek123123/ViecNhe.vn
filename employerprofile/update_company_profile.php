@@ -107,10 +107,11 @@ if (isset($_FILES['banner_logo']) && $_FILES['banner_logo']['error'] === UPLOAD_
     }
 }
 
-// Update database
-$sql_update = "UPDATE company SET company_name = ?, company_address = ?, industry = ?, company_size = ?, information = ?";
-$params = [$company_name, $company_address, $industry, $company_size, $information];
-$types = "sssss";
+// Update database and send the company back for review after any edit.
+$company_status = 'pending_review';
+$sql_update = "UPDATE company SET company_name = ?, company_address = ?, industry = ?, company_size = ?, information = ?, status = ?";
+$params = [$company_name, $company_address, $industry, $company_size, $information, $company_status];
+$types = "ssssss";
 
 if (!empty($company_logo)) {
     $sql_update .= ", company_logo = ?";

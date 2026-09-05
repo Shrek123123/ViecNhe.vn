@@ -191,7 +191,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
                     <?php
                     $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
                     ?>
-                    <a href="ho_so_ung_vien.php">
+                    <a href="jobseekerprofile/ho_so_ung_vien.php">
                         <?= $lang['profile']; ?>
                     </a>
                     <a href="jobseekerlogout.php">

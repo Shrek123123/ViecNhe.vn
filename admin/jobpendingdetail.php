@@ -127,6 +127,142 @@ $conn->close();
         .action-buttons .reject-btn:hover {
             background-color: #c82333;
         }
+        .review-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(11, 30, 69, 0.55);
+        }
+        .review-modal-overlay[hidden] {
+            display: none;
+        }
+        .review-modal {
+            position: relative;
+            width: min(100%, 560px);
+            padding: 30px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+        }
+        .review-modal h2 {
+            margin: 0 42px 8px 0;
+            color: #0b1e45;
+            font-size: 1.35rem;
+        }
+        .modal-description {
+            margin: 0 0 20px;
+            color: #555;
+            line-height: 1.5;
+        }
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            border: 0;
+            background: transparent;
+            color: #555;
+            font-size: 1.8rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .modal-close:hover,
+        .modal-close:focus-visible {
+            color: #0b1e45;
+        }
+        .review-modal label {
+            display: block;
+            margin-bottom: 8px;
+            color: #15294c;
+            font-weight: 600;
+        }
+        .review-modal textarea {
+            display: block;
+            width: 100%;
+            min-height: 130px;
+            box-sizing: border-box;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            color: #15294c;
+            font: inherit;
+            resize: vertical;
+        }
+        .review-modal textarea:focus {
+            outline: 3px solid rgba(0, 123, 255, 0.2);
+            border-color: #007bff;
+        }
+        .field-help {
+            margin: 6px 0 0;
+            color: #777;
+            font-size: 0.85rem;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+        }
+        .modal-actions button {
+            min-width: 110px;
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 5px;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .cancel-btn {
+            background: #e9ecef;
+            color: #15294c;
+        }
+        .cancel-btn:hover,
+        .cancel-btn:focus-visible {
+            background: #d8dde3;
+        }
+        .modal-submit-btn {
+            color: #fff;
+        }
+        .approve-submit {
+            background: #28a745;
+        }
+        .approve-submit:hover,
+        .approve-submit:focus-visible {
+            background: #218838;
+        }
+        .reject-submit {
+            background: #dc3545;
+        }
+        .reject-submit:hover,
+        .reject-submit:focus-visible {
+            background: #c82333;
+        }
+        .modal-actions button:disabled {
+            cursor: wait;
+            opacity: 0.65;
+        }
+        .modal-close:focus-visible,
+        .modal-actions button:focus-visible {
+            outline: 3px solid rgba(0, 123, 255, 0.35);
+            outline-offset: 2px;
+        }
+        body.modal-open {
+            overflow: hidden;
+        }
+        @media (max-width: 600px) {
+            .review-modal {
+                padding: 24px 20px;
+            }
+            .modal-actions {
+                flex-direction: column-reverse;
+            }
+            .modal-actions button {
+                width: 100%;
+            }
+        }
         .not-found {
             text-align: center;
             color: #d90000;
@@ -183,18 +319,88 @@ $conn->close();
                 <p><strong>Current Status:</strong> <span style="font-weight: bold; color: #ffc107;"><?php echo htmlspecialchars($job['status']); ?></span></p>
             </div>
 
-            <div class="action-buttons">
-                <form method="POST" action="process_job_review.php" style="display: inline-block;">
-                    <input type="hidden" name="job_id" value="<?php echo htmlspecialchars($job['id']); ?>">
-                    <input type="hidden" name="action" value="approve">
-                    <button type="submit" class="approve-btn">Approve Job</button>
-                </form>
-                <form method="POST" action="process_job_review.php" style="display: inline-block;">
-                    <input type="hidden" name="job_id" value="<?php echo htmlspecialchars($job['id']); ?>">
-                    <input type="hidden" name="action" value="reject">
-                    <button type="submit" class="reject-btn">Reject Job</button>
-                </form>
+            <div class="action-buttons" aria-label="Job review actions">
+                <button type="button" class="approve-btn" data-review-action="approve">Approve Job</button>
+                <button type="button" class="reject-btn" data-review-action="reject">Reject Job</button>
             </div>
+
+            <div class="review-modal-overlay" id="review-modal" hidden>
+                <div class="review-modal" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+                    <button type="button" class="modal-close" id="close-review-modal" aria-label="Close review note dialog">&times;</button>
+                    <h2 id="review-modal-title">Ghi chú cho nhà tuyển dụng (nếu có)</h2>
+                    <p class="modal-description">Bạn có thể để lại ghi chú trước khi hoàn tất đánh giá công việc này.</p>
+
+                    <form method="POST" action="process_job_review.php" id="job-review-form">
+                        <input type="hidden" name="job_id" value="<?php echo htmlspecialchars($job['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="action" id="review-action" value="">
+
+                        <label for="admin-note">Ghi chú</label>
+                        <textarea id="admin-note" name="admin_note" rows="6" maxlength="2000" placeholder="Nhập ghi chú cho nhà tuyển dụng (không bắt buộc)" aria-describedby="admin-note-help"></textarea>
+                        <p class="field-help" id="admin-note-help">Tối đa 2.000 ký tự.</p>
+
+                        <div class="modal-actions">
+                            <button type="button" class="cancel-btn" id="cancel-review">Hủy</button>
+                            <button type="submit" class="modal-submit-btn" id="submit-review">Submit Review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                (function () {
+                    const reviewModal = document.getElementById('review-modal');
+                    const reviewForm = document.getElementById('job-review-form');
+                    const reviewAction = document.getElementById('review-action');
+                    const adminNote = document.getElementById('admin-note');
+                    const submitReview = document.getElementById('submit-review');
+                    const closeReviewModal = document.getElementById('close-review-modal');
+                    const cancelReview = document.getElementById('cancel-review');
+                    const reviewButtons = document.querySelectorAll('[data-review-action]');
+
+                    function closeModal() {
+                        reviewModal.hidden = true;
+                        document.body.classList.remove('modal-open');
+                        reviewAction.value = '';
+                    }
+
+                    function openModal(action) {
+                        const isApprove = action === 'approve';
+                        reviewAction.value = action;
+                        submitReview.textContent = isApprove ? 'Approve Job' : 'Reject Job';
+                        submitReview.classList.toggle('approve-submit', isApprove);
+                        submitReview.classList.toggle('reject-submit', !isApprove);
+                        reviewModal.hidden = false;
+                        document.body.classList.add('modal-open');
+                        adminNote.focus();
+                    }
+
+                    reviewButtons.forEach(function (button) {
+                        button.addEventListener('click', function () {
+                            openModal(button.dataset.reviewAction);
+                        });
+                    });
+
+                    closeReviewModal.addEventListener('click', closeModal);
+                    cancelReview.addEventListener('click', closeModal);
+
+                    reviewModal.addEventListener('click', function (event) {
+                        if (event.target === reviewModal) {
+                            closeModal();
+                        }
+                    });
+
+                    document.addEventListener('keydown', function (event) {
+                        if (event.key === 'Escape' && !reviewModal.hidden) {
+                            closeModal();
+                        }
+                    });
+
+                    reviewForm.addEventListener('submit', function () {
+                        submitReview.disabled = true;
+                        submitReview.textContent = 'Processing...';
+                    });
+                }());
+            </script>
         <?php else: ?>
             <div class="not-found">
                 Job not found or not awaiting review.

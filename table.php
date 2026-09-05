@@ -82,6 +82,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS company (
     information TEXT,
     company_logo VARCHAR(255),
     banner_logo VARCHAR(255),
+    status ENUM('pending_review', 'approved', 'rejected') DEFAULT 'pending_review',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (employer_id) REFERENCES user(id)
 )");
@@ -116,6 +117,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS job (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status ENUM('pending_review', 'approved', 'rejected') DEFAULT 'pending_review',
+    admin_notes TEXT,
     job_post_number_by_employer INT(11) NOT NULL DEFAULT 0,
     FOREIGN KEY (posted_by_employer_id) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE ON UPDATE CASCADE

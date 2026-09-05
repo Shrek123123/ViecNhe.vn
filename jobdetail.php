@@ -90,6 +90,11 @@ require_once 'helpers.php';
                 return;
             }
 
+            if (this.getAttribute('data-already-applied') === '1') {
+                window.alert(this.getAttribute('data-duplicate-message') || 'You have applied to this job before and therefore cannot apply again.');
+                return;
+            }
+
             // Hiển thị modal
             const applyModal = new bootstrap.Modal(document.getElementById('applyModal'));
             applyModal.show();
@@ -207,17 +212,34 @@ require_once 'helpers.php';
                             <?= $job_deadline ?>
                         </div>
                         <?php
-                        $is_logged_in = isset($_SESSION['username']) && $_SESSION['role'] === 'jobseeker';
+                        $is_logged_in = isset($_SESSION['username'], $_SESSION['role']) && $_SESSION['role'] === 'jobseeker';
                         $job_detail_id = isset($job['id']) ? intval($job['id']) : 0;
                         $current_url = "jobdetail.php?id=" . urlencode($job_detail_id);
                         $login_url = "jobseekerlogin.php?redirect=" . urlencode($current_url);
+                        $has_applied = false;
+
+                        if ($is_logged_in && !empty($_SESSION['jobseeker_id']) && $job_detail_id > 0) {
+                            $application_check = $conn->prepare(
+                                'SELECT id FROM application WHERE job_id = ? AND jobseeker_id = ? LIMIT 1'
+                            );
+                            if ($application_check) {
+                                $current_jobseeker_id = (int) $_SESSION['jobseeker_id'];
+                                $application_check->bind_param('ii', $job_detail_id, $current_jobseeker_id);
+                                $application_check->execute();
+                                $application_check->store_result();
+                                $has_applied = $application_check->num_rows > 0;
+                                $application_check->close();
+                            }
+                        }
                         ?>
 
                         
                         <div class="d-flex gap-3">
                             <button class="btn btn-danger apply-btn" type="button"
-                                data-logged-in="<?= $is_logged_in ? '1' : '0' ?>" data-login-url="<?= $login_url ?>"
-                                data-job-id="<?= $job['id'] ?>">
+                                data-logged-in="<?= $is_logged_in ? '1' : '0' ?>" data-login-url="<?= htmlspecialchars($login_url, ENT_QUOTES, 'UTF-8') ?>"
+                                data-job-id="<?= $job_detail_id ?>"
+                                data-already-applied="<?= $has_applied ? '1' : '0' ?>"
+                                data-duplicate-message="<?= htmlspecialchars($lang['you_have_apply_before_warning'] ?? 'You have applied to this job before and therefore cannot apply again.', ENT_QUOTES, 'UTF-8') ?>">
                                 <?= $lang['jobdetail_apply_now'] ?>
                             </button>
                             <button class="btn btn-secondary" type="button" id="save-job-btn"
@@ -506,19 +528,32 @@ require_once 'helpers.php';
                     method: 'POST',
                     body: formData
                 })
-                    .then(res => res.text())
+                    .then(res => res.json())
                     .then(data => {
-                        // Show success message
+                        const isSuccess = Boolean(data && data.success);
+                        const message = data && (data.message || data.error)
+                            ? (data.message || data.error)
+                            : 'There was an error. Please try again.';
+                        const alertType = isSuccess ? 'success' : 'warning';
+
                         document.getElementById('applyFormContent').innerHTML = `
                     <div class="modal-body text-center p-5">
-                        <div class="alert alert-success"><?php echo $lang['applied_successfully']; ?></div>
+                        <div class="alert alert-${alertType}" role="alert"></div>
                     </div>
                 `;
-                        // Optionally close modal after a delay:
-                        setTimeout(() => {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('applyModal'));
-                            modal.hide();
-                        }, 1500);
+                        document.querySelector('#applyFormContent .alert').textContent = message;
+
+                        if (isSuccess) {
+                            const applyButton = document.querySelector('.apply-btn');
+                            if (applyButton) {
+                                applyButton.setAttribute('data-already-applied', '1');
+                            }
+
+                            setTimeout(() => {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('applyModal'));
+                                modal.hide();
+                            }, 1500);
+                        }
                     })
                     .catch(() => {
                         document.getElementById('applyFormContent').innerHTML = `

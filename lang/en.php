@@ -133,6 +133,7 @@ $lang = [
     "recruitment_consulting" => "Recruitment Consulting",
     "post_job_now" => "Post a Job Now →",
     "job_post_is_saved_for_review" => "Your job post is now saved for review. Please wait for further notice!",
+    "ung_tuyen_viec" => "Applied for",
 
     //post-job form
     "post_job_form_title" => "Post job form",
@@ -276,6 +277,7 @@ $lang = [
     "job_unliked" => "Job unliked successfully!",
     "job_liked" => "Job liked successfully!",
     "applied_successfully" => "Applied successfully!",
+    "you_have_apply_before_warning" => "You have applied to this job before and therefore cannot apply again.",
     "job_detail_title" => "Job Detail",
     'jobdetail_interested' => 'There have been %d people interested in this job, apply now to not miss it!',
     'jobdetail_salary' => 'Salary:',
@@ -588,6 +590,11 @@ $lang = [
     'upload_cv' => 'Upload CV',
     'allow_employers_find' => 'Allow employers to find you',
     'apply' => 'Apply',
+    'cover_letter' => 'Cover letter (optional)',
+    'phone_number_required' => 'Please enter your phone number.',
+    'invalid_phone_number' => 'Please enter a valid Vietnamese phone number (e.g. 0901234567 or +84901234567).',
+    'phone_number_in_use' => 'This phone number is already in use.',
+    'cover_letter_too_long' => 'Cover letter must not exceed 5,000 characters.',
     'agreement_text' => 'By clicking the submit button, I agree to share my personal information with employers according to the',
     'terms_of_use' => 'Terms of Use',
     'privacy_policy' => 'Privacy Policy',

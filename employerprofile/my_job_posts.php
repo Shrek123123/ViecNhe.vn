@@ -595,7 +595,6 @@ $employer_id = $_SESSION['employerid'] ?? 0;
             </div>
 
             <div class="dashboard-company">
-                <img src="<?= $profile_pic ?? 'https://via.placeholder.com/34' ?>" alt="company logo">
 
                 <div class="dashboard-company-info">
                     <div class="company-name">
@@ -649,7 +648,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                 $applications = [];
                 $employerid = $_SESSION['employerid'] ?? 0;
                 if ($employerid > 0 && isset($conn) && $conn->ping()) {
-                    $sql_app = "SELECT a.fullname, a.status FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL) ORDER BY a.id DESC LIMIT 2";
+                    $sql_app = "SELECT a.fullname, a.status, j.job_title FROM application a JOIN job j ON a.job_id = j.id WHERE j.posted_by_employer_id = ? AND (a.hidden_from_employer = 0 OR a.hidden_from_employer IS NULL) ORDER BY a.id DESC LIMIT 2";
                     $stmt_app = $conn->prepare($sql_app);
                     $stmt_app->bind_param("i", $employerid);
                     $stmt_app->execute();
@@ -677,11 +676,15 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                     $config = $status_mapping[$status_raw] ?? ['class' => 'status-default', 'lang_key' => $status_raw];
                     $status_class = $config['class'];
                     $status_icon = isset($lang[$config['lang_key']]) ? $lang[$config['lang_key']] : ucfirst($status_raw);
+                    $job_title = (string) ($app['job_title'] ?? '');
+                    if (mb_strlen($job_title, 'UTF-8') > 50) {
+                        $job_title = mb_substr($job_title, 0, 47, 'UTF-8') . '...';
+                    }
                 ?>
                     <div class="applicant-card">
-                        <img src="https://via.placeholder.com/28">
                         <div class="applicant-info">
-                            <?= htmlspecialchars($app['fullname']) ?><br>
+                            <?= htmlspecialchars($app['fullname'], ENT_QUOTES, 'UTF-8') ?><br>
+                            <span class="applicant-job-title"><?= htmlspecialchars($lang['ung_tuyen_viec'] ?? 'Applied for', ENT_QUOTES, 'UTF-8') ?>: <?= htmlspecialchars($job_title, ENT_QUOTES, 'UTF-8') ?></span><br>
                             <span class="<?= $status_class ?>"><?= $status_icon ?></span>
                         </div>
                     </div>

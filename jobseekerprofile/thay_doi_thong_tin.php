@@ -226,50 +226,7 @@ $jobseeker_id = $_SESSION['jobseeker_id'] ?? ''; // Ví dụ: jobseeker_id của
             <button id="btn-savedjobs" class="active" onclick="window.location.href='cong_viec_da_luu.php'"><?= $lang['btn_savedjobs'] ?></button>
             <button id="btn-changeinfo" onclick="window.location.href='thay_doi_thong_tin.php'"><?= $lang['btn_changeinfo'] ?></button>
 
-            <h3><?= $lang['jobseekerprofile_appliedjobs'] ?></h3>
-
-            <!-- Applicants -->
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user1['avatar']) ? $user1['avatar'] : '../' . ltrim($user1['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Alex<br>
-                    <span class="status-viewed">✔ Viewed</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user2['avatar']) ? $user2['avatar'] : '../' . ltrim($user2['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Selena<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user3['avatar']) ? $user3['avatar'] : '../' . ltrim($user3['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Tyler<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user4['avatar']) ? $user4['avatar'] : '../' . ltrim($user4['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Patrica<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user5['avatar']) ? $user5['avatar'] : '../' . ltrim($user5['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Miranda<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="view-more">View more</div>
+            
         </div>
         <!-- Right side content -->
         <div class="content-area">

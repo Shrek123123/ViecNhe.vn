@@ -139,6 +139,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS application (
     email VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     cv_file VARCHAR(255),
+    cover_letter TEXT NULL,
     allow_search BOOLEAN DEFAULT FALSE,
     hidden_from_employer BOOLEAN DEFAULT FALSE,
     UNIQUE (job_id, jobseeker_id),
@@ -149,6 +150,16 @@ if ($stmt === TRUE) {
     echo "Table application created successfully <br>";
 } else {
     echo "Error creating table: " . $conn->error;
+}
+
+// Thêm cột cover_letter cho các database đã được tạo trước đó.
+$cover_letter_column = $conn->query("SHOW COLUMNS FROM application LIKE 'cover_letter'");
+if ($cover_letter_column && $cover_letter_column->num_rows === 0) {
+    if ($conn->query("ALTER TABLE application ADD COLUMN cover_letter TEXT NULL AFTER cv_file") === TRUE) {
+        echo "Column application.cover_letter added successfully <br>";
+    } else {
+        echo "Error adding application.cover_letter: " . $conn->error . "<br>";
+    }
 }
 
 // Tạo bảng feedback

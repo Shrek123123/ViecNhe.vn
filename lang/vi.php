@@ -136,6 +136,7 @@ $lang = [
     "recruitment_consulting" => "Tư vấn tuyển dụng",
     "post_job_now" => "Đăng tin tuyển dụng ngay →",
     "job_post_is_saved_for_review" => "Bài đăng tuyển đã được lưu để duyệt qua, kết quả sẽ được thông báo trong thời gian sớm nhất!",
+    "ung_tuyen_viec" => "Ứng tuyển việc",
 
     //post-job form
     "post_job_form_title" => "Mẫu đăng tuyển dụng nhanh",
@@ -278,6 +279,7 @@ $lang = [
     "job_unliked" => "Bỏ thích công việc thành công!",
     "job_liked" => "Thêm thích công việc thành công!",
     "applied_successfully" => "Ứng tuyển thành công!",
+    "you_have_apply_before_warning" => "Bạn đã ứng tuyển vào công việc này rồi, vui lòng lựa chọn công việc khác.",
     "job_detail_title" => "Chi tiết công việc",
     'jobdetail_interested' => 'Đã có %d người quan tâm đến công việc này, ứng tuyển ngay để không bỏ lỡ!',
     'jobdetail_salary' => 'Mức lương:',
@@ -587,6 +589,11 @@ $lang = [
     'upload_cv' => 'Tải lên CV',
     'allow_employers_find' => 'Cho phép nhà tuyển dụng tìm thấy bạn',
     'apply' => 'Ứng tuyển',
+    'cover_letter' => 'Thư xin việc (tuỳ chọn)',
+    'phone_number_required' => 'Vui lòng nhập số điện thoại.',
+    'invalid_phone_number' => 'Vui lòng nhập số điện thoại Việt Nam hợp lệ (ví dụ: 0901234567 hoặc +84901234567).',
+    'phone_number_in_use' => 'Số điện thoại này đã được sử dụng.',
+    'cover_letter_too_long' => 'Thư xin việc không được vượt quá 5.000 ký tự.',
     'agreement_text' => 'Bằng việc nhấn nút gửi, tôi đồng ý chia sẻ thông tin cá nhân của mình với nhà tuyển dụng theo',
     'terms_of_use' => 'Điều khoản sử dụng',
     'privacy_policy' => 'Chính sách bảo mật',

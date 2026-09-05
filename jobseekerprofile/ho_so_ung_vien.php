@@ -1,4 +1,4 @@
-﻿<?php require_once '../config.php';
+<?php require_once '../config.php';
 session_start();
 if (!isset($_SESSION['username'])) {
     $redirect = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php';
@@ -29,9 +29,10 @@ $jobseeker_id = $_SESSION['jobseeker_id'] ?? ''; // Ví dụ: jobseeker_id của
 
 $profile_data = null; // Khởi tạo biến profile_data
 $user_email = "Email not available"; // Giá trị mặc định
+$user_phone_number = '';
 $is_email_verified = false; // Giá trị mặc định
 
-$sql_user = "SELECT email, verify_email, username FROM user WHERE id = ?";
+$sql_user = "SELECT email, phone_number, verify_email, username FROM user WHERE id = ?";
 $stmt_user = $conn->prepare($sql_user);
 $stmt_user->bind_param("i", $jobseeker_id);
 $stmt_user->execute();
@@ -40,6 +41,7 @@ $result_user = $stmt_user->get_result();
 if ($result_user->num_rows > 0) {
     $user_data = $result_user->fetch_assoc();
     $user_email = $user_data['email'];
+    $user_phone_number = trim((string) ($user_data['phone_number'] ?? ''));
     $is_email_verified = (bool) $user_data['verify_email'];
     $user_display_name = htmlspecialchars($user_data['username']);
 }
@@ -607,50 +609,9 @@ if ($cv_file_path) {
                 </div>
             </div>
 
-            <h3><?= $lang['jobseekerprofile_appliedjobs'] ?></h3>
 
             <!-- Applicants -->
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user1['avatar']) ? $user1['avatar'] : '../' . ltrim($user1['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Alex<br>
-                    <span class="status-viewed">✔ Viewed</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user2['avatar']) ? $user2['avatar'] : '../' . ltrim($user2['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Selena<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user3['avatar']) ? $user3['avatar'] : '../' . ltrim($user3['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Tyler<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user4['avatar']) ? $user4['avatar'] : '../' . ltrim($user4['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Patrica<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="applicant-card">
-                <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $user5['avatar']) ? $user5['avatar'] : '../' . ltrim($user5['avatar'], '/')); ?>" alt="avatar">
-                <div class="applicant-info">
-                    Miranda<br>
-                    <span class="status-new">★ New</span>
-                </div>
-            </div>
-
-            <div class="view-more">View more</div>
+            
         </div>
         <!-- Right side content -->
         <div class="content-area">
@@ -714,7 +675,7 @@ if ($cv_file_path) {
                                     <img src="../image/phone.svg" alt="phone icon"
                                         style="width: 16px; height: 16px; margin-right: 5px;">
                                     <div class="open-modal" id="display_phone_number">
-                                        <?php echo !empty($profile_data['phone_number']) ? htmlspecialchars($profile_data['phone_number']) : $lang['addmobilephone']; ?>
+                                        <?php echo $user_phone_number !== '' ? htmlspecialchars($user_phone_number) : $lang['addmobilephone']; ?>
                                     </div>
                                 </div>
                                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
@@ -815,7 +776,7 @@ if ($cv_file_path) {
 
                 <label><?= $lang['phone_number'] ?> *</label>
                 <input type="tel" name="phone_number" placeholder="<?= $lang['enter_phone'] ?>" required
-                    value="<?= htmlspecialchars($profile_data['phone_number'] ?? '') ?>">
+                    value="<?= htmlspecialchars($user_phone_number ?? '') ?>">
 
                 <label><?= $lang['current_address'] ?> *</label>
                 <input type="text" name="address" placeholder="<?= $lang['current_address_placeholder'] ?>" required

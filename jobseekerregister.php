@@ -135,13 +135,28 @@ session_start();
           <input type="email" placeholder="<?php echo $lang['placeholder_email']; ?>" name="email" required>
         </div>
         <div class="form-group">
+          <label><?php echo $lang['phone_number_register']; ?></label>
+          <input type="tel" placeholder="<?php echo $lang['placeholder_phone_number_register']; ?>" name="phonenumber">
+        </div>
+        <div class="form-group">
           <label><?php echo $lang['password']; ?></label>
-          <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password" required>
+          <div class="password-toggle-wrapper" style="position: relative;">
+            <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password" required
+              style="padding-right: 45px;">
+            <button type="button" class="toggle-password" data-target="password"
+              style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
+              aria-label="Toggle password visibility">👁</button>
+          </div>
         </div>
         <div class="form-group">
           <label><?php echo $lang['reenter_password']; ?></label>
-          <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>" name="retypepass"
-            required>
+          <div class="password-toggle-wrapper" style="position: relative;">
+            <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>" name="retypepass"
+              required style="padding-right: 45px;">
+            <button type="button" class="toggle-password" data-target="retypepass"
+              style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
+              aria-label="Toggle password visibility">👁</button>
+          </div>
         </div>
         <div class="terms-container" style="align-items: center;">
           <label style="display: flex; align-items: center; gap: 8px;">
@@ -227,9 +242,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
   }
 
-  $stmt = $conn->prepare("INSERT INTO user (username, user_type, email, password) VALUES (?, 'jobseeker', ?, ?)");
+  $phone_number = !empty($_POST['phonenumber']) ? trim($_POST['phonenumber']) : NULL;
+
+  $stmt = $conn->prepare("INSERT INTO user (username, user_type, email, password, phone_number) VALUES (?, 'jobseeker', ?, ?, ?)");
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-  $stmt->bind_param("sss", $username, $email, $hashed_password);
+  $stmt->bind_param("ssss", $username, $email, $hashed_password, $phone_number);
 
   if ($stmt->execute()) {
     echo "<script>alert('Registration successful!'); window.location.href = 'jobseekerlogin.php';</script>";
@@ -261,6 +278,18 @@ $conn->close();
       } else {
         termsError.style.display = 'none';
       }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.toggle-password').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const input = document.getElementById(btn.dataset.target) || document.querySelector('input[name="' + btn.dataset.target + '"]');
+        if (!input) return;
+        const isVisible = input.type === 'text';
+        input.type = isVisible ? 'password' : 'text';
+        btn.textContent = isVisible ? '👁' : '🙈';
+      });
     });
   });
 </script>

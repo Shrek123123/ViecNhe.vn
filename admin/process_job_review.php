@@ -4,11 +4,11 @@ session_start();
 require_once '../config.php'; // Điều chỉnh đường dẫn đến config.php
 
 // --- Kiểm tra quyền Admin (quan trọng) ---
-// if (!isset($_SESSION['usernameadmin'])) {
-//     // Nếu không phải admin, chuyển hướng hoặc hiển thị lỗi
-//     header('Location: ../index.php');
-//     exit();
-// }
+if (!isset($_SESSION['usernameadmin'])) {
+    // Nếu không phải admin, chuyển hướng hoặc hiển thị lỗi
+    header('Location: ../index.php');
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_id'], $_POST['action'])) {
     $jobId = intval($_POST['job_id']);

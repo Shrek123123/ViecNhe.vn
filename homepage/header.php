@@ -228,9 +228,7 @@ if ($jobseeker_id > 0) {
                 <a href="employerpage.php" class="btn-register">
                     <?= $lang['employer_redirect']; ?>
                 </a>
-                <a href="admin/adminlogin.php" class="btn-register">
-                    <?= $lang['admin_login']; ?>
-                </a>
+               
                 <button id="lang-switch-btn"
                     style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
                     <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>

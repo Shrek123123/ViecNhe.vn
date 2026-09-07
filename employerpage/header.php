@@ -186,7 +186,6 @@ if (isset($_SESSION['employerid'])) {
             <div class="guest-options">
                 <a href="employerlogin.php" class="btn-login"><?php echo $lang['login/register_employer']; ?></a>
                 <a href="index.php" class="btn-register"><?php echo $lang['jobseeker_redirect']; ?></a>
-                <a href="admin/adminlogin.php" class="btn-register"><?php echo $lang['admin_login']; ?></a>
                 <button id="lang-switch-btn"
                     style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
                     <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>

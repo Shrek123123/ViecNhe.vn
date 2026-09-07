@@ -190,15 +190,31 @@ include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
                     <input type="email" placeholder="<?php echo $lang['placeholder_email']; ?>" name="email" required>
                 </div>
                 <div class="form-group">
+                    <label><?php echo $lang['phone_number_register']; ?></label>
+                    <input type="tel" placeholder="<?php echo $lang['placeholder_phone_number_register']; ?>"
+                        name="phonenumber">
+                </div>
+                <div class="form-group">
                     <label><?php echo $lang['password']; ?></label>
-                    <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password"
-                        required>
+                    <div style="position: relative;">
+                        <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>"
+                            name="password" required style="padding-right: 45px;">
+                        <button type="button" class="toggle-password" data-target="password"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
+                            aria-label="Toggle password visibility">👁</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label><?php echo $lang['reenter_password']; ?></label>
-                    <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>"
-                        name="retypepass" required>
+                    <div style="position: relative;">
+                        <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>"
+                            name="retypepass" required style="padding-right: 45px;">
+                        <button type="button" class="toggle-password" data-target="retypepass"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
+                            aria-label="Toggle password visibility">👁</button>
+                    </div>
                 </div>
+
 
                 <h3><?php echo $lang['company_information']; ?></h3>
                 <div class="form-group">
@@ -420,11 +436,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+    $phone_number = !empty($_POST['phonenumber']) ? trim($_POST['phonenumber']) : NULL;
+
     // Insert new user into the database
     // Insert user first
-    $stmt = $conn->prepare("INSERT INTO user (username, user_type, email, password) VALUES (?, 'employer', ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO user (username, user_type, email, password, phone_number) VALUES (?, 'employer', ?, ?, ?)");
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    $stmt->bind_param("sss", $username, $email, $hashed_password);
+    $stmt->bind_param("ssss", $username, $email, $hashed_password, $phone_number);
     $stmt->execute();
 
     // Get the ID of the newly created user
@@ -532,4 +550,17 @@ $conn->close();
             }
         });
     });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.toggle-password').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const input = document.getElementById(btn.dataset.target) || document.querySelector('input[name="' + btn.dataset.target + '"]');
+        if (!input) return;
+        const isVisible = input.type === 'text';
+        input.type = isVisible ? 'password' : 'text';
+        btn.textContent = isVisible ? '👁' : '🙈';
+      });
+    });
+  });
 </script>

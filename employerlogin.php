@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         header {
             width: 100%;
-      
+
         }
 
         .main-content {
@@ -128,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .form-group {
             margin-bottom: 20px;
             text-align: left;
+            position: relative;
         }
 
         label {
@@ -221,7 +222,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="form-group">
                     <label for="passwordInput"><?= $lang['password']; ?></label>
                     <input type="password" id="passwordInput" name="password"
-                        placeholder="<?= $lang['employer_login_password_placeholder']; ?>" required>
+                        placeholder="<?= $lang['employer_login_password_placeholder']; ?>" required
+                        style="padding-right: 45px;">
+                    <button type="button" class="toggle-password" data-target="passwordInput"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
+                        aria-label="Toggle password visibility">👁</button>
                     <div class="forgot">
                         <a href="employerforgetpassword.php"><?= $lang['employer_login_forgot_password']; ?></a>
                     </div>
@@ -243,3 +248,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </body>
 
 </html>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.toggle-password').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const input = document.getElementById(btn.dataset.target) || document.querySelector('input[name="' + btn.dataset.target + '"]');
+        if (!input) return;
+        const isVisible = input.type === 'text';
+        input.type = isVisible ? 'password' : 'text';
+        btn.textContent = isVisible ? '👁' : '🙈';
+      });
+    });
+  });
+</script>

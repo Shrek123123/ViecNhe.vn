@@ -29,12 +29,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         if (password_verify($password, $row['password'])) {
-            // Password is correct
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['role'] = 'jobseeker';
-            $_SESSION['jobseeker_id'] = $row['id'];
-            // Clear any previous output before redirecting
-            if (ob_get_level()) {
+            if (($row['status'] ?? 'unlocked') === 'locked') {
+                echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var errorDiv = document.createElement('div');
+                    errorDiv.style.color = 'red';
+                    errorDiv.style.textAlign = 'center';
+                    errorDiv.style.marginTop = '10px';
+                    errorDiv.innerText = " . json_encode($lang['account_locked'] ?? 'Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.', JSON_UNESCAPED_UNICODE) . ";
+                    document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                });
+                </script>";
+            } else {
+                // Password is correct
+                $_SESSION['username'] = $row['username'];
+                $_SESSION['role'] = 'jobseeker';
+                $_SESSION['jobseeker_id'] = $row['id'];
+                // Clear any previous output before redirecting
+                if (ob_get_level()) {
                 ob_end_clean();
             }
             // Respect optional redirect parameter (only allow internal redirects)
@@ -55,9 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
 
-            // Fallback destination
-            header("Location: jobseekerdashboard.php");
-            exit();
+                // Fallback destination
+                header("Location: jobseekerdashboard.php");
+                exit();
+            }
 
         } else {
             // Invalid password

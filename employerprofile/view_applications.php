@@ -609,6 +609,85 @@ if (isset($_SESSION['flash_message'])) {
             text-decoration: underline;
         }
 
+        .cover-letter-trigger {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 0 10px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #b23b3b;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .cover-letter-trigger:focus-visible,
+        .cover-letter-modal__close:focus-visible {
+            outline: 3px solid rgba(178, 59, 59, 0.3);
+            outline-offset: 2px;
+        }
+
+        .cover-letter-modal[hidden] {
+            display: none;
+        }
+
+        .cover-letter-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10003;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.48);
+        }
+
+        .cover-letter-modal__dialog {
+            width: min(560px, 100%);
+            max-height: min(70vh, 560px);
+            overflow: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
+        }
+
+        .cover-letter-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cover-letter-modal__title {
+            margin: 0;
+            color: #b23b3b;
+            font-size: 18px;
+        }
+
+        .cover-letter-modal__close {
+            border: 0;
+            background: transparent;
+            color: #777;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .cover-letter-modal__content {
+            margin: 0;
+            padding: 20px;
+            color: #444;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
         /* ===== CONTENT ===== */
         .dashboard-content {
             flex: 1;
@@ -858,7 +937,7 @@ if (isset($_SESSION['flash_message'])) {
                             if (isset($conn) && $conn->ping()) {
                                 // Truy vấn để lấy các ứng dụng cho job_id cụ thể
                                 // Lấy thông tin từ bảng 'application'
-                                $sql = "SELECT id, fullname, phonenumber, email, status, created_at, cv_file
+                                $sql = "SELECT id, jobseeker_id, fullname, phonenumber, email, status, created_at, cv_file, cover_letter
             FROM application
             WHERE job_id = ? AND (hidden_from_employer = 0 OR hidden_from_employer IS NULL)";
                                 $stmt = $conn->prepare($sql);
@@ -874,6 +953,7 @@ if (isset($_SESSION['flash_message'])) {
                                         $fullname = htmlspecialchars($row['fullname']);
                                         $phonenumber = htmlspecialchars($row['phonenumber']);
                                         $email = htmlspecialchars($row['email']);
+                                        $cover_letter = trim((string) ($row['cover_letter'] ?? ''));
                                         $job_status_raw = htmlspecialchars($row['status']);
                                         $created_at = new DateTime($row['created_at']);
                                         $formatted_created_at = formatDateByLocale($row['created_at']);
@@ -953,6 +1033,18 @@ if (isset($_SESSION['flash_message'])) {
                                             <div style="font-size: 14px; color: #555; margin-bottom: 10px;">
                                                 <?= $lang['phone'] ?> <strong><?php echo $phonenumber; ?></strong>
                                             </div>
+                                            <?php if ($cover_letter !== ''): ?>
+                                                <div>
+                                                    <button
+                                                        type="button"
+                                                        class="cover-letter-trigger"
+                                                        data-cover-letter="<?= htmlspecialchars($cover_letter, ENT_QUOTES, 'UTF-8') ?>"
+                                                        aria-haspopup="dialog"
+                                                        aria-controls="coverLetterModal">
+                                                        <?= htmlspecialchars($lang['thu_tu_gioi_thieu'] ?? 'Cover letter', ENT_QUOTES, 'UTF-8') ?>
+                                                    </button>
+                                                </div>
+                                            <?php endif; ?>
                                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                                 <div>
                                                     <?= $lang['status2'] ?> <span
@@ -989,6 +1081,55 @@ if (isset($_SESSION['flash_message'])) {
                             }
                             ?>
                         </div>
+
+                        <div id="coverLetterModal" class="cover-letter-modal" role="dialog" aria-modal="true" aria-labelledby="coverLetterModalTitle" hidden>
+                            <div class="cover-letter-modal__dialog" role="document">
+                                <div class="cover-letter-modal__header">
+                                    <h2 id="coverLetterModalTitle" class="cover-letter-modal__title">
+                                        <?= htmlspecialchars($lang['thu_tu_gioi_thieu'] ?? 'Cover letter', ENT_QUOTES, 'UTF-8') ?>
+                                    </h2>
+                                    <button type="button" class="cover-letter-modal__close" aria-label="<?= htmlspecialchars($lang['close'] ?? 'Close', ENT_QUOTES, 'UTF-8') ?>">&times;</button>
+                                </div>
+                                <p id="coverLetterModalContent" class="cover-letter-modal__content"></p>
+                            </div>
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const modal = document.getElementById('coverLetterModal');
+                                const content = document.getElementById('coverLetterModalContent');
+                                const closeButton = modal?.querySelector('.cover-letter-modal__close');
+                                let lastTrigger = null;
+
+                                if (!modal || !content || !closeButton) return;
+
+                                const closeModal = function () {
+                                    modal.hidden = true;
+                                    document.body.style.overflow = '';
+                                    if (lastTrigger) lastTrigger.focus();
+                                };
+
+                                document.querySelectorAll('.cover-letter-trigger').forEach(function (trigger) {
+                                    trigger.addEventListener('click', function () {
+                                        lastTrigger = trigger;
+                                        content.textContent = trigger.dataset.coverLetter || '—';
+                                        modal.hidden = false;
+                                        document.body.style.overflow = 'hidden';
+                                        closeButton.focus();
+                                    });
+                                });
+
+                                closeButton.addEventListener('click', closeModal);
+                                modal.addEventListener('click', function (event) {
+                                    if (event.target === modal) closeModal();
+                                });
+
+                                document.addEventListener('keydown', function (event) {
+                                    if (event.key === 'Escape' && !modal.hidden) closeModal();
+                                });
+                            });
+                        </script>
+
                         <script>
                             // Tạo modal cho Manage và Xóa
                             document.body.insertAdjacentHTML('beforeend', `

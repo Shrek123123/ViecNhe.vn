@@ -92,7 +92,7 @@ $lang = [
     "footer_address_hcm" => "Phòng 102, Tòa nhà 20–208 Trần Cao Vân, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh",
     "footer_address_hn" => "Chi nhánh: Tầng 4, Times Tower, 35 Lê Văn Lương, Thanh Xuân, Hà Nội.",
     "footer_license" => "Giấy phép dịch vụ việc làm số: 2893/2022/S8LĐTBXH-VLATLĐ do Sở Lao động Thương binh và Xã hội cấp ngày 18/11/2024",
-    "footer_phone" => "Điện thoại: (028) 7109 424 | (024) 7109 440",
+    "footer_phone" => "Điện thoại: +84 9818 52782 ",
     "footer_email_job_seeker" => "Email hỗ trợ người tìm việc: ntv@jobhive.vn",
     "footer_email_employer" => "Email hỗ trợ nhà tuyển dụng: ntd@jobhive.vn",
 
@@ -241,6 +241,7 @@ $lang = [
     //error messages
     "login_invalid_password" => "Tài khoản đúng nhưng mật khẩu sai.",
     "login_invalid_email" => "Email không đúng. Vui lòng thử lại.",
+    "account_locked" => "Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.",
     //jobseekerlogin
     "email" => "Email",
     "password" => "Mật khẩu",
@@ -398,6 +399,8 @@ $lang = [
     'pending_review' => 'Đang chờ duyệt',
     'approved' => 'Đã được duyệt',
     'rejected' => 'Đã bị từ chối',
+    'rejected_reason' => '- Lý do bị từ chối',
+    'title' => 'Lý do',
     'job_days_left' => 'Bài đăng còn %d ngày hiệu lực',
     'job_closed' => 'Bài đăng đã hết hạn',
     'updated_days' => 'Đã cập nhật %d ngày trước',
@@ -590,6 +593,7 @@ $lang = [
     'allow_employers_find' => 'Cho phép nhà tuyển dụng tìm thấy bạn',
     'apply' => 'Ứng tuyển',
     'cover_letter' => 'Thư xin việc (tuỳ chọn)',
+    'thu_tu_gioi_thieu' => 'Thư tự giới thiệu',
     'phone_number_required' => 'Vui lòng nhập số điện thoại.',
     'invalid_phone_number' => 'Vui lòng nhập số điện thoại Việt Nam hợp lệ (ví dụ: 0901234567 hoặc +84901234567).',
     'phone_number_in_use' => 'Số điện thoại này đã được sử dụng.',

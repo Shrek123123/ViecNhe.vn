@@ -200,7 +200,7 @@ $conn->close();
             <li><a href="#">Change homepage picture</a></li>
             <li><a href="#">Users</a></li>
             <li><a href="jobpending.php">Review Job Posts</a></li>
-            <li><a href="#">Review Users</a></li>
+            <li><a href="user_table.php">Review Users</a></li>
             <li><a href="feedbackcheck.php">Feedbacks</a></li>
         </ul>
     </div>

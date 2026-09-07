@@ -420,9 +420,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button type="button" class="change-info-option" data-href="thay_doi_mat_khau.php"><?= $lang['change_password_action'] ?></button>
                 </div>
             </div>
-
-
-            --Applicants card--
         </div>
 
         <div class="content-area">

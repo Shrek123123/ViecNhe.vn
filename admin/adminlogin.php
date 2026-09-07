@@ -1,12 +1,18 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config.php';
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'vi';
+}
+include_once __DIR__ . '/../lang/' . $_SESSION['lang'] . '.php';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
+    $accountLockedMessage = $lang['account_locked'] ?? 'Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.';
 
     // Check if the email and password are correct
-    $stmt = $conn->prepare("SELECT * FROM user WHERE email = ? AND user_type = 'admin'");
+    $stmt = $conn->prepare("SELECT id, username, password, status FROM user WHERE email = ? AND user_type = 'admin'");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -14,10 +20,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         if (password_verify($password, $row['password'])) {
-            // Password is correct
-            $_SESSION['usernameadmin'] = $row['username'];
-            header("Location: admindashboard.php");
-            exit();
+            if (($row['status'] ?? 'unlocked') === 'locked') {
+                echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var errorDiv = document.createElement('div');
+                    errorDiv.style.color = 'red';
+                    errorDiv.style.textAlign = 'center';
+                    errorDiv.style.marginTop = '10px';
+                    errorDiv.innerText = " . json_encode($accountLockedMessage, JSON_UNESCAPED_UNICODE) . ";
+                    document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                });
+                </script>";
+            } else {
+                // Password is correct
+                $_SESSION['usernameadmin'] = $row['username'];
+                $_SESSION['admin_id'] = (int) $row['id'];
+                header("Location: admindashboard.php");
+                exit();
+            }
         } else {
             // Invalid password
             echo "<script>

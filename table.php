@@ -19,12 +19,24 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS user (
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     verify_email BOOLEAN DEFAULT FALSE,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    admin_note TEXT DEFAULT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status ENUM('unlocked', 'locked') NOT NULL DEFAULT 'unlocked'
 )");
 if ($stmt === TRUE) {
     echo "Table user created successfully <br>";
 } else {
     echo "Error creating table: " . $conn->error;
+}
+
+// Bổ sung status cho các database đã được tạo trước đó.
+$user_status_column = $conn->query("SHOW COLUMNS FROM `user` LIKE 'status'");
+if ($user_status_column && $user_status_column->num_rows === 0) {
+    if ($conn->query("ALTER TABLE `user` ADD COLUMN status ENUM('unlocked', 'locked') NOT NULL DEFAULT 'unlocked' AFTER updated_at") === TRUE) {
+        echo "Column user.status added successfully <br>";
+    } else {
+        echo "Error adding user.status: " . $conn->error . "<br>";
+    }
 }
 
 // Tạo bảng jobseeker_profile

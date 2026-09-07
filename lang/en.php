@@ -90,7 +90,7 @@ $lang = [
     "footer_address_hcm" => "Room 102, Building 20–208 Tran Cao Van, Da Kao Ward, District 1, Ho Chi Minh City",
     "footer_address_hn" => "Branch: 4th Floor, Times Tower, 35 Le Van Luong, Thanh Xuan, Hanoi.",
     "footer_license" => "Employment service license No: 2893/2022/S8LĐTBXH-VLATLĐ issued by the Department of Labor, War Invalids and Social Affairs on 18/11/2024",
-    "footer_phone" => "Phone: (028) 7109 424 | (024) 7109 440",
+    "footer_phone" => "Phone: +84 9818 52782",
     "footer_email_job_seeker" => "Job seeker support email: ntv@jobhive.vn",
     "footer_email_employer" => "Employer support email: ntd@jobhive.vn",
 
@@ -239,6 +239,7 @@ $lang = [
     //error messages
     "login_invalid_password" => "Invalid password. Please try again.",
     "login_invalid_email" => "Invalid email. Please try again.",
+    "account_locked" => "This account is locked. Please contact an administrator.",
     //jobseekerlogin
     "email" => "Email",
     "password" => "Password",
@@ -396,6 +397,8 @@ $lang = [
     'pending_review' => 'Pending Review',
     'approved' => 'Approved',
     'rejected' => 'Rejected',
+    'rejected_reason' => '- Reasons for rejecting',
+    'title' => 'Reasons:',
     'reject' => 'Reject',
     'job_days_left' => '%d days left to apply',
     'job_closed' => 'Application closed',
@@ -591,6 +594,7 @@ $lang = [
     'allow_employers_find' => 'Allow employers to find you',
     'apply' => 'Apply',
     'cover_letter' => 'Cover letter (optional)',
+    'thu_tu_gioi_thieu' => 'Cover letter',
     'phone_number_required' => 'Please enter your phone number.',
     'invalid_phone_number' => 'Please enter a valid Vietnamese phone number (e.g. 0901234567 or +84901234567).',
     'phone_number_in_use' => 'This phone number is already in use.',

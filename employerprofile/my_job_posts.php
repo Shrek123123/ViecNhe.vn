@@ -516,6 +516,127 @@ $employer_id = $_SESSION['employerid'] ?? 0;
             text-decoration: underline;
         }
 
+        :root {
+            --jobhive-brand-red: #b23b3b;
+            --jobhive-danger-red: #dc3545;
+            --jobhive-surface: #fff;
+            --jobhive-overlay: rgba(0, 0, 0, 0.48);
+        }
+
+        .application-action-form {
+            display: inline;
+        }
+
+        .application-action-button {
+            position: relative;
+            background: var(--jobhive-brand-red);
+            color: var(--jobhive-surface);
+            border: none;
+            border-radius: 6px;
+            padding: 6px 18px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .application-action-button:focus-visible,
+        .rejected-reason-trigger:focus-visible,
+        .rejection-modal__close:focus-visible {
+            outline: 3px solid rgba(178, 59, 59, 0.35);
+            outline-offset: 2px;
+        }
+
+        .application-count-badge {
+            position: absolute;
+            top: -9px;
+            right: -9px;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 5px;
+            box-sizing: border-box;
+            border-radius: 50%;
+            background: var(--jobhive-danger-red);
+            color: var(--jobhive-surface);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            border: 2px solid var(--jobhive-surface);
+        }
+
+        .rejected-reason-trigger {
+            margin-left: 8px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: var(--jobhive-danger-red);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .rejection-modal[hidden] {
+            display: none;
+        }
+
+        .rejection-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--jobhive-overlay);
+        }
+
+        .rejection-modal__dialog {
+            width: min(520px, 100%);
+            max-height: min(70vh, 520px);
+            overflow: auto;
+            background: var(--jobhive-surface);
+            border-radius: 10px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+        }
+
+        .rejection-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rejection-modal__title {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .rejection-modal__close {
+            border: 0;
+            background: transparent;
+            color: #666;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .rejection-modal__content {
+            margin: 0;
+            padding: 20px;
+            color: #444;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
         /* ===== CONTENT ===== */
         .dashboard-content {
             flex: 1;
@@ -702,7 +823,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                     <div style="display: flex; flex-direction: column; gap: 18px;">
                         <?php
                         if ($employer_id > 0 && isset($conn) && $conn->ping()) {
-                            $sql = "SELECT * FROM job WHERE posted_by_employer_id = ? ORDER BY created_at DESC";
+                            $sql = "SELECT job.*, (SELECT COUNT(a.id) FROM application a WHERE a.job_id = job.id) AS application_count FROM job WHERE posted_by_employer_id = ? ORDER BY created_at DESC";
                             $stmt = $conn->prepare($sql);
                             $stmt->bind_param("i", $employer_id);
                             $stmt->execute();
@@ -771,11 +892,13 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                 else
                                     $updated_str = sprintf($lang['updated_days'], floor($diff / 86400));
 
-                                // Xử lý Trạng thái
-                                $job_status_raw = $row['status'];
+                                // Xử lý trạng thái và số lượng hồ sơ theo từng bài đăng
+                                $job_status_raw = (string) ($row['status'] ?? '');
                                 $status_colors = ['pending_review' => '#ffc107', 'approved' => '#28a745', 'rejected' => '#dc3545'];
                                 $status_color = $status_colors[$job_status_raw] ?? '#6c757d';
                                 $job_status_text = $lang[$job_status_raw] ?? $job_status_raw;
+                                $application_count = max(0, (int) ($row['application_count'] ?? 0));
+                                $admin_notes = trim((string) ($row['admin_notes'] ?? ''));
 
                                 ?>
                                 <div
@@ -808,7 +931,17 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                         </div>
                                         <div style="font-size: 14px;">
                                             <?= $lang['status'] ?>: <span
-                                                style="font-weight: bold; color: <?= $status_color ?>;"><?= $job_status_text ?></span>
+                                                style="font-weight: bold; color: <?= $status_color ?>;"><?= htmlspecialchars($job_status_text, ENT_QUOTES, 'UTF-8') ?></span>
+                                            <?php if ($job_status_raw === 'rejected'): ?>
+                                                <button
+                                                    type="button"
+                                                    class="rejected-reason-trigger"
+                                                    data-rejection-reason="<?= htmlspecialchars($admin_notes, ENT_QUOTES, 'UTF-8') ?>"
+                                                    aria-haspopup="dialog"
+                                                    aria-controls="rejectionReasonModal">
+                                                    <?= htmlspecialchars($lang['rejected_reason'] ?? '- Reasons for rejecting:', ENT_QUOTES, 'UTF-8') ?>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
 
@@ -827,11 +960,16 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                                 <?= $lang['delete'] ?>
                                             </button>
                                         </form>
-                                        <form action="view_applications.php" method="POST" style="display: inline;">
+                                        <form action="view_applications.php" method="POST" class="application-action-form">
                                             <input type="hidden" name="job_id" value="<?php echo $job_id; ?>">
-                                            <button type="submit"
-                                                style="background: #b23b3b; color: #fff; border: none; border-radius: 6px; padding: 6px 18px; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block;">
-                                                <?= $lang['check_submitted_applications'] ?>
+                                            <button
+                                                type="submit"
+                                                class="application-action-button"
+                                                aria-label="<?= htmlspecialchars($lang['check_submitted_applications'], ENT_QUOTES, 'UTF-8') ?> (<?= $application_count ?>)">
+                                                <?= htmlspecialchars($lang['check_submitted_applications'], ENT_QUOTES, 'UTF-8') ?>
+                                                <?php if ($application_count > 0): ?>
+                                                    <span class="application-count-badge" aria-hidden="true"><?= $application_count ?></span>
+                                                <?php endif; ?>
                                             </button>
                                         </form>
                                     </div>
@@ -884,6 +1022,63 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                     menu.classList.remove('show');
                     btnChangeInfo.classList.toggle('active', isActivePage);
                 }
+            });
+        });
+    </script>
+
+    <div
+        id="rejectionReasonModal"
+        class="rejection-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="rejectionReasonModalTitle"
+        hidden>
+        <div class="rejection-modal__dialog" role="document">
+            <div class="rejection-modal__header">
+                <h2 id="rejectionReasonModalTitle" class="rejection-modal__title">
+                    <?= htmlspecialchars($lang['title'] ?? 'Reasons:', ENT_QUOTES, 'UTF-8') ?>
+                </h2>
+                <button
+                    type="button"
+                    class="rejection-modal__close"
+                    aria-label="<?= htmlspecialchars($lang['close'] ?? 'Close', ENT_QUOTES, 'UTF-8') ?>">&times;</button>
+            </div>
+            <p id="rejectionReasonModalContent" class="rejection-modal__content"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('rejectionReasonModal');
+            const modalContent = document.getElementById('rejectionReasonModalContent');
+            const closeButton = modal?.querySelector('.rejection-modal__close');
+            let lastTrigger = null;
+
+            if (!modal || !modalContent || !closeButton) return;
+
+            const closeModal = function () {
+                modal.hidden = true;
+                document.body.style.overflow = '';
+                if (lastTrigger) lastTrigger.focus();
+            };
+
+            document.querySelectorAll('.rejected-reason-trigger').forEach(function (trigger) {
+                trigger.addEventListener('click', function () {
+                    lastTrigger = trigger;
+                    modalContent.textContent = trigger.dataset.rejectionReason || '—';
+                    modal.hidden = false;
+                    document.body.style.overflow = 'hidden';
+                    closeButton.focus();
+                });
+            });
+
+            closeButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) closeModal();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !modal.hidden) closeModal();
             });
         });
     </script>

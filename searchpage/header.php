@@ -424,7 +424,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
     <div class="header-right">
         <?php if (!isset($_SESSION['username'])): ?>
             <a href="jobseekerlogin.php" class="btn-login mobile-login-btn">
-                <?= $lang['login/register_jobseeker']; ?>
+                <?= $lang['login']; ?>
             </a>
         <?php endif; ?>
     </div>

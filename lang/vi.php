@@ -1,5 +1,6 @@
 <?php
 $lang = [
+    "login" => "Đăng nhập",
     //homepage
     //header
     "create_cv" => "Tạo CV",

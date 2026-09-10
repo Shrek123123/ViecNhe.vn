@@ -410,7 +410,7 @@ if (isset($_SESSION['employerid'])) {
     <div class="header-right">
         <?php if (!isset($_SESSION['usernameemployer'])): ?>
             <a href="employerlogin.php" class="btn-login mobile-login-btn">
-                <?php echo $lang['login/register_employer']; ?>
+                <?php echo $lang['login']; ?>
             </a>
         <?php endif; ?>
     </div>

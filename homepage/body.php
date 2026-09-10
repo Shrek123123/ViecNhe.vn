@@ -162,6 +162,18 @@ $savedJobIdsJson = json_encode($savedJobIds);
 
 ?>
 <style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
@@ -548,6 +560,109 @@ $savedJobIdsJson = json_encode($savedJobIds);
   @media (max-width: 600px) {
     .job-grid {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 24px 16px;
+    }
+
+    .title {
+      font-size: 20px;
+    }
+
+    .search-box {
+      margin-top: 20px;
+    }
+
+    .search-box form {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      width: 100%;
+    }
+
+    .search-box input,
+    .search-box select,
+    .search-box button {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .main-content {
+      flex-direction: column;
+      margin-top: 20px;
+      gap: 15px;
+    }
+
+    .left-menu {
+      width: 100%;
+      min-width: 0;
+      order: 2;
+    }
+
+    .right-banner {
+      width: 100%;
+      min-width: 0;
+      order: 1;
+    }
+
+    .right-banner img {
+      max-height: 160px;
+      object-fit: cover;
+    }
+
+    .job-section {
+      padding: 24px 12px;
+      margin: 10px 0;
+    }
+
+    .job-section h2 {
+      font-size: 18px;
+    }
+
+    .job-filters {
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .job-filters button {
+      padding: 6px 12px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .industry-filter-carousel {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .industry-filter-window {
+      overflow-x: auto !important;
+    }
+
+    .industry-nav-btn {
+      display: none !important;
+    }
+
+    .company-logo {
+      width: 60px;
+      height: 60px;
+    }
+
+    .logos {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .logos img {
+      max-height: 40px;
+    }
+
+    .section-3 .header {
+      flex-wrap: wrap;
+      gap: 10px;
     }
   }
 </style>

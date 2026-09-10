@@ -283,11 +283,6 @@ include 'lang/' . $_SESSION['lang'] . '.php';
         </button>
     </div>
 
-    <div class="header-right">
-        <a href="employerlogin.php" class="btn-login mobile-login-btn">
-            <?= $lang['login/register_employer']; ?>
-        </a>
-    </div>
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <script>

@@ -440,7 +440,7 @@ if ($jobseeker_id > 0) {
     <div class="header-right">
         <?php if (!isset($_SESSION['username'])): ?>
             <a href="../jobseekerlogin.php" class="btn-login mobile-login-btn">
-                <?= $lang['login/register_jobseeker']; ?>
+                <?= $lang['login']; ?>
             </a>
         <?php endif; ?>
     </div>

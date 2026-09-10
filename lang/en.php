@@ -1,5 +1,6 @@
 <?php
 $lang = [
+    "login" => "Login",
     "create_cv" => "Create CV",
     "contact_us" => "Contact Us",
     "feedback" => "Feedback",

@@ -400,6 +400,7 @@ $lang = [
     'approved' => 'Đã được duyệt',
     'rejected' => 'Đã bị từ chối',
     'rejected_reason' => '- Lý do bị từ chối',
+    'rejected_reason_title' => 'Lý do từ chối',
     'title' => 'Lý do',
     'job_days_left' => 'Bài đăng còn %d ngày hiệu lực',
     'job_closed' => 'Bài đăng đã hết hạn',

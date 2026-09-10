@@ -400,6 +400,7 @@ $lang = [
     'approved' => 'Approved',
     'rejected' => 'Rejected',
     'rejected_reason' => '- Reasons for rejecting',
+    'rejected_reason_title' => 'Reasons for rejection',
     'title' => 'Reasons:',
     'reject' => 'Reject',
     'job_days_left' => '%d days left to apply',

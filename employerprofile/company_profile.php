@@ -636,6 +636,82 @@ $employer_id = $_SESSION['employerid'] ?? 0;
             border-radius: 12px;
         }
 
+        .rejected-reason-trigger {
+            margin-left: 8px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #b23b3b;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .rejected-reason-trigger:focus-visible,
+        .rejection-modal__close:focus-visible {
+            outline: 3px solid rgba(178, 59, 59, 0.35);
+            outline-offset: 2px;
+        }
+
+        .rejection-modal[hidden] {
+            display: none;
+        }
+
+        .rejection-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.48);
+        }
+
+        .rejection-modal__dialog {
+            width: min(520px, 100%);
+            max-height: min(70vh, 520px);
+            overflow: auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+        }
+
+        .rejection-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rejection-modal__title {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .rejection-modal__close {
+            border: 0;
+            background: transparent;
+            color: #666;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .rejection-modal__content {
+            margin: 0;
+            padding: 20px;
+            color: #444;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
         /* ===== CONTENT ===== */
         .dashboard-content {
             flex: 1;
@@ -852,6 +928,13 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                             if (mb_strlen($information_raw, 'UTF-8') > 200) {
                                 $information = htmlspecialchars(mb_substr($information_raw, 0, 200, 'UTF-8') . '...');
                             }
+
+                            // Trạng thái công ty (lấy từ cột status bảng company)
+                            $company_status_raw = (string) ($company['status'] ?? '');
+                            $company_status_colors = ['pending_review' => '#ffc107', 'approved' => '#28a745', 'rejected' => '#dc3545'];
+                            $company_status_color = $company_status_colors[$company_status_raw] ?? '#6c757d';
+                            $company_status_text = $lang[$company_status_raw] ?? $company_status_raw;
+                            $company_admin_notes = trim((string) ($company['admin_notes'] ?? ''));
                             ?>
                             <div class="company-card">
                                 <div class="company-logo-wrap">
@@ -869,6 +952,21 @@ $employer_id = $_SESSION['employerid'] ?? 0;
 
                                     <div class="company-meta">
                                         <strong><?= $lang['industry_label'] ?? 'Industry' ?>:</strong> <?= $industry ?: '—' ?>
+                                    </div>
+
+                                    <div class="company-meta">
+                                        <strong><?= $lang['status'] ?>:</strong>
+                                        <span style="font-weight: bold; color: <?= $company_status_color ?>;"><?= htmlspecialchars($company_status_text, ENT_QUOTES, 'UTF-8') ?></span>
+                                        <?php if ($company_status_raw === 'rejected'): ?>
+                                            <button
+                                                type="button"
+                                                class="rejected-reason-trigger"
+                                                data-rejection-reason="<?= htmlspecialchars($company_admin_notes, ENT_QUOTES, 'UTF-8') ?>"
+                                                aria-haspopup="dialog"
+                                                aria-controls="rejectionReasonModal">
+                                                <?= htmlspecialchars($lang['rejected_reason_title'] ?? 'Reasons for rejection', ENT_QUOTES, 'UTF-8') ?>
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
 
                                     <div class="company-description">
@@ -940,6 +1038,63 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                     menu.classList.remove('show');
                     btnChangeInfo.classList.toggle('active', isActivePage);
                 }
+            });
+        });
+    </script>
+
+    <div
+        id="rejectionReasonModal"
+        class="rejection-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="rejectionReasonModalTitle"
+        hidden>
+        <div class="rejection-modal__dialog" role="document">
+            <div class="rejection-modal__header">
+                <h2 id="rejectionReasonModalTitle" class="rejection-modal__title">
+                    <?= htmlspecialchars($lang['rejected_reason_title'] ?? 'Reasons for rejection', ENT_QUOTES, 'UTF-8') ?>
+                </h2>
+                <button
+                    type="button"
+                    class="rejection-modal__close"
+                    aria-label="<?= htmlspecialchars($lang['close'] ?? 'Close', ENT_QUOTES, 'UTF-8') ?>">&times;</button>
+            </div>
+            <p id="rejectionReasonModalContent" class="rejection-modal__content"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('rejectionReasonModal');
+            const modalContent = document.getElementById('rejectionReasonModalContent');
+            const closeButton = modal?.querySelector('.rejection-modal__close');
+            let lastTrigger = null;
+
+            if (!modal || !modalContent || !closeButton) return;
+
+            const closeModal = function () {
+                modal.hidden = true;
+                document.body.style.overflow = '';
+                if (lastTrigger) lastTrigger.focus();
+            };
+
+            document.querySelectorAll('.rejected-reason-trigger').forEach(function (trigger) {
+                trigger.addEventListener('click', function () {
+                    lastTrigger = trigger;
+                    modalContent.textContent = trigger.dataset.rejectionReason || '—';
+                    modal.hidden = false;
+                    document.body.style.overflow = 'hidden';
+                    closeButton.focus();
+                });
+            });
+
+            closeButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) closeModal();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !modal.hidden) closeModal();
             });
         });
     </script>

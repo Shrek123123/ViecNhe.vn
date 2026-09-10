@@ -113,43 +113,208 @@ include 'lang/' . $_SESSION['lang'] . '.php';
     .btn-register {
         text-decoration: none;
     }
+
+    .header-nav {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+
+    #lang-switch-btn {
+        padding: 8px 16px;
+        border: none;
+        background: #f5f5f5;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-left: auto;
+        margin-right: 50px;
+    }
+
+    .logo-wrap {
+        display: flex;
+        align-items: center;
+    }
+
+    .header-nav-links {
+        display: flex;
+        gap: 30px;
+        margin-left: 50px;
+        align-items: center;
+    }
+
+    /* ===== Nut menu 3 gach (chi hien tren mobile) ===== */
+    .menu-toggle {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        margin-right: 8px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .menu-toggle span {
+        display: block;
+        width: 26px;
+        height: 3px;
+        background: #333;
+        border-radius: 2px;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1500;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .header-right {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .menu-toggle {
+            display: flex;
+        }
+
+        .header-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 270px;
+            max-width: 82%;
+            flex: none;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+            background: #fff;
+            padding: 20px 0;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
+            transform: translateX(-105%);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .header-nav.active {
+            transform: translateX(0);
+        }
+
+        .header-nav-links {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .header-nav-links a {
+            width: 100%;
+            padding: 14px 20px;
+            box-sizing: border-box;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-nav #lang-switch-btn {
+            margin: 0;
+            width: 100%;
+            border-radius: 0;
+            text-align: left;
+            padding: 14px 20px;
+            border-bottom: 1px solid #eee;
+            background: #f5f5f5;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .mobile-login-btn {
+            padding: 8px 12px;
+            color: #d90000;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+    }
 </style>
 
 <div class="header">
-    <div style="display: flex; align-items: center;">
+    <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="logo-wrap">
         <a href="index.php">
             <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
-    <div style="display: flex; gap: 30px; margin-left: 50px;">
-        <a href="#" style="text-decoration: none; color: #333;">
-            <?= $lang['create_cv']; ?>
-        </a>
-        <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
-            <?= $lang['contact_us']; ?>
-        </a>
-        <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">
-            <?= $lang['feedback']; ?>
-        </a>
-    </div>
 
-    <div style="display: flex; gap: 15px; margin-left: auto">
-        <div class="guest-options">
-            <button id="lang-switch-btn"
-                style="padding: 8px 16px; border: none; background: #f5f5f5; cursor: pointer; border-radius: 4px;">
-                <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
-            </button>
-            <script>
-                document.getElementById('lang-switch-btn').onclick = function () {
-                    var currentLang = '<?php echo $_SESSION['lang']; ?>';
-                    if (currentLang === 'vi') {
-                        window.location.href = '?lang=en';
-                    } else {
-                        window.location.href = '?lang=vi';
-                    }
-                };
-            </script>
+    <div class="header-nav" id="header-nav">
+        <div class="header-nav-links">
+            <a href="#" style="text-decoration: none; color: #333;">
+                <?= $lang['create_cv']; ?>
+            </a>
+            <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
+                <?= $lang['contact_us']; ?>
+            </a>
+            <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">
+                <?= $lang['feedback']; ?>
+            </a>
         </div>
+
+        <button id="lang-switch-btn">
+            <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
+        </button>
     </div>
 
+    <div class="header-right">
+        <a href="jobseekerlogin.php" class="btn-login mobile-login-btn">
+            <?= $lang['login/register_jobseeker']; ?>
+        </a>
+    </div>
 </div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<script>
+    (function () {
+        var toggle = document.getElementById('menu-toggle');
+        var sidebar = document.getElementById('header-nav');
+        var overlay = document.getElementById('sidebar-overlay');
+
+        function closeMenu() {
+            if (sidebar) sidebar.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+        }
+
+        if (toggle && sidebar && overlay) {
+            toggle.addEventListener('click', function () {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            overlay.addEventListener('click', closeMenu);
+        }
+
+        var langBtn = document.getElementById('lang-switch-btn');
+        if (langBtn) {
+            langBtn.addEventListener('click', function () {
+                var currentLang = '<?php echo $_SESSION['lang']; ?>';
+                window.location.href = currentLang === 'vi' ? '?lang=en' : '?lang=vi';
+            });
+        }
+    })();
+</script>

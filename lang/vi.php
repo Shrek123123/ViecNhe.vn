@@ -647,5 +647,7 @@ $lang = [
     'company_profile_job_experience' => 'Kinh nghiệm:',
     'company_profile_job_view_details' => 'Xem chi tiết',
     'company_profile_no_jobs' => 'Hiện công ty chưa có tin tuyển dụng nào.',
+    'company_under_review_notice' => 'Trang công ty này đang được kiểm duyệt trong thời gian sớm nhất',
+    'ok' => 'OK',
 ];
 

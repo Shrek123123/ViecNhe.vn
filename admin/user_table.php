@@ -222,6 +222,20 @@ foreach ($users as $user) {
     }
 }
 
+// --- Số mục chờ duyệt cho badge trên sidebar ---
+$pending_jobs_badge = 0;
+$pending_companies_badge = 0;
+$res_pending_jobs = $conn->query("SELECT COUNT(*) AS total FROM job WHERE status = 'pending_review'");
+if ($res_pending_jobs) {
+    $pending_jobs_badge = (int) ($res_pending_jobs->fetch_assoc()['total'] ?? 0);
+    $res_pending_jobs->close();
+}
+$res_pending_companies = $conn->query("SELECT COUNT(*) AS total FROM company WHERE status = 'pending_review'");
+if ($res_pending_companies) {
+    $pending_companies_badge = (int) ($res_pending_companies->fetch_assoc()['total'] ?? 0);
+    $res_pending_companies->close();
+}
+
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -284,68 +298,85 @@ $conn->close();
             outline-offset: 2px;
         }
 
-        .admin-mobile-header {
-            display: none;
-        }
-
-        .admin-sidebar {
+        .sidebar {
+            width: 200px;
+            background-color: #0b1e45;
+            color: white;
+            height: 100vh;
             position: fixed;
-            inset: 0 auto 0 0;
-            z-index: 20;
-            width: 220px;
+            top: 0;
+            left: 0;
             padding: 20px 10px;
             overflow-y: auto;
-            color: #fff;
-            background: var(--admin-navy);
         }
 
-        .admin-sidebar h2 {
-            margin: 0 10px 10px;
-            font-size: 21px;
+        .sidebar h2 {
+            margin-top: 0;
         }
 
-        .admin-sidebar__status {
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #15294c;
+            border-radius: 5px;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #1e3a66;
+            cursor: pointer;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .sidebar ul li a:hover {
+            color: white;
+        }
+
+        .user-status {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin: 0 10px 24px;
-            font-size: 13px;
+            margin-bottom: 10px;
         }
 
-        .admin-sidebar__status-dot {
-            width: 10px;
+        .status-dot {
             height: 10px;
+            width: 10px;
+            background-color: #4caf50;
             border-radius: 50%;
-            background: #4caf50;
         }
 
-        .admin-sidebar nav ul {
-            display: grid;
-            gap: 10px;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .admin-sidebar nav a {
-            display: block;
-            padding: 11px 12px;
-            border-radius: var(--admin-radius-sm);
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: #e74c3c;
             color: #fff;
-            font-size: 13px;
-            text-decoration: none;
-            transition: background-color 120ms ease;
-        }
-
-        .admin-sidebar nav a:hover,
-        .admin-sidebar nav a[aria-current="page"] {
-            background: var(--admin-nav-hover);
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
         }
 
         .admin-main {
             min-width: 0;
             min-height: 100vh;
-            margin-left: 220px;
+            margin-left: 200px;
             padding: 20px 24px 40px;
         }
 
@@ -757,58 +788,6 @@ $conn->close();
         }
 
         @media (max-width: 820px) {
-            .admin-mobile-header {
-                position: fixed;
-                inset: 0 0 auto;
-                z-index: 30;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                height: 56px;
-                padding: 0 16px;
-                color: #fff;
-                background: var(--admin-navy);
-            }
-
-            .admin-mobile-header strong {
-                font-size: 16px;
-            }
-
-            .admin-mobile-header button {
-                min-width: 44px;
-                min-height: 40px;
-                border: 1px solid rgba(255, 255, 255, 0.5);
-                border-radius: var(--admin-radius-sm);
-                color: #fff;
-                background: transparent;
-                cursor: pointer;
-            }
-
-            .admin-sidebar {
-                top: 56px;
-                right: auto;
-                bottom: 0;
-                left: -240px;
-                width: 220px;
-                transition: left 140ms ease;
-            }
-
-            .admin-sidebar.is-open {
-                left: 0;
-            }
-
-            .admin-nav-backdrop {
-                position: fixed;
-                inset: 56px 0 0;
-                z-index: 19;
-                display: none;
-                background: rgba(11, 30, 69, 0.35);
-            }
-
-            .admin-nav-backdrop.is-visible {
-                display: block;
-            }
-
             .admin-main {
                 margin-left: 0;
                 padding: 76px 14px 30px;
@@ -862,28 +841,25 @@ $conn->close();
 </head>
 
 <body>
-    <header class="admin-mobile-header">
-        <strong>Quản trị</strong>
-        <button type="button" id="mobileMenuButton" aria-expanded="false" aria-controls="adminSidebar">Menu</button>
-    </header>
-
-    <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar">
         <h2>Quản trị</h2>
-        <div class="admin-sidebar__status">
-            <span class="admin-sidebar__status-dot" aria-hidden="true"></span>
+        <div class="user-status">
+            <div class="status-dot"></div>
             <span>Trực tuyến</span>
         </div>
-        <nav aria-label="Điều hướng quản trị">
-            <ul>
-                <li><a href="#">Ảnh trang chủ</a></li>
-                <li><a href="user_table.php" aria-current="page">Người dùng</a></li>
-                <li><a href="jobpending.php">Duyệt tin tuyển dụng</a></li>
-                <li><a href="user_table.php">Duyệt người dùng</a></li>
-                <li><a href="feedbackcheck.php">Phản hồi</a></li>
-            </ul>
-        </nav>
-    </aside>
-    <div class="admin-nav-backdrop" id="adminNavBackdrop" hidden></div>
+        <ul>
+            <li><a href="#">Thay đổi ảnh trang chủ</a></li>
+            <li><a href="#">Người dùng</a></li>
+            <li><a href="jobpending.php">Duyệt tin tuyển dụng
+                    <?php if ($pending_jobs_badge > 0): ?><span class="nav-badge"><?= $pending_jobs_badge ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="company_check.php">Duyệt thông tin công ty
+                    <?php if ($pending_companies_badge > 0): ?><span class="nav-badge"><?= $pending_companies_badge ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="user_table.php" style="background:#1e3a66;">Duyệt người dùng</a></li>
+            <li><a href="feedbackcheck.php">Phản hồi</a></li>
+        </ul>
+    </div>
 
     <main class="admin-main">
         <div class="admin-topbar">
@@ -1120,29 +1096,6 @@ $conn->close();
                 button.addEventListener('click', function () {
                     const message = button.closest('.flash-message');
                     if (message) message.remove();
-                });
-            });
-
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const sidebar = document.getElementById('adminSidebar');
-            const navBackdrop = document.getElementById('adminNavBackdrop');
-
-            function setMobileMenu(open) {
-                sidebar.classList.toggle('is-open', open);
-                navBackdrop.classList.toggle('is-visible', open);
-                navBackdrop.hidden = !open;
-                mobileMenuButton.setAttribute('aria-expanded', String(open));
-            }
-
-            mobileMenuButton.addEventListener('click', function () {
-                setMobileMenu(!sidebar.classList.contains('is-open'));
-            });
-            navBackdrop.addEventListener('click', function () {
-                setMobileMenu(false);
-            });
-            sidebar.querySelectorAll('a').forEach(function (link) {
-                link.addEventListener('click', function () {
-                    setMobileMenu(false);
                 });
             });
         });

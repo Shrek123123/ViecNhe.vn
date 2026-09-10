@@ -61,16 +61,25 @@ if ($result_feedbacks && $result_feedbacks->num_rows > 0) {
     $user_feedbacks = $row['total'];
 }
 
+// Đếm số mục chờ duyệt cho badge trên sidebar (job + company)
+$pending_jobs_badge = $job_post_pendings;
+$pending_companies_badge = 0;
+$res_pending_companies = $conn->query("SELECT COUNT(*) AS total FROM company WHERE status = 'pending_review'");
+if ($res_pending_companies) {
+    $pending_companies_badge = (int) ($res_pending_companies->fetch_assoc()['total'] ?? 0);
+    $res_pending_companies->close();
+}
+
 // Đóng kết nối database sau khi đã lấy xong dữ liệu
 $conn->close();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
+    <title>Bảng điều khiển quản trị</title>
     <style>
         body {
             margin: 0;
@@ -186,57 +195,84 @@ $conn->close();
             background-color: #4caf50;
             border-radius: 50%;
         }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: #e74c3c;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+        }
     </style>
 </head>
 
 <body>
     <div class="sidebar">
-        <h2>Admin</h2>
+        <h2>Quản trị</h2>
         <div class="user-status">
             <div class="status-dot"></div>
-            <span>Online</span>
+            <span>Trực tuyến</span>
         </div>
         <ul>
-            <li><a href="#">Change homepage picture</a></li>
-            <li><a href="#">Users</a></li>
-            <li><a href="jobpending.php">Review Job Posts</a></li>
-            <li><a href="user_table.php">Review Users</a></li>
-            <li><a href="feedbackcheck.php">Feedbacks</a></li>
+            <li><a href="#">Thay đổi ảnh trang chủ</a></li>
+            <li><a href="#">Người dùng</a></li>
+            <li><a href="jobpending.php">Duyệt tin tuyển dụng
+                    <?php if ($pending_jobs_badge > 0): ?><span class="nav-badge"><?php echo $pending_jobs_badge; ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="company_check.php">Duyệt thông tin công ty
+                    <?php if ($pending_companies_badge > 0): ?><span class="nav-badge"><?php echo $pending_companies_badge; ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="user_table.php">Duyệt người dùng</a></li>
+            <li><a href="feedbackcheck.php">Phản hồi</a></li>
         </ul>
     </div>
     <div class="main">
         <div class="top-bar">
-            <h1>Dashboard</h1>
+            <h1>Bảng điều khiển</h1>
             <div>
                 <img src="../image/logo.png" alt="Profile" style="width: 200px; height: 48px; border-radius: 10px; object-fit: cover;">
             </div>
             <form method="post" action="adminlogout.php" style="display: inline;">
                 <button type="submit" name="admin_logout"
                     style="padding: 8px 16px; background: #e74c3c; color: #fff; border-radius: 5px; border: none; font-weight: bold; cursor: pointer;">
-                    Logout
+                    Đăng xuất
                 </button>
             </form>
         </div>
         <div class="cards">
             <div class="card yellow">
                 <h2><?php echo $total_employer_accounts; ?></h2>
-                <p>Total Employer Accounts</p>
+                <p>Tổng tài khoản nhà tuyển dụng</p>
             </div>
             <div class="card yellow">
                 <h2><?php echo $total_jobseeker_accounts; ?></h2>
-                <p>Total Job Seeker Accounts</p>
+                <p>Tổng tài khoản ứng viên</p>
             </div>
             <div class="card green">
                 <h2><?php echo $total_job_posts; ?></h2>
-                <p>Total Job Posts</p>
+                <p>Tổng tin tuyển dụng</p>
             </div>
             <div class="card blue">
                 <h2><?php echo $job_post_pendings; ?></h2>
-                <p>Job Post Pendings</p>
+                <p>Tin đang chờ duyệt</p>
             </div>
             <div class="card purple">
                 <h2><?php echo $user_feedbacks; ?></h2>
-                <p>User Feedbacks</p>
+                <p>Phản hồi từ người dùng</p>
             </div>
         </div>
         <div class="content-grid">
@@ -245,20 +281,20 @@ $conn->close();
                     width="100%" alt="Graph" />
             </div>
             <div class="box">
-                <h3>Access Activities</h3>
+                <h3>Hoạt động truy cập</h3>
                 <ul>
-                    <li>Post new job</li>
-                    <li>Recruitment</li>
-                    <li>Apply</li>
+                    <li>Đăng tin mới</li>
+                    <li>Tuyển dụng</li>
+                    <li>Ứng tuyển</li>
                 </ul>
             </div>
         </div>
         <div class="content-grid" style="margin-top: 20px;">
             <div class="box">
-                <h3>Notifications</h3>
+                <h3>Thông báo</h3>
             </div>
             <div class="box">
-                <h3>Page Views</h3>
+                <h3>Lượt xem trang</h3>
             </div>
         </div>
     </div>

@@ -183,7 +183,7 @@ if (isset($_SESSION['employerid'])) {
                     <?php
                     $employerId = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
                     ?>
-                    <a href="employerlogout.php"><?php echo $lang['logout']; ?></a>
+                    <a href="../employerlogout.php"><?php echo $lang['logout']; ?></a>
                 </div>
             </div>
             <button id="lang-switch-btn"

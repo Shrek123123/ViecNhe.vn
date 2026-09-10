@@ -206,7 +206,7 @@ if ($jobseeker_id > 0) {
                     <?php
                     $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
                     ?>
-                    <a href="jobseekerlogout.php">
+                    <a href="../jobseekerlogout.php">
                         <?= $lang['logout']; ?>
                     </a>
                 </div>

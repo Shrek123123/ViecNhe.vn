@@ -46,14 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 errorDiv.style.color = 'red';
                 errorDiv.style.textAlign = 'center';
                 errorDiv.style.marginTop = '10px';
-                errorDiv.innerText = 'Invalid password. Please try again.';
+                errorDiv.innerText = 'Mật khẩu không đúng. Vui lòng thử lại.';
                 document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
             });
             </script>";
         }
     } else {
         // Email not found
-        echo "<script>alert('Invalid email. Please try again.');</script>";
+        echo "<script>alert('Email không tồn tại. Vui lòng thử lại.');</script>";
     }
 
     // Close the statement and connection
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobSeeker Login - JobHive</title>
+    <title>Đăng nhập quản trị - JobHive</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -143,31 +143,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="container">
         <div class="left">
-            <h2>Welcome admin</h2>
-            <p>Let's kickstart your profile to new heights with JobHive</p>
+            <h2>Chào mừng quản trị viên</h2>
+            <p>Hãy cùng đưa hệ thống JobHive lên một tầm cao mới</p>
             <form accept="adminlogin.php" method="POST">
                 <div class="form-group">
                     <label>Email</label><br>
                     <input type="email" placeholder="Email" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label>Password</label><br>
-                    <input type="password" placeholder="Password" name="password" required>
-                    <div class="forgot"><a href="jobseekerforgetpassword.php">Forget password</a></div>
+                    <label>Mật khẩu</label><br>
+                    <input type="password" placeholder="Mật khẩu" name="password" required>
+                    <div class="forgot"><a href="jobseekerforgetpassword.php">Quên mật khẩu</a></div>
                 </div>
-                <button class="btn-login">Login</button>
+                <button class="btn-login">Đăng nhập</button>
             </form>
         </div>
         <div class="right">
             <a href="../index.php">
                 <img src="../image/logo.png" alt="JobHive Logo" style="height: 70px; margin-bottom: 20px;">
             </a>
-            <h2>Your Job<br>Is our Hive</h2>
-            <p>JobHive - The pionnering job portal destination for foreigners in Vietnam</p>
+            <h2>Việc làm của bạn<br>là tổ ấm của chúng tôi</h2>
+            <p>JobHive - Cổng thông tin việc làm tiên phong dành cho người nước ngoài tại Việt Nam</p>
             <div class="support">
-                <p>Having trouble logging in?</p>
-                <p>Call us at: <strong>012 345 6789</strong></p>
-                <p>Email us at: <a href="mailto:support@jobhive.com">support@jobhive.com</a></p>
+                <p>Gặp khó khăn khi đăng nhập?</p>
+                <p>Gọi cho chúng tôi: <strong>012 345 6789</strong></p>
+                <p>Gửi email cho chúng tôi: <a href="mailto:support@jobhive.com">support@jobhive.com</a></p>
             </div>
         </div>
 

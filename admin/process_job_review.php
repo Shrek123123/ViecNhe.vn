@@ -19,10 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_id'], $_POST['act
     if ($action === 'approve') {
         $newStatus = 'approved';
     } elseif ($action === 'reject') {
+        // Bắt buộc phải có lý do từ chối
+        if ($adminNote === '') {
+            echo "<script>alert('Vui lòng nhập lý do từ chối công việc này!'); window.history.back();</script>";
+            exit();
+        }
         $newStatus = 'rejected';
     } else {
         // Hành động không hợp lệ
-        echo "<script>alert('Invalid action!'); window.history.back();</script>";
+        echo "<script>alert('Hành động không hợp lệ!'); window.history.back();</script>";
         exit();
     }
 
@@ -30,19 +35,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_id'], $_POST['act
     if ($stmt) {
         $stmt->bind_param("ssi", $newStatus, $adminNote, $jobId);
         if ($stmt->execute()) {
-            echo "<script>alert('Job has been " . $newStatus . " successfully!'); window.location.href = 'jobpending.php';</script>";
+            echo "<script>alert('Đã " . ($newStatus === 'approved' ? 'phê duyệt' : 'từ chối') . " tin tuyển dụng thành công!'); window.location.href = 'jobpending.php';</script>";
         } else {
-            echo "<script>alert('Error updating job status: " . $stmt->error . "'); window.history.back();</script>";
+            echo "<script>alert('Lỗi khi cập nhật trạng thái tin tuyển dụng: " . $stmt->error . "'); window.history.back();</script>";
         }
         $stmt->close();
     } else {
-        echo "<script>alert('Error preparing statement: " . $conn->error . "'); window.history.back();</script>";
+        echo "<script>alert('Lỗi khi chuẩn bị truy vấn: " . $conn->error . "'); window.history.back();</script>";
     }
     $conn->close();
     exit();
 } else {
     // Yêu cầu không hợp lệ (không phải POST hoặc thiếu dữ liệu)
-    echo "<script>alert('Invalid request!'); window.history.back();</script>";
+    echo "<script>alert('Yêu cầu không hợp lệ!'); window.history.back();</script>";
     exit();
 }
 ?>

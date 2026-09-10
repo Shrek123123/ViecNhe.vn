@@ -8,14 +8,27 @@ if (!isset($_SESSION['usernameadmin'])) { // Giả định 'usernameadmin' là b
     header('Location: ../index.php'); // Chuyển hướng đến trang đăng nhập admin
     exit();
 }
+$sql = "SELECT j.id, j.job_title, c.company_name, j.posted_by_employer_id
+            FROM job j
+            LEFT JOIN company c ON c.id = j.company_id
+            WHERE j.status = 'pending_review'
+            ORDER BY j.created_at ASC";
+        $result = $conn->query($sql);
 
+ $pending_jobs_badge = $result->num_rows;
+        $res_pending_companies = $conn->query("SELECT COUNT(*) AS total FROM company WHERE status = 'pending_review'");
+        $pending_companies_badge = 0;
+        if ($res_pending_companies) {
+            $pending_companies_badge = (int) ($res_pending_companies->fetch_assoc()['total'] ?? 0);
+            $res_pending_companies->close();
+        }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Review Pending Job Posts</title>
+    <title>Quản trị - Duyệt tin tuyển dụng chờ phê duyệt</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,12 +104,104 @@ if (!isset($_SESSION['usernameadmin'])) { // Giả định 'usernameadmin' là b
             border-radius: 8px;
             border: 1px dashed #ccc;
         }
+
+        /* --- Sidebar đồng bộ --- */
+        .sidebar {
+            width: 200px;
+            background-color: #0b1e45;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px 10px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 { margin-top: 0; }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #15294c;
+            border-radius: 5px;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #1e3a66;
+            cursor: pointer;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .sidebar ul li a:hover { color: white; }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: #4caf50;
+            border-radius: 50%;
+        }
+
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: #e74c3c;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="admindashboard.php" class="back-button">&larr; Back to Dashboard</a>
-        <h1>Job Posts Awaiting Review</h1>
+    <div class="sidebar">
+        <h2>Quản trị</h2>
+        <div class="user-status">
+            <div class="status-dot"></div>
+            <span>Trực tuyến</span>
+        </div>
+        <ul>
+            <li><a href="#">Thay đổi ảnh trang chủ</a></li>
+            <li><a href="#">Người dùng</a></li>
+            <li><a href="jobpending.php">Duyệt tin tuyển dụng
+                    <?php if ($pending_jobs_badge > 0): ?><span class="nav-badge"><?php echo $pending_jobs_badge; ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="company_check.php">Duyệt thông tin công ty
+                    <?php if ($pending_companies_badge > 0): ?><span class="nav-badge"><?php echo $pending_companies_badge; ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="user_table.php">Duyệt người dùng</a></li>
+            <li><a href="feedbackcheck.php">Phản hồi</a></li>
+        </ul>
+    </div>
+
+    <div class="container" style="margin-left: 240px;">
+        <a href="admindashboard.php" class="back-button">&larr; Quay lại bảng điều khiển</a>
+        <h1>Tin tuyển dụng đang chờ duyệt</h1>
 
         <?php
         $sql = "SELECT j.id, j.job_title, c.company_name, j.posted_by_employer_id
@@ -113,18 +218,23 @@ if (!isset($_SESSION['usernameadmin'])) { // Giả định 'usernameadmin' là b
                     <a href="jobpendingdetail.php?id=<?php echo htmlspecialchars($row['id']); ?>">
                         <div class="job-info">
                             <h3><?php echo htmlspecialchars($row['job_title']); ?></h3>
-                            <p><strong>Company:</strong> <?php echo htmlspecialchars($row['company_name']); ?></p>
-                            <p><strong>Posted by Employer ID:</strong> <?php echo htmlspecialchars($row['posted_by_employer_id']); ?></p>
+                            <p><strong>Công ty:</strong> <?php echo htmlspecialchars($row['company_name']); ?></p>
+                            <p><strong>Đăng bởi nhà tuyển dụng mã số:</strong> <?php echo htmlspecialchars($row['posted_by_employer_id']); ?></p>
                         </div>
                     </a>
                 </div>
                 <?php
             }
         } else {
-            echo '<div class="no-jobs">No job posts currently awaiting review.</div>';
+            echo '<div class="no-jobs">Hiện không có tin tuyển dụng nào đang chờ duyệt.</div>';
         }
+
+        // --- Đếm số mục chờ duyệt cho badge trên sidebar ---
+       
+
         $conn->close();
         ?>
     </div>
 </body>
+
 </html>

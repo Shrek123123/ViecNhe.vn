@@ -17,12 +17,12 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                 j.job_description, j.job_benefit, j.job_requirement, j.job_location,
                 j.no_employee_needed, j.salary, j.post_duration, j.contact_email,
                 j.contact_phone, j.job_type, c.industry AS job_category, j.required_certification,
-                j.job_experience, c.company_logo, j.created_at, j.status, j.job_detailed_location, j.job_location_district
+                j.job_experience, c.company_logo, j.created_at, j.last_updated_at, j.status, j.job_detailed_location, j.job_location_district
             FROM job j
             LEFT JOIN company c ON c.id = j.company_id
             WHERE j.id = ? AND j.status = 'pending_review'"; // Chỉ lấy job đang chờ duyệt
     $stmt = $conn->prepare($sql);
-    
+
     if ($stmt) {
         $stmt->bind_param("i", $jobId);
         $stmt->execute();
@@ -34,14 +34,29 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         $stmt->close();
     }
 }
+
+// --- Đếm số mục chờ duyệt cho badge trên sidebar ---
+$pending_jobs_badge = 0;
+$pending_companies_badge = 0;
+require_once '../config.php';
+$res_pending_jobs = $conn->query("SELECT COUNT(*) AS total FROM job WHERE status = 'pending_review'");
+if ($res_pending_jobs) {
+    $pending_jobs_badge = (int) ($res_pending_jobs->fetch_assoc()['total'] ?? 0);
+    $res_pending_jobs->close();
+}
+$res_pending_companies = $conn->query("SELECT COUNT(*) AS total FROM company WHERE status = 'pending_review'");
+if ($res_pending_companies) {
+    $pending_companies_badge = (int) ($res_pending_companies->fetch_assoc()['total'] ?? 0);
+    $res_pending_companies->close();
+}
 $conn->close();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Job Details for Review</title>
+    <title>Quản trị - Chi tiết tin tuyển dụng chờ duyệt</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -272,61 +287,154 @@ $conn->close();
             border-radius: 8px;
             border: 1px dashed #d90000;
         }
+
+        /* --- Sidebar đồng bộ --- */
+        .sidebar {
+            width: 200px;
+            background-color: #0b1e45;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px 10px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 { margin-top: 0; }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #15294c;
+            border-radius: 5px;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #1e3a66;
+            cursor: pointer;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .sidebar ul li a:hover { color: white; }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: #4caf50;
+            border-radius: 50%;
+        }
+
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: #e74c3c;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="jobpending.php" class="back-button">&larr; Back to Pending Jobs</a>
-        <h1>Job Details for Review</h1>
+    <div class="sidebar">
+        <h2>Quản trị</h2>
+        <div class="user-status">
+            <div class="status-dot"></div>
+            <span>Trực tuyến</span>
+        </div>
+        <ul>
+            <li><a href="#">Thay đổi ảnh trang chủ</a></li>
+            <li><a href="#">Người dùng</a></li>
+            <li><a href="jobpending.php">Duyệt tin tuyển dụng
+                    <?php if ($pending_jobs_badge > 0): ?><span class="nav-badge"><?php echo $pending_jobs_badge; ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="company_check.php">Duyệt thông tin công ty
+                    <?php if ($pending_companies_badge > 0): ?><span class="nav-badge"><?php echo $pending_companies_badge; ?></span><?php endif; ?>
+                </a></li>
+            <li><a href="user_table.php">Duyệt người dùng</a></li>
+            <li><a href="feedbackcheck.php">Phản hồi</a></li>
+        </ul>
+    </div>
+
+    <div class="container" style="margin-left: 240px;">
+        <a href="jobpending.php" class="back-button">&larr; Quay lại danh sách tin chờ duyệt</a>
+        <h1>Chi tiết tin tuyển dụng chờ duyệt</h1>
 
         <?php if ($job): ?>
             <div class="job-details">
-                <p><strong>Job ID:</strong> <?php echo htmlspecialchars($job['id']); ?></p>
-                <p><strong>Posted by Employer ID:</strong> <?php echo htmlspecialchars($job['posted_by_employer_id']); ?></p>
-                <p><strong>Company Name:</strong> <?php echo htmlspecialchars($job['company_name']); ?></p>
-                <p><strong>Company Size:</strong> <?php echo htmlspecialchars($job['company_size']); ?></p>
-                <p><strong>Job Title:</strong> <?php echo htmlspecialchars($job['job_title']); ?></p>
-                
-                <div class="section-title">Job Description</div>
+                <p><strong>Mã tin tuyển dụng:</strong> <?php echo htmlspecialchars($job['id']); ?></p>
+                <p><strong>Đăng bởi nhà tuyển dụng mã số:</strong> <?php echo htmlspecialchars($job['posted_by_employer_id']); ?></p>
+                <p><strong>Tên công ty:</strong> <?php echo htmlspecialchars($job['company_name']); ?></p>
+                <p><strong>Quy mô công ty:</strong> <?php echo htmlspecialchars($job['company_size']); ?></p>
+                <p><strong>Tiêu đề công việc:</strong> <?php echo htmlspecialchars($job['job_title']); ?></p>
+
+                <div class="section-title">Mô tả công việc</div>
                 <p><?php echo nl2br(htmlspecialchars($job['job_description'])); ?></p>
-                
-                <div class="section-title">Job Requirements</div>
+
+                <div class="section-title">Yêu cầu công việc</div>
                 <p><?php echo nl2br(htmlspecialchars($job['job_requirement'])); ?></p>
-                
-                <div class="section-title">Job Benefits</div>
+
+                <div class="section-title">Quyền lợi công việc</div>
                 <p><?php echo nl2br(htmlspecialchars($job['job_benefit'])); ?></p>
-                
-                <p><strong>Job Location:</strong> <?php echo htmlspecialchars($job['job_location']); ?></p>
-                <p><strong>Detailed Location:</strong> <?php echo htmlspecialchars($job['job_detailed_location']); ?></p>
-                <p><strong>District:</strong> <?php echo htmlspecialchars($job['job_location_district']); ?></p>
-                <p><strong>Number of Employees Needed:</strong> <?php echo htmlspecialchars($job['no_employee_needed']); ?></p>
-                <p><strong>Salary:</strong> <?php echo htmlspecialchars($job['salary']); ?></p>
-                <p><strong>Post Duration (days):</strong> <?php echo htmlspecialchars($job['post_duration']); ?></p>
-                <p><strong>Contact Email:</strong> <?php echo htmlspecialchars($job['contact_email']); ?></p>
-                <p><strong>Contact Phone:</strong> <?php echo htmlspecialchars($job['contact_phone']); ?></p>
-                <p><strong>Job Type:</strong> <?php echo htmlspecialchars($job['job_type']); ?></p>
-                <p><strong>Job Category:</strong> <?php echo htmlspecialchars($job['job_category']); ?></p>
-                <p><strong>Required Certification:</strong> <?php echo htmlspecialchars($job['required_certification']); ?></p>
-                <p><strong>Job Experience:</strong> <?php echo htmlspecialchars($job['job_experience']); ?></p>
-                <p><strong>Company Logo:</strong> 
+
+                <p><strong>Địa điểm làm việc:</strong> <?php echo htmlspecialchars($job['job_location']); ?></p>
+                <p><strong>Địa chỉ chi tiết:</strong> <?php echo htmlspecialchars($job['job_detailed_location']); ?></p>
+                <p><strong>Quận/huyện:</strong> <?php echo htmlspecialchars($job['job_location_district']); ?></p>
+                <p><strong>Số lượng nhân sự cần tuyển:</strong> <?php echo htmlspecialchars($job['no_employee_needed']); ?></p>
+                <p><strong>Mức lương:</strong> <?php echo htmlspecialchars($job['salary']); ?></p>
+                <p><strong>Thời gian đăng tin (ngày):</strong> <?php echo htmlspecialchars($job['post_duration']); ?></p>
+                <p><strong>Email liên hệ:</strong> <?php echo htmlspecialchars($job['contact_email']); ?></p>
+                <p><strong>Số điện thoại liên hệ:</strong> <?php echo htmlspecialchars($job['contact_phone']); ?></p>
+                <p><strong>Loại công việc:</strong> <?php echo htmlspecialchars($job['job_type']); ?></p>
+                <p><strong>Ngành nghề:</strong> <?php echo htmlspecialchars($job['job_category']); ?></p>
+                <p><strong>Chứng chỉ yêu cầu:</strong> <?php echo htmlspecialchars($job['required_certification']); ?></p>
+                <p><strong>Kinh nghiệm:</strong> <?php echo htmlspecialchars($job['job_experience']); ?></p>
+                <p><strong>Logo công ty:</strong>
                     <?php if (!empty($job['company_logo'])): ?>
-                        <a href="../<?php echo htmlspecialchars($job['company_logo']); ?>" target="_blank">View Logo</a>
+                        <a href="../<?php echo htmlspecialchars($job['company_logo']); ?>" target="_blank">Xem logo</a>
                     <?php else: ?>
-                        N/A
+                        Không có
                     <?php endif; ?>
                 </p>
-                <p><strong>Posted On:</strong> <?php echo (new DateTime($job['created_at']))->format('d/m/Y H:i'); ?></p>
-                <p><strong>Current Status:</strong> <span style="font-weight: bold; color: #ffc107;"><?php echo htmlspecialchars($job['status']); ?></span></p>
+                <p><strong>Ngày đăng:</strong> <?php echo (new DateTime($job['created_at']))->format('d/m/Y H:i'); ?></p>
+                <p><strong>Ngày cập nhật:</strong> <?php echo !empty($job['last_updated_at']) ? (new DateTime($job['last_updated_at']))->format('d/m/Y H:i') : '—'; ?></p>
+                <p><strong>Trạng thái hiện tại:</strong> <span style="font-weight: bold; color: #ffc107;"><?php echo htmlspecialchars($job['status']); ?></span></p>
             </div>
 
-            <div class="action-buttons" aria-label="Job review actions">
-                <button type="button" class="approve-btn" data-review-action="approve">Approve Job</button>
-                <button type="button" class="reject-btn" data-review-action="reject">Reject Job</button>
+            <div class="action-buttons" aria-label="Hành động duyệt tin">
+                <button type="button" class="approve-btn" data-review-action="approve">Phê duyệt tin</button>
+                <button type="button" class="reject-btn" data-review-action="reject">Từ chối tin</button>
             </div>
 
             <div class="review-modal-overlay" id="review-modal" hidden>
                 <div class="review-modal" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
-                    <button type="button" class="modal-close" id="close-review-modal" aria-label="Close review note dialog">&times;</button>
+                    <button type="button" class="modal-close" id="close-review-modal" aria-label="Đóng hộp thoại ghi chú">&times;</button>
                     <h2 id="review-modal-title">Ghi chú cho nhà tuyển dụng (nếu có)</h2>
                     <p class="modal-description">Bạn có thể để lại ghi chú trước khi hoàn tất đánh giá công việc này.</p>
 
@@ -334,13 +442,13 @@ $conn->close();
                         <input type="hidden" name="job_id" value="<?php echo htmlspecialchars($job['id'], ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="action" id="review-action" value="">
 
-                        <label for="admin-note">Ghi chú</label>
+                        <label for="admin-note">Ghi chú <span id="admin-note-required-mark" style="color: #dc3545;"></span></label>
                         <textarea id="admin-note" name="admin_note" rows="6" maxlength="2000" placeholder="Nhập ghi chú cho nhà tuyển dụng (không bắt buộc)" aria-describedby="admin-note-help"></textarea>
-                        <p class="field-help" id="admin-note-help">Tối đa 2.000 ký tự.</p>
+                        <p class="field-help" id="admin-note-help">Tối đa 2.000 ký tự. <span id="admin-note-required-help" style="display: none; color: #dc3545;">Bắt buộc nhập lý do khi từ chối công việc.</span></p>
 
                         <div class="modal-actions">
                             <button type="button" class="cancel-btn" id="cancel-review">Hủy</button>
-                            <button type="submit" class="modal-submit-btn" id="submit-review">Submit Review</button>
+                            <button type="submit" class="modal-submit-btn" id="submit-review">Gửi đánh giá</button>
                         </div>
                     </form>
                 </div>
@@ -356,19 +464,31 @@ $conn->close();
                     const closeReviewModal = document.getElementById('close-review-modal');
                     const cancelReview = document.getElementById('cancel-review');
                     const reviewButtons = document.querySelectorAll('[data-review-action]');
+                    const requiredMark = document.getElementById('admin-note-required-mark');
+                    const requiredHelp = document.getElementById('admin-note-required-help');
 
                     function closeModal() {
                         reviewModal.hidden = true;
                         document.body.classList.remove('modal-open');
                         reviewAction.value = '';
+                        requiredMark.textContent = '';
+                        requiredHelp.style.display = 'none';
                     }
 
                     function openModal(action) {
                         const isApprove = action === 'approve';
                         reviewAction.value = action;
-                        submitReview.textContent = isApprove ? 'Approve Job' : 'Reject Job';
+                        submitReview.textContent = isApprove ? 'Phê duyệt tin' : 'Từ chối tin';
                         submitReview.classList.toggle('approve-submit', isApprove);
                         submitReview.classList.toggle('reject-submit', !isApprove);
+                        // Khi từ chối (reject) thì bắt buộc phải nhập lý do
+                        adminNote.required = !isApprove;
+                        adminNote.placeholder = isApprove
+                            ? 'Nhập ghi chú cho nhà tuyển dụng (không bắt buộc)'
+                            : 'Bắt buộc nhập lý do từ chối công việc này';
+                        requiredMark.textContent = isApprove ? '' : '*';
+                        requiredHelp.style.display = isApprove ? 'none' : 'inline';
+                        adminNote.setCustomValidity('');
                         reviewModal.hidden = false;
                         document.body.classList.add('modal-open');
                         adminNote.focus();
@@ -395,15 +515,28 @@ $conn->close();
                         }
                     });
 
-                    reviewForm.addEventListener('submit', function () {
+                    reviewForm.addEventListener('submit', function (event) {
+                        // Chặn submit nếu là reject mà chưa nhập lý do
+                        if (reviewAction.value === 'reject' && adminNote.value.trim() === '') {
+                            event.preventDefault();
+                            adminNote.setCustomValidity('Vui lòng nhập lý do từ chối công việc này.');
+                            adminNote.reportValidity();
+                            return;
+                        }
+                        adminNote.setCustomValidity('');
                         submitReview.disabled = true;
-                        submitReview.textContent = 'Processing...';
+                        submitReview.textContent = 'Đang xử lý...';
+                    });
+
+                    // Xoá thông báo lỗi khi người dùng bắt đầu nhập
+                    adminNote.addEventListener('input', function () {
+                        adminNote.setCustomValidity('');
                     });
                 }());
             </script>
         <?php else: ?>
             <div class="not-found">
-                Job not found or not awaiting review.
+                Không tìm thấy tin tuyển dụng hoặc tin này không còn chờ duyệt.
             </div>
         <?php endif; ?>
     </div>

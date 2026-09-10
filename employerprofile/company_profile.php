@@ -28,6 +28,25 @@ include '../lang/' . $_SESSION['lang'] . '.php';
 require_once '../config.php';
 require_once '../helpers.php';
 
+// ===== Xử lý xoá công ty =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_company_id'])) {
+    $company_delete_id = (int) $_POST['delete_company_id'];
+    $employer_id_for_delete = (int) ($_SESSION['employerid'] ?? 0);
+
+    if ($company_delete_id > 0 && $employer_id_for_delete > 0 && isset($conn)) {
+        // Chỉ cho phép xoá công ty thuộc chính employer đang đăng nhập
+        $delete_stmt = $conn->prepare("DELETE FROM company WHERE id = ? AND employer_id = ?");
+        if ($delete_stmt) {
+            $delete_stmt->bind_param('ii', $company_delete_id, $employer_id_for_delete);
+            $delete_stmt->execute();
+            $delete_stmt->close();
+        }
+    }
+
+    header('Location: company_profile.php');
+    exit();
+}
+
 $currentPage = basename($_SERVER['PHP_SELF']);
 $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 $employer_id = $_SESSION['employerid'] ?? 0;
@@ -564,7 +583,30 @@ $employer_id = $_SESSION['employerid'] ?? 0;
         .company-card-actions {
             display: flex;
             justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
             margin-top: 16px;
+        }
+
+        .delete-company-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            color: #b23b3b;
+            border: 1px solid #b23b3b;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.16s ease, color 0.16s ease;
+        }
+
+        .delete-company-btn:hover {
+            background: #b23b3b;
+            color: #fff;
         }
 
         .edit-company-btn {
@@ -715,9 +757,9 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                 ?>
 
                 <!-- Applicant preview (dynamic) -->
-                <?php foreach ($applications as $app): 
+                <?php foreach ($applications as $app):
                     $status_raw = strtolower($app['status']);
-                    
+
                     // Map status với CSS class và language key
                     $status_mapping = [
                         'pending' => ['class' => 'status-new', 'lang_key' => 'application_pending'],
@@ -726,7 +768,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                         'interviewed' => ['class' => 'status-interviewed', 'lang_key' => 'application_interviewed'],
                         'rejected' => ['class' => 'status-rejected', 'lang_key' => 'application_rejected'],
                     ];
-                    
+
                     $config = $status_mapping[$status_raw] ?? ['class' => 'status-default', 'lang_key' => $status_raw];
                     $status_class = $config['class'];
                     $status_icon = isset($lang[$config['lang_key']]) ? $lang[$config['lang_key']] : ucfirst($status_raw);
@@ -838,6 +880,14 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                             <i class="fa-solid fa-pen-to-square"></i>
                                             <?= $lang['edit_company_button'] ?? 'Edit Company' ?>
                                         </a>
+                                        <form method="post" action="company_profile.php" style="display:inline;"
+                                            onsubmit="return confirm('<?= htmlspecialchars($lang['confirm_delete_company'] ?? 'Bạn có chắc chắn muốn xoá công ty này không? Hành động này không thể hoàn tác.', ENT_QUOTES, 'UTF-8') ?>');">
+                                            <input type="hidden" name="delete_company_id" value="<?= (int) ($company['id'] ?? 0) ?>">
+                                            <button type="submit" class="delete-company-btn">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                                <?= $lang['delete'] ?? 'Delete' ?>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>

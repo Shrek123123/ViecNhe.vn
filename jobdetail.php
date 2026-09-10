@@ -140,7 +140,8 @@ require_once 'helpers.php';
                     if ($job_id > 0) {
                         $stmt = $conn->prepare(
                             "SELECT j.*, c.company_name, c.company_logo, c.industry, c.company_size, c.company_address, c.banner_logo " .
-                            "FROM job j LEFT JOIN company c ON c.id = j.company_id WHERE j.id = ?"
+                            "FROM job j LEFT JOIN company c ON c.id = j.company_id " .
+                            "WHERE j.id = ? AND (c.status IS NULL OR c.status NOT IN ('pending_review', 'rejected'))"
                         );
                         $stmt->bind_param("i", $job_id);
                         $stmt->execute();
@@ -233,7 +234,7 @@ require_once 'helpers.php';
                         }
                         ?>
 
-                        
+
                         <div class="d-flex gap-3">
                             <button class="btn btn-danger apply-btn" type="button"
                                 data-logged-in="<?= $is_logged_in ? '1' : '0' ?>" data-login-url="<?= htmlspecialchars($login_url, ENT_QUOTES, 'UTF-8') ?>"
@@ -282,6 +283,7 @@ require_once 'helpers.php';
                          FROM job j
                          INNER JOIN company c ON c.id = j.company_id
                          WHERE c.industry = ? AND j.id != ?
+                         AND c.status NOT IN ('pending_review', 'rejected')
                          LIMIT 5"
                     );
                     $stmt_related->bind_param("si", $job['industry'], $job_id);

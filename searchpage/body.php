@@ -656,6 +656,8 @@ foreach ($industryOptionKeys as $industryKey) {
             $sql_count_base = "SELECT COUNT(*) as total FROM job j LEFT JOIN company c ON c.id = j.company_id";
 
             $conditions[] = "j.status = 'approved'";
+            // Không hiển thị job card nếu công ty đang chờ duyệt hoặc đã bị từ chối
+            $conditions[] = "(c.status IS NULL OR c.status NOT IN ('pending_review', 'rejected'))";
             $params = [];
             $param_types = '';
 

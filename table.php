@@ -95,7 +95,9 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS company (
     company_logo VARCHAR(255),
     banner_logo VARCHAR(255),
     status ENUM('pending_review', 'approved', 'rejected') DEFAULT 'pending_review',
+    admin_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (employer_id) REFERENCES user(id)
 )");
 if ($stmt === TRUE) {

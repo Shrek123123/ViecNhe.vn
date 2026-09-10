@@ -650,5 +650,7 @@ $lang = [
     'company_profile_job_experience' => 'Experience:',
     'company_profile_job_view_details' => 'View details',
     'company_profile_no_jobs' => 'This company does not have any job postings yet.',
+    'company_under_review_notice' => 'The company page is under review by admin',
+    'ok' => 'OK',
 
 ];

@@ -50,6 +50,121 @@ if (!$company) {
     ];
 }
 
+// Nếu công ty đang chờ duyệt hoặc đã bị từ chối thì không hiển thị hồ sơ công ty
+$company_review_status = strtolower(trim((string) ($company['status'] ?? '')));
+if (in_array($company_review_status, ['pending_review', 'rejected'], true)) {
+    $under_review_message = $lang['company_under_review_notice'] ?? 'The company page is under review by admin';
+    $under_review_ok = $lang['ok'] ?? 'OK';
+    $under_review_cancel = $lang['cancel'] ?? 'Cancel';
+    ?>
+    <!DOCTYPE html>
+    <html lang="<?= htmlspecialchars($_SESSION['lang']) ?>">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><?= htmlspecialchars($under_review_message) ?></title>
+        <style>
+            * { box-sizing: border-box; }
+            body {
+                margin: 0;
+                font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+                background: rgba(17, 24, 39, 0.55);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .review-dialog {
+                background: #ffffff;
+                width: min(440px, 100%);
+                border-radius: 16px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+                padding: 32px 28px 24px;
+                text-align: center;
+                animation: review-pop 0.2s ease-out;
+            }
+            @keyframes review-pop {
+                from { transform: scale(0.96); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+            }
+            .review-icon {
+                width: 64px;
+                height: 64px;
+                margin: 0 auto 18px;
+                border-radius: 50%;
+                background: #fff4e5;
+                color: #f59e0b;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 34px;
+                font-weight: 700;
+            }
+            .review-message {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #1f2937;
+                margin: 0 0 24px;
+            }
+            .review-actions {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+            }
+            .review-actions button {
+                flex: 1;
+                padding: 12px 18px;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+                border: none;
+                transition: all 0.2s ease;
+            }
+            .review-btn-ok {
+                background: #d43d3d;
+                color: #ffffff;
+            }
+            .review-btn-ok:hover { background: #b93131; }
+            .review-btn-cancel {
+                background: #f3f4f6;
+                color: #374151;
+            }
+            .review-btn-cancel:hover { background: #e5e7eb; }
+        </style>
+    </head>
+    <body>
+        <div class="review-dialog" role="alertdialog" aria-modal="true">
+            <div class="review-icon">!</div>
+            <p class="review-message"><?= htmlspecialchars($under_review_message) ?></p>
+            <div class="review-actions">
+                <button type="button" class="review-btn-ok" id="under-review-ok"><?= htmlspecialchars($under_review_ok) ?></button>
+                <button type="button" class="review-btn-cancel" id="under-review-cancel"><?= htmlspecialchars($under_review_cancel) ?></button>
+            </div>
+        </div>
+        <script>
+            (function () {
+                function goBack() {
+                    var referrer = document.referrer || '';
+                    if (referrer && referrer.indexOf('companyprofile.php') === -1) {
+                        window.location.href = referrer;
+                    } else if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        window.location.href = 'index.php';
+                    }
+                }
+                document.getElementById('under-review-ok').addEventListener('click', goBack);
+                document.getElementById('under-review-cancel').addEventListener('click', goBack);
+            })();
+        </script>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
 $company_id_for_query = isset($company['id']) ? (int) $company['id'] : 0;
 $jobseeker_id = isset($_SESSION['jobseeker_id']) ? (int) $_SESSION['jobseeker_id'] : 0;
 

@@ -800,7 +800,8 @@ $savedJobIdsJson = json_encode($savedJobIds);
         $count_sql = "SELECT COUNT(*) as total
             FROM job j
             LEFT JOIN company c ON c.id = j.company_id
-            WHERE j.status = 'approved'";
+            WHERE j.status = 'approved'
+            AND (c.status IS NULL OR c.status NOT IN ('pending_review', 'rejected'))";
         $count_bind_types = '';
         $count_params = [];
         if ($selectedIndustryKey !== '') {
@@ -827,7 +828,8 @@ $savedJobIdsJson = json_encode($savedJobIds);
                         c.company_name, c.company_logo, c.industry AS industry
                         FROM job j
                         LEFT JOIN company c ON c.id = j.company_id
-                        WHERE j.status = 'approved'";
+                        WHERE j.status = 'approved'
+                        AND (c.status IS NULL OR c.status NOT IN ('pending_review', 'rejected'))";
         $bind_types = '';
         $params = [];
         if ($selectedIndustryKey !== '') {
@@ -850,7 +852,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
         }
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         // Output jobs (only 9 per page)
         if ($result && $result->num_rows > 0):
           while ($row = $result->fetch_assoc()):

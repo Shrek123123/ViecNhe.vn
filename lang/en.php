@@ -98,7 +98,7 @@ $lang = [
 
     // Footer section
     "footer_about_us" => "About Us",
-    "footer_company_full" => "ViecNhe.vn - Job Search Joint Stock Company 24h",
+    "footer_company_full" => "ViecNhe.vn - Your trusted and easygoing job-searching website",
     "footer_address_hcm" => "Room 102, Building 20–208 Tran Cao Van, Da Kao Ward, District 1, Ho Chi Minh City",
     "footer_address_hn" => "Branch: 4th Floor, Times Tower, 35 Le Van Luong, Thanh Xuan, Hanoi.",
     "footer_license" => "Employment service license No: 2893/2022/S8LĐTBXH-VLATLĐ issued by the Department of Labor, War Invalids and Social Affairs on 18/11/2024",

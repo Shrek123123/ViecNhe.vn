@@ -146,7 +146,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
 </head>
 
 <body>
-    <?php include_once(__DIR__ . '/header_loginlogout/employer.php'); ?>
+    <?php include_once(__DIR__ . '/header_loginlogout/employerregister.php'); ?>
     <div class="main-content">
         <div class="form-container">
             <h2><?= $lang['employerforgetpassword_title']; ?></h2>

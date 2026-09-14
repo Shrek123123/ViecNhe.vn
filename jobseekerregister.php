@@ -120,7 +120,7 @@ session_start();
 </head>
 
 <body>
-  <?php include_once(__DIR__ . '/header_loginlogout/jobseeker.php'); ?>
+  <?php include_once(__DIR__ . '/header_loginlogout/jobseekerregister.php'); ?>
   <div class="main-content">
     <div class="register-form-container">
       <h2><?php echo $lang['jobseekerregister_title']; ?></h2>

@@ -171,7 +171,7 @@ include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
 
 <body>
     <?php
-    include_once(__DIR__ . '/header_loginlogout/employer.php');
+    include_once(__DIR__ . '/header_loginlogout/employerregister.php');
     ?>
 
     <div class="main-content">

@@ -352,7 +352,21 @@ if (isset($_SESSION['employerid'])) {
         display: none;
     }
 
+    .mobile-applicant-preview {
+        display: none;
+    }
+
     @media (max-width: 768px) {
+        .mobile-applicant-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 16px;
+            background: #f3f3f3;
+            box-sizing: border-box;
+        }
+
         .header-right {
             display: flex;
             align-items: center;
@@ -479,5 +493,61 @@ if (isset($_SESSION['employerid'])) {
                 window.location.href = currentLang === 'vi' ? '?lang=en' : '?lang=vi';
             });
         }
+
+        var applicantSidebar = null;
+        var applicantItems = [];
+        var applicantPlaceholders = [];
+        var applicantPreview = null;
+
+        function moveApplicantPreview() {
+            if (!applicantSidebar) {
+                applicantSidebar = document.querySelector('.dashboard-sidebar');
+                if (!applicantSidebar) {
+                    return;
+                }
+
+                applicantItems = Array.prototype.slice.call(
+                    applicantSidebar.querySelectorAll('.applicant-card, .view-more')
+                );
+                if (!applicantItems.length) {
+                    return;
+                }
+
+                applicantItems.forEach(function (item) {
+                    var placeholder = document.createComment('applicant-preview-position');
+                    item.parentNode.insertBefore(placeholder, item);
+                    applicantPlaceholders.push(placeholder);
+                });
+            }
+
+            var dashboardMain = applicantSidebar.parentElement;
+            if (!dashboardMain) {
+                return;
+            }
+
+            var preview = applicantPreview || dashboardMain.querySelector('.mobile-applicant-preview');
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.className = 'mobile-applicant-preview';
+                dashboardMain.insertBefore(preview, applicantSidebar.nextElementSibling);
+            }
+            applicantPreview = preview;
+
+            var isMobile = window.matchMedia('(max-width: 768px)').matches;
+            applicantItems.forEach(function (item, index) {
+                if (isMobile) {
+                    preview.appendChild(item);
+                } else {
+                    applicantSidebar.insertBefore(item, applicantPlaceholders[index]);
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', moveApplicantPreview);
+        } else {
+            moveApplicantPreview();
+        }
+        window.addEventListener('resize', moveApplicantPreview);
     })();
 </script>

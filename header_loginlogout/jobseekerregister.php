@@ -11,6 +11,20 @@ if (!isset($_SESSION['lang'])) {
 
 // Load file ngôn ngữ tương ứng
 include 'lang/' . $_SESSION['lang'] . '.php';
+
+$auth_header_mode = $auth_header_mode ?? 'register';
+$auth_switch = null;
+if ($auth_header_mode === 'login') {
+    $auth_switch = [
+        'href' => 'jobseekerregister.php',
+        'label' => $lang['button_register'],
+    ];
+} else {
+    $auth_switch = [
+        'href' => 'jobseekerlogin.php',
+        'label' => $lang['jobseeker_login_button'],
+    ];
+}
 ?>
 <style>
     .header a:hover {
@@ -85,6 +99,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
         align-items: center;
         background-color: white;
         padding: 10px;
+        position: relative;
         border-bottom: 1px solid #ddd;
         width: 100%;
         box-sizing: border-box;
@@ -112,6 +127,35 @@ include 'lang/' . $_SESSION['lang'] . '.php';
     .btn-login,
     .btn-register {
         text-decoration: none;
+    }
+
+    .auth-switch {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 8px 14px;
+        border: 1px solid #d70000;
+        border-radius: 6px;
+        background: #fff;
+        color: #d70000;
+        font-weight: bold;
+        white-space: nowrap;
+        transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    .auth-switch:hover {
+        background: #d70000;
+        color: #fff !important;
+    }
+
+    .desktop-auth-switch {
+        margin-left: auto;
+        margin-right: 12px;
+    }
+
+    .mobile-auth-switch {
+        display: none;
     }
 
     .header-nav {
@@ -189,6 +233,19 @@ include 'lang/' . $_SESSION['lang'] . '.php';
             display: flex;
         }
 
+        .desktop-auth-switch {
+            display: none !important;
+        }
+
+        .mobile-auth-switch {
+            display: inline-flex;
+            position: absolute;
+            top: 12px;
+            right: 10px;
+            margin: 0;
+            z-index: 10;
+        }
+
         .header-nav {
             position: fixed;
             top: 0;
@@ -242,6 +299,7 @@ include 'lang/' . $_SESSION['lang'] . '.php';
             display: flex;
             align-items: center;
             margin-left: auto;
+            padding-right: 105px;
         }
 
         .mobile-login-btn {
@@ -278,11 +336,22 @@ include 'lang/' . $_SESSION['lang'] . '.php';
             </a>
         </div>
 
+        <?php if ($auth_switch !== null): ?>
+            <a class="auth-switch desktop-auth-switch" href="<?= htmlspecialchars($auth_switch['href'], ENT_QUOTES, 'UTF-8'); ?>">
+                <?= htmlspecialchars($auth_switch['label'], ENT_QUOTES, 'UTF-8'); ?>
+            </a>
+        <?php endif; ?>
+
         <button id="lang-switch-btn">
             <?php echo ($_SESSION['lang'] === 'vi') ? 'English' : 'Tiếng Việt'; ?>
         </button>
     </div>
 
+    <?php if ($auth_switch !== null): ?>
+        <a class="auth-switch mobile-auth-switch" href="<?= htmlspecialchars($auth_switch['href'], ENT_QUOTES, 'UTF-8'); ?>">
+            <?= htmlspecialchars($auth_switch['label'], ENT_QUOTES, 'UTF-8'); ?>
+        </a>
+    <?php endif; ?>
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <script>

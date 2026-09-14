@@ -826,6 +826,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 grid-template-columns: 1fr !important;
             }
         }
+        .applicant-preview-heading a {
+            display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px;
+            border-radius: 8px; background: #fff4f4; color: #b23b3b !important;
+            text-decoration: none !important; cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .applicant-preview-heading a:hover,
+        .applicant-preview-heading a:focus-visible {
+            background: #b23b3b; color: #fff !important; transform: translateY(-1px);
+        }
     </style>
 </head>
 
@@ -878,7 +888,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 ?>
 
-                <h3 class="applicant-preview-heading"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+                <h3 class="applicant-preview-heading"><a href="view_more_list_application.php" style="color: inherit; text-decoration: none;"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></a></h3>
 
                 <?php
                 // Lấy 2 đơn ứng tuyển đầu tiên từ database
@@ -948,8 +958,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="current_password"><?= htmlspecialchars($lang['current_password_label'] ?? 'Current password') ?></label>
                             <div class="password-field">
                                 <input id="current_password" name="current_password" type="password" required>
-                                <button type="button" class="password-toggle" data-target="current_password" aria-label="Toggle password visibility">
-                                    <i class="fa-solid fa-eye"></i>
+                                <button type="button" class="password-toggle" data-target="current_password" aria-label="Show password" aria-pressed="false">
+                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div class="field-inline-message" data-error-for="current_password"></div>
@@ -959,8 +969,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="new_password"><?= htmlspecialchars($lang['new_password_label'] ?? 'New password') ?></label>
                             <div class="password-field">
                                 <input id="new_password" name="new_password" type="password" required>
-                                <button type="button" class="password-toggle" data-target="new_password" aria-label="Toggle password visibility">
-                                    <i class="fa-solid fa-eye"></i>
+                                <button type="button" class="password-toggle" data-target="new_password" aria-label="Show password" aria-pressed="false">
+                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div class="field-inline-message" data-error-for="new_password"></div>
@@ -970,8 +980,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="confirm_password"><?= htmlspecialchars($lang['confirm_password_label'] ?? 'Confirm new password') ?></label>
                             <div class="password-field">
                                 <input id="confirm_password" name="confirm_password" type="password" required>
-                                <button type="button" class="password-toggle" data-target="confirm_password" aria-label="Toggle password visibility">
-                                    <i class="fa-solid fa-eye"></i>
+                                <button type="button" class="password-toggle" data-target="confirm_password" aria-label="Show password" aria-pressed="false">
+                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div class="field-inline-message" data-error-for="confirm_password"></div>
@@ -1060,6 +1070,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     icon.classList.toggle('fa-eye', !isHidden);
                     icon.classList.toggle('fa-eye-slash', isHidden);
                 }
+                this.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+                this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
             });
         });
 

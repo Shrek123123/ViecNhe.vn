@@ -72,6 +72,29 @@ session_start();
       box-sizing: border-box;
     }
 
+    .password-toggle-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-toggle-wrapper input {
+      padding-right: 44px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      line-height: 1;
+    }
+
     input[type="checkbox"] {
       width: auto;
       margin-right: 5px;
@@ -140,29 +163,26 @@ session_start();
         </div>
         <div class="form-group">
           <label><?php echo $lang['password']; ?></label>
-          <div class="password-toggle-wrapper" style="position: relative;">
-            <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password" required
-              style="padding-right: 45px;">
+          <div class="password-toggle-wrapper">
+            <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>" name="password" required>
             <button type="button" class="toggle-password" data-target="password"
-              style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
-              aria-label="Toggle password visibility">👁</button>
+              aria-label="Toggle password visibility" aria-pressed="false">👁</button>
           </div>
         </div>
         <div class="form-group">
           <label><?php echo $lang['reenter_password']; ?></label>
-          <div class="password-toggle-wrapper" style="position: relative;">
+          <div class="password-toggle-wrapper">
             <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>" name="retypepass"
-              required style="padding-right: 45px;">
+              required>
             <button type="button" class="toggle-password" data-target="retypepass"
-              style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
-              aria-label="Toggle password visibility">👁</button>
+              aria-label="Toggle password visibility" aria-pressed="false">👁</button>
           </div>
         </div>
         <div class="terms-container" style="align-items: center;">
           <label style="display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" name="terms" value="accepted" required style="margin: 0;">
             <small><?php echo $lang['terms_agreement_text']; ?> <a
-          href="term.html"><?php echo $lang['terms_of_use_link_text']; ?></a>
+          href="term.php"><?php echo $lang['terms_of_use_link_text']; ?></a>
               <?php echo $lang['terms_of_use_after_link_text']; ?></small>
           </label>
           <span id="terms-error"></span>
@@ -286,9 +306,11 @@ $conn->close();
       btn.addEventListener('click', function () {
         const input = document.getElementById(btn.dataset.target) || document.querySelector('input[name="' + btn.dataset.target + '"]');
         if (!input) return;
-        const isVisible = input.type === 'text';
-        input.type = isVisible ? 'password' : 'text';
-        btn.textContent = isVisible ? '👁' : '🙈';
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.textContent = isHidden ? '🙈' : '👁';
+        btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+        btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
       });
     });
   });

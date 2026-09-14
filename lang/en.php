@@ -666,4 +666,16 @@ $lang = [
     'company_under_review_notice' => 'The company page is under review by admin',
     'ok' => 'OK',
 
+    // term.php
+    'terms_page_title' => 'ViecNhe.vn Terms of Use',
+    'terms_logo_alt' => 'ViecNhe.vn logo',
+    'terms_register_title' => 'Register for an account',
+    'terms_register_description' => 'Create an advantage for your business with a recruitment experience powered by deep AI and Hiring Funnel technology.',
+    'terms_regulations_title' => 'Regulations',
+    'terms_multiple_accounts' => 'To ensure service quality, ViecNhe.vn <strong class="warning">does not allow one user to create multiple different accounts.</strong>',
+    'terms_duplicate_accounts' => 'If a violation is detected, ViecNhe.vn will stop providing services to all duplicate accounts or block all access to the ViecNhe.vn website system.',
+    'terms_recruiter_support' => 'After registering for a recruiter account and providing the necessary information, recruiters may be supported to display basic (standard) job postings, excluding certain positions. The number of job postings and how they are displayed depends on ViecNhe.vn regulations at each time.',
+    'terms_contact_notice' => 'For any inquiries, please contact the Customer Service Hotline:',
+    'terms_hotline_1' => '(028) 7109 440',
+    'terms_hotline_2' => '(029) 7109 424',
 ];

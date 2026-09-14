@@ -662,4 +662,16 @@ $lang = [
     'company_profile_no_jobs' => 'Hiện công ty chưa có tin tuyển dụng nào.',
     'company_under_review_notice' => 'Trang công ty này đang được kiểm duyệt trong thời gian sớm nhất',
     'ok' => 'OK',
+    // term.php
+    'terms_page_title' => 'Điều khoản việcnhẹ.vn',
+    'terms_logo_alt' => 'Logo ViecNhe.vn',
+    'terms_register_title' => 'Đăng ký tài khoản',
+    'terms_register_description' => 'Tạo lợi thế cho doanh nghiệp của bạn với trải nghiệm tuyển dụng được hỗ trợ bởi công nghệ AI và phễu tuyển dụng chuyên sâu.',
+    'terms_regulations_title' => 'Quy định',
+    'terms_multiple_accounts' => 'Để đảm bảo chất lượng dịch vụ, ViecNhe.vn <strong class="warning">không cho phép một người dùng tạo nhiều tài khoản khác nhau.</strong>',
+    'terms_duplicate_accounts' => 'Nếu phát hiện vi phạm, ViecNhe.vn sẽ ngừng cung cấp dịch vụ cho tất cả tài khoản trùng lặp hoặc chặn toàn bộ quyền truy cập vào hệ thống website ViecNhe.vn.',
+    'terms_recruiter_support' => 'Sau khi đăng ký tài khoản nhà tuyển dụng và cung cấp đầy đủ thông tin cần thiết, nhà tuyển dụng có thể được hỗ trợ hiển thị các tin tuyển dụng cơ bản (tiêu chuẩn), ngoại trừ một số vị trí nhất định. Số lượng tin đăng và cách hiển thị sẽ tuân theo quy định của ViecNhe.vn tại từng thời điểm.',
+    'terms_contact_notice' => 'Nếu có thắc mắc, vui lòng liên hệ Đường dây nóng Chăm sóc khách hàng:',
+    'terms_hotline_1' => '(028) 7109 440',
+    'terms_hotline_2' => '(029) 7109 424',
 ];

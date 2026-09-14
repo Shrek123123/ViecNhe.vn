@@ -171,7 +171,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
   html,
   body {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {

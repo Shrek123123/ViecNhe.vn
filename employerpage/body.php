@@ -252,6 +252,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   }
 
   @media (max-width: 768px) {
+    #myModal {
+      z-index: 2100;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    #myModal[style*="display: block"] {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #myModal .modal-content {
+      width: 100%;
+      max-width: 520px;
+      max-height: calc(100vh - 32px);
+      margin: 0 auto;
+      padding: 20px 16px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
     .hero {
       height: auto;
       padding: 20px;
@@ -290,17 +312,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     .form-table td {
       padding: 5px 0;
+      text-align: center;
     }
 
     .form-table label {
       margin-bottom: 5px;
       display: block;
+      white-space: normal;
+      text-align: center;
     }
 
     .form-table input,
     .form-table select,
     .form-table textarea {
+      display: block;
       width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
       box-sizing: border-box;
     }
   }
@@ -542,4 +570,3 @@ if (isset($_SESSION['employerid'])) {
   }
 
 </script>
-

@@ -746,6 +746,32 @@ if (isset($_SESSION['flash_message'])) {
         }
 
         @media (max-width: 768px) {
+            .application-status-actions {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 10px;
+            }
+
+            .application-status,
+            .application-actions {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .application-actions {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .application-actions a,
+            .application-actions button {
+                margin-right: 0 !important;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
             .dashboard-topbar {
                 flex-direction: column;
                 align-items: flex-start;
@@ -793,6 +819,16 @@ if (isset($_SESSION['flash_message'])) {
                 border-bottom: 1px solid #ddd;
                 padding: 20px 0;
             }
+        }
+        .applicant-preview-heading a {
+            display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px;
+            border-radius: 8px; background: #fff4f4; color: #b23b3b !important;
+            text-decoration: none !important; cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .applicant-preview-heading a:hover,
+        .applicant-preview-heading a:focus-visible {
+            background: #b23b3b; color: #fff !important; transform: translateY(-1px);
         }
     </style>
 </head>
@@ -860,7 +896,7 @@ if (isset($_SESSION['flash_message'])) {
                 }
                 ?>
 
-                <h3 class="applicant-preview-heading"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+                <h3 class="applicant-preview-heading"><a href="view_more_list_application.php" style="color: inherit; text-decoration: none;"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></a></h3>
 
                 <?php
                 // Lấy 2 đơn ứng tuyển đầu tiên từ database
@@ -1086,12 +1122,13 @@ if (isset($_SESSION['flash_message'])) {
                                                     </button>
                                                 </div>
                                             <?php endif; ?>
-                                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                                <div>
+                                            <div class="application-status-actions"
+                                                style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div class="application-status">
                                                     <?= $lang['status2'] ?> <span
                                                         style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo ucfirst($display_status); ?></span>
                                                 </div>
-                                                <div>
+                                                <div class="application-actions">
                                                     <?php if (!empty($cv_file)): ?>
                                                         <a href="<?php echo htmlspecialchars($cv_file); ?>" class="view-cv-button"
                                                             data-application-id="<?php echo $application_id; ?>"

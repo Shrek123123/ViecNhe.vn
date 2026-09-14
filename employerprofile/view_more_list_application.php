@@ -185,6 +185,22 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             margin-bottom: 15px;
         }
 
+        .application-status-actions {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .application-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            max-width: 100%;
+        }
+
         .hotline-item i {
             font-size: 24px;
             color: #333;
@@ -715,6 +731,8 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 
             .application-card {
                 padding: 15px !important;
+                min-width: 0;
+                box-sizing: border-box;
             }
 
             /* Target the flex containers inside the card */
@@ -725,18 +743,26 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                 gap: 10px !important;
             }
             
-            .application-card > div:nth-child(5) div:last-child {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                width: 100%;
+            .application-actions {
+                width: auto;
+                max-width: 100%;
             }
 
-            .application-card > div:nth-child(5) button,
-            .application-card > div:nth-child(5) a {
-                width: 100%;
+            .application-actions button,
+            .application-actions a {
+                width: auto;
+                max-width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
                 text-align: center;
                 margin-right: 0 !important;
+            }
+
+            .cover-letter-trigger {
+                max-width: 100%;
+                box-sizing: border-box;
+                white-space: normal;
+                overflow-wrap: anywhere;
             }
 
             .change-info-menu {
@@ -769,6 +795,60 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             .posting-options {
                 grid-template-columns: 1fr !important;
             }
+        }
+
+        @media (max-width: 768px) {
+            #manageApplicationModal {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 16px;
+                box-sizing: border-box;
+                z-index: 3000 !important;
+            }
+
+            #manageApplicationModal[style*="display: block"] {
+                display: flex !important;
+            }
+
+            #manageApplicationModal .modal-content {
+                width: 100% !important;
+                max-width: 500px;
+                max-height: calc(100vh - 32px);
+                margin: 0 !important;
+                overflow-y: auto;
+                box-sizing: border-box;
+            }
+
+            #hideApplicationModal {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 16px;
+                box-sizing: border-box;
+                z-index: 3000 !important;
+            }
+
+            #hideApplicationModal[style*="display: block"] {
+                display: flex !important;
+            }
+
+            #hideApplicationModal .modal-content {
+                width: 100% !important;
+                max-width: 400px;
+                max-height: calc(100vh - 32px);
+                margin: 0 !important;
+                overflow-y: auto;
+                box-sizing: border-box;
+            }
+        }
+        .applicant-preview-heading a {
+            display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px;
+            border-radius: 8px; background: #fff4f4; color: #b23b3b !important;
+            text-decoration: none !important; cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .applicant-preview-heading a:hover,
+        .applicant-preview-heading a:focus-visible {
+            background: #b23b3b; color: #fff !important; transform: translateY(-1px);
         }
     </style>
 </head>
@@ -822,7 +902,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                 }
                 ?>
 
-                <h3 class="applicant-preview-heading"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+                <h3 class="applicant-preview-heading"><a href="view_more_list_application.php" style="color: inherit; text-decoration: none;"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></a></h3>
 
                 <?php
                 // Lấy 2 đơn ứng tuyển đầu tiên từ database
@@ -1000,11 +1080,11 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                                                     </button>
                                                 </div>
                                             <?php endif; ?>
-                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div class="application-status-actions">
                                                 <div>
                                                     <?= $lang['status2'] ?> <span style="font-weight: bold; color: <?php echo $status_color; ?>;"><?php echo ucfirst($display_status); ?></span>
                                                 </div>
-                                                <div>
+                                                <div class="application-actions">
                                                     <?php if (!empty($cv_file)): ?>
                                                         <a href="<?php echo htmlspecialchars($cv_file); ?>" class="view-cv-button" data-application-id="<?php echo $application_id; ?>" style="background: #b23b3b; color: #fff; border: none; border-radius: 5px; padding: 6px 12px; font-size: 13px; text-decoration: none; margin-right: 8px;" target="_blank" rel="noopener noreferrer">
                                                             <?= $lang['view_cv'] ?>

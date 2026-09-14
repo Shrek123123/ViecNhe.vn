@@ -133,9 +133,7 @@ require_once 'helpers.php';
 
 <body>
 
-    <header>
-        <?php require_once 'homepage/header.php' ?>
-    </header>
+    <?php require_once 'homepage/header.php' ?>
     <div>
 
     </div>

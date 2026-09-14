@@ -728,6 +728,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
                 grid-template-columns: 1fr !important;
             }
         }
+        .applicant-preview-heading a {
+            display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px;
+            border-radius: 8px; background: #fff4f4; color: #b23b3b !important;
+            text-decoration: none !important; cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .applicant-preview-heading a:hover,
+        .applicant-preview-heading a:focus-visible {
+            background: #b23b3b; color: #fff !important; transform: translateY(-1px);
+        }
     </style>
 </head>
 
@@ -780,7 +790,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
                 }
                 ?>
 
-                <h3 class="applicant-preview-heading"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+                <h3 class="applicant-preview-heading"><a href="view_more_list_application.php" style="color: inherit; text-decoration: none;"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></a></h3>
 
                 <?php
                 // Lấy 2 đơn ứng tuyển đầu tiên từ database

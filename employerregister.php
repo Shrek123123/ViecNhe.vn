@@ -95,6 +95,40 @@ include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
             padding: 0;
         }
 
+        .password-toggle-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        .password-toggle-wrapper input {
+            width: 100%;
+            padding-right: 44px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            z-index: 1;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            transform: translateY(-50%);
+        }
+
+        .toggle-password:hover {
+            background: #f5f5f5;
+            color: #d90000;
+        }
+
         .btn-register {
             width: 100%;
             padding: 12px;
@@ -196,22 +230,20 @@ include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
                 </div>
                 <div class="form-group">
                     <label><?php echo $lang['password']; ?></label>
-                    <div style="position: relative;">
+                    <div class="password-toggle-wrapper">
                         <input type="password" placeholder="<?php echo $lang['placeholder_password']; ?>"
-                            name="password" required style="padding-right: 45px;">
+                            name="password" required>
                         <button type="button" class="toggle-password" data-target="password"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
-                            aria-label="Toggle password visibility">👁</button>
+                            aria-label="Toggle password visibility" aria-pressed="false">👁</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label><?php echo $lang['reenter_password']; ?></label>
-                    <div style="position: relative;">
+                    <div class="password-toggle-wrapper">
                         <input type="password" placeholder="<?php echo $lang['placeholder_reenter_password']; ?>"
-                            name="retypepass" required style="padding-right: 45px;">
+                            name="retypepass" required>
                         <button type="button" class="toggle-password" data-target="retypepass"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
-                            aria-label="Toggle password visibility">👁</button>
+                            aria-label="Toggle password visibility" aria-pressed="false">👁</button>
                     </div>
                 </div>
 
@@ -293,7 +325,7 @@ include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
                     <label style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" name="terms" value="accepted" required style="margin: 0;">
                         <small><?php echo $lang['terms_agreement_text']; ?> <a
-                                href="term.html"><?php echo $lang['terms_of_use_link_text']; ?></a>
+                                href="term.php"><?php echo $lang['terms_of_use_link_text']; ?></a>
                             <?php echo $lang['terms_of_use_after_link_text']; ?></small>
                     </label>
                     <span id="terms-error"></span>
@@ -557,9 +589,11 @@ $conn->close();
       btn.addEventListener('click', function () {
         const input = document.getElementById(btn.dataset.target) || document.querySelector('input[name="' + btn.dataset.target + '"]');
         if (!input) return;
-        const isVisible = input.type === 'text';
-        input.type = isVisible ? 'password' : 'text';
-        btn.textContent = isVisible ? '👁' : '🙈';
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.textContent = isHidden ? '🙈' : '👁';
+        btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+        btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
       });
     });
   });

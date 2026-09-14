@@ -147,6 +147,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-sizing: border-box;
         }
 
+        .password-toggle-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-toggle-wrapper input {
+            padding-right: 44px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            line-height: 1;
+        }
+
         .btn-login {
             width: 100%;
             padding: 12px;
@@ -221,12 +244,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <div class="form-group">
                     <label for="passwordInput"><?= $lang['password']; ?></label>
-                    <input type="password" id="passwordInput" name="password"
-                        placeholder="<?= $lang['employer_login_password_placeholder']; ?>" required
-                        style="padding-right: 45px;">
-                    <button type="button" class="toggle-password" data-target="passwordInput"
-                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;"
-                        aria-label="Toggle password visibility">👁</button>
+                    <div class="password-toggle-wrapper">
+                        <input type="password" id="passwordInput" name="password"
+                            placeholder="<?= $lang['employer_login_password_placeholder']; ?>" required>
+                        <button type="button" class="toggle-password" data-target="passwordInput"
+                            aria-label="Toggle password visibility" aria-pressed="false">👁</button>
+                    </div>
                     <div class="forgot">
                         <a href="employerforgetpassword.php"><?= $lang['employer_login_forgot_password']; ?></a>
                     </div>
@@ -254,9 +277,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       btn.addEventListener('click', function () {
         const input = document.getElementById(btn.dataset.target) || document.querySelector('input[name="' + btn.dataset.target + '"]');
         if (!input) return;
-        const isVisible = input.type === 'text';
-        input.type = isVisible ? 'password' : 'text';
-        btn.textContent = isVisible ? '👁' : '🙈';
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.textContent = isHidden ? '🙈' : '👁';
+        btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+        btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
       });
     });
   });

@@ -612,6 +612,9 @@ if ($cv_file_path) {
                 <div class="status">● Online</div>
             </div>
         </div>
+        <button class="profile-sidebar-toggle" type="button" aria-label="Toggle profile menu">
+            <span></span><span></span><span></span>
+        </button>
     </div>
     <!-- Main layout -->
     <div class="main">
@@ -620,6 +623,7 @@ if ($cv_file_path) {
             <button id="btn-myprofile" onclick="window.location.href='ho_so_ung_vien.php'"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications" class="active" onclick="window.location.href='don_ung_tuyen.php'"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs" onclick="window.location.href='cong_viec_da_luu.php'"><?= $lang['btn_savedjobs'] ?></button>
+            <button id="btn-followed-companies" onclick="window.location.href='followed_company.php'"><?= $lang['btn_followed_companies'] ?></button>
             <div class="change-info-wrap">
                 <button id="btn-changeinfo" type="button"><?= $lang['btn_changeinfo'] ?></button>
                 <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
@@ -1191,4 +1195,5 @@ if ($cv_file_path) {
     ?>
 </footer>
 
+<?php include 'mobile_sidebar.php'; ?>
 </html>

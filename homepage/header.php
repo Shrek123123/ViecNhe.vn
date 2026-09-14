@@ -99,7 +99,6 @@ if ($jobseeker_id > 0) {
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         border-radius: 5px;
         flex-direction: column;
-        min-width: 120px;
         z-index: 1000;
     }
 
@@ -408,6 +407,16 @@ if ($jobseeker_id > 0) {
         .header-right .dropdown-menu {
             left: auto;
             right: 0;
+            min-width: 0;
+            width: max-content;
+            align-items: flex-start;
+        }
+
+        .header-right .dropdown-menu a {
+            width: max-content;
+            align-self: flex-start;
+            white-space: nowrap;
+            box-sizing: border-box;
         }
     }
 </style>
@@ -494,7 +503,7 @@ if ($jobseeker_id > 0) {
         </button>
     </div>
 
-        <div class="header-right">
+    <div class="header-right">
         <?php if (isset($_SESSION['username'])): ?>
             <div class="user-dropdown">
                 <div class="user-info">

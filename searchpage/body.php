@@ -219,6 +219,7 @@ foreach ($industryOptionKeys as $industryKey) {
         display: flex;
         align-items: center;
         gap: 8px;
+        width: 100%;
     }
 
     .sort-by-form select,
@@ -550,14 +551,15 @@ foreach ($industryOptionKeys as $industryKey) {
         }
 
         .sort-by-form {
-            flex-direction: column;
-            width: 100%;
+            flex-direction: row;
             align-items: stretch;
         }
 
         .sort-by-form select,
         .sort-by-form button {
-            width: 100%;
+            width: auto;
+            min-width: 0;
+            flex: 1 1 0;
         }
     }
 
@@ -639,22 +641,48 @@ foreach ($industryOptionKeys as $industryKey) {
 
 <div class="info">
     <section class="section-2">
-        <?php $current_sort = $_GET['sort'] ?? 'newest_first'; ?>
+        <?php $current_filter_type = $_GET['filter_type'] ?? ''; $current_filter_value = $_GET['filter_value'] ?? ''; ?>
         <div class="sort-by-container">
-            <form class="sort-by-form" action="" method="get">
-                <select name="sort" aria-label="<?php echo htmlspecialchars($lang['sort'] ?? 'Sort jobs'); ?>">
-                    <option value="newest_first" <?php echo ($current_sort == 'newest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_newest_first'] ?? 'Date posted: Newest first'; ?></option>
-                    <option value="oldest_first" <?php echo ($current_sort == 'oldest_first') ? 'selected' : ''; ?>><?php echo $lang['sort_oldest_first'] ?? 'Date posted: Oldest first'; ?></option>
-                    <option value="salary_highest" <?php echo ($current_sort == 'salary_highest') ? 'selected' : ''; ?>><?php echo $lang['sort_salary_highest'] ?? 'Salary: Highest to lowest'; ?></option>
-                    <option value="salary_lowest" <?php echo ($current_sort == 'salary_lowest') ? 'selected' : ''; ?>><?php echo $lang['sort_salary_lowest'] ?? 'Salary: Lowest to highest'; ?></option>
+            <form class="sort-by-form" action="" method="get" id="job-filter-form">
+                <select name="filter_type" id="job-filter-type">
+                    <option value=""><?php echo htmlspecialchars($lang['filter_type'] ?? 'Filter by'); ?></option>
+                    <?php foreach (['salary' => 'filter_salary', 'experience' => 'filter_experience', 'position' => 'filter_position', 'job_type' => 'filter_job_type'] as $type => $key): ?>
+                        <option value="<?php echo $type; ?>" <?php echo $current_filter_type === $type ? 'selected' : ''; ?>><?php echo htmlspecialchars($lang[$key] ?? ucfirst($type)); ?></option>
+                    <?php endforeach; ?>
                 </select>
+                <select name="filter_value" id="job-filter-value"><option value=""><?php echo htmlspecialchars($lang['filter_value'] ?? 'Choose an option'); ?></option></select>
                 <input type="hidden" name="category" value="<?php echo htmlspecialchars($_GET['category'] ?? ''); ?>">
                 <input type="hidden" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
                 <input type="hidden" name="location" value="<?php echo htmlspecialchars($_GET['location'] ?? ''); ?>">
                 <input type="hidden" name="job_type" value="<?php echo htmlspecialchars($_GET['job_type'] ?? ''); ?>">
-                <button type="submit"><?php echo $lang['filter'] ?? 'Filter'; ?></button>
             </form>
         </div>
+        <script>
+        (function () {
+            var type = document.getElementById('job-filter-type'), value = document.getElementById('job-filter-value');
+            var options = <?php echo json_encode([
+                'salary' => [
+                    ['value' => 'salary_lowest', 'label' => $lang['sort_salary_lowest'] ?? 'Salary: Lowest to highest'],
+                    ['value' => 'salary_highest', 'label' => $lang['sort_salary_highest'] ?? 'Salary: Highest to lowest'],
+                    ['value' => 'thoa_thuan', 'label' => $lang['salary_negotiate'] ?? 'Negotiable']
+                ],
+                'experience' => array_map(function ($key) use ($lang) { return ['value' => $key, 'label' => translateJobExperience($key, $lang)]; }, array_keys($lang['job_experience_labels'] ?? [])),
+                'position' => array_map(function ($key) use ($lang) { return ['value' => $key, 'label' => translateJobPosition($key, $lang)]; }, array_keys($lang['job_position_options'] ?? [])),
+                'job_type' => array_map(function ($key) use ($lang) { return ['value' => $key, 'label' => translateJobType($key, $lang)]; }, ['full_time', 'part_time', 'intern', 'freelance', 'remote'])
+            ], JSON_UNESCAPED_UNICODE); ?>;
+            function refresh() {
+                value.innerHTML = '<option value=""><?php echo htmlspecialchars($lang['filter_value'] ?? 'Choose an option', ENT_QUOTES); ?></option>';
+                (options[type.value] || []).forEach(function (item) {
+                    var option = document.createElement('option'); option.value = item.value; option.textContent = item.label;
+                    if (item.value === <?php echo json_encode($current_filter_value); ?>) option.selected = true;
+                    value.appendChild(option);
+                });
+            }
+            type.addEventListener('change', function () { refresh(); value.value = ''; });
+            value.addEventListener('change', function () { if (value.value) document.getElementById('job-filter-form').submit(); });
+            refresh();
+        }());
+        </script>
 
         <div class="job-section">
             <?php
@@ -668,6 +696,8 @@ foreach ($industryOptionKeys as $industryKey) {
             $search_location = $_GET['location'] ?? '';
             $search_job_type = strtolower(trim((string) ($_GET['job_type'] ?? '')));
             $sort_order = $_GET['sort'] ?? 'newest_first';
+            $filter_type = $_GET['filter_type'] ?? '';
+            $filter_value = $_GET['filter_value'] ?? '';
 
             $job_type_aliases = [
                 'full time' => 'full-time',
@@ -685,7 +715,7 @@ foreach ($industryOptionKeys as $industryKey) {
             // Bắt đầu xây dựng câu truy vấn SQL
             $sql_base = "SELECT j.id, j.job_title, c.company_logo AS company_logo,
                 c.company_name AS company_name, c.industry AS industry,
-                j.salary, j.job_location, j.job_type, j.job_experience,
+                j.salary, j.job_location, j.job_type, j.job_experience, j.job_position,
                 j.created_at, j.post_duration
                 FROM job j
                 LEFT JOIN company c ON c.id = j.company_id";
@@ -725,6 +755,22 @@ foreach ($industryOptionKeys as $industryKey) {
                 $param_types .= 's';
             }
 
+            if ($filter_type === 'experience' && $filter_value !== '') {
+                $conditions[] = "LOWER(REPLACE(REPLACE(TRIM(j.job_experience), '-', '_'), ' ', '_')) = ?";
+                $params[] = strtolower($filter_value);
+                $param_types .= 's';
+            } elseif ($filter_type === 'position' && $filter_value !== '') {
+                $conditions[] = "LOWER(REPLACE(REPLACE(TRIM(j.job_position), '-', '_'), ' ', '_')) = ?";
+                $params[] = strtolower($filter_value);
+                $param_types .= 's';
+            } elseif ($filter_type === 'job_type' && $filter_value !== '') {
+                $conditions[] = "LOWER(REPLACE(REPLACE(TRIM(j.job_type), '-', '_'), ' ', '_')) = ?";
+                $params[] = strtolower($filter_value);
+                $param_types .= 's';
+            } elseif ($filter_type === 'salary' && $filter_value === 'thoa_thuan') {
+                $conditions[] = "LOWER(TRIM(j.salary)) IN ('thoa_thuan', 'negotiable')";
+            }
+
             // Hoàn thiện mệnh đề WHERE
             $where_clause = '';
             if (!empty($conditions)) {
@@ -732,28 +778,11 @@ foreach ($industryOptionKeys as $industryKey) {
             }
 
             // --- Xử lý sắp xếp ---
-            $salary_numeric_min = "
-                CASE
-                    WHEN LOWER(TRIM(j.salary)) LIKE '%usd%' THEN
-                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'usd', 1), '-', ' '), ' ', 1), '$', ''), ',', ''), '.', '') AS DECIMAL(20,2)) * 25000
-                    WHEN LOWER(TRIM(j.salary)) LIKE '%vnd%' THEN
-                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'vnd', 1), '-', ' '), ' ', 1), ',', ''), '.', ''), '$', '') AS DECIMAL(20,2))
-                    WHEN LOWER(TRIM(j.salary)) LIKE '%triệu%' THEN
-                        CAST(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'triệu', 1), '-', ' '), ' ', 1), ',', ''), '.', '') AS DECIMAL(20,2)) * 1000000
-                    ELSE 0
-                END";
+            $salary_numeric_first = "CAST(REPLACE(REGEXP_SUBSTR(LOWER(TRIM(j.salary)), '[0-9]+([.,][0-9]+)?'), ',', '.') AS DECIMAL(20,2))";
 
-            $salary_numeric_max = "
-                CASE
-                    WHEN LOWER(TRIM(j.salary)) LIKE '%usd%' THEN
-                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'usd', 1), '-', ' '), ' ', -1), '$', ''), ',', ''), '.', '') AS DECIMAL(20,2)) * 25000
-                    WHEN LOWER(TRIM(j.salary)) LIKE '%vnd%' THEN
-                        CAST(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'vnd', 1), '-', ' '), ' ', -1), ',', ''), '.', ''), '$', '') AS DECIMAL(20,2))
-                    WHEN LOWER(TRIM(j.salary)) LIKE '%triệu%' THEN
-                        CAST(REPLACE(REPLACE(SUBSTRING_INDEX(REPLACE(SUBSTRING_INDEX(LOWER(TRIM(j.salary)), 'triệu', 1), '-', ' '), ' ', -1), ',', ''), '.', '') AS DECIMAL(20,2)) * 1000000
-                    ELSE 0
-                END";
-
+            if ($filter_type === 'salary' && in_array($filter_value, ['salary_lowest', 'salary_highest'], true)) {
+                $sort_order = $filter_value;
+            }
             $allowed_sort_orders = ['newest_first', 'oldest_first', 'salary_highest', 'salary_lowest'];
             if (!in_array($sort_order, $allowed_sort_orders, true)) {
                 $sort_order = 'newest_first';
@@ -767,10 +796,10 @@ foreach ($industryOptionKeys as $industryKey) {
                     $order_by_clause = " ORDER BY j.created_at ASC";
                     break;
                 case 'salary_highest':
-                    $order_by_clause = " ORDER BY " . $salary_numeric_max . " DESC, j.created_at DESC";
+                    $order_by_clause = " ORDER BY " . $salary_numeric_first . " DESC, j.created_at DESC";
                     break;
                 case 'salary_lowest':
-                    $order_by_clause = " ORDER BY " . $salary_numeric_min . " ASC, j.created_at DESC";
+                    $order_by_clause = " ORDER BY " . $salary_numeric_first . " ASC, j.created_at DESC";
                     break;
                 default:
                     $order_by_clause = " ORDER BY j.created_at DESC";
@@ -841,6 +870,7 @@ foreach ($industryOptionKeys as $industryKey) {
                     $companyLogo = normalizeCompanyLogoPath($row['company_logo'] ?? 'image/logo1.png');
                     $companyIndustry = translateCompanyIndustry($row['industry'] ?? '', $lang) ?: ($lang['jobdetail_unknown'] ?? 'Unknown');
                     $jobExperienceLabel = translateJobExperience($row['job_experience'] ?? '', $lang);
+                    $jobSalaryLabel = translateJobSalary($row['salary'] ?? '', $lang);
                     $isJobAlreadySaved = in_array((string) $job_id, $savedJobIds, true);
                     ?>
                     <div class="job-card" data-job-id="<?php echo $job_id; ?>">
@@ -860,7 +890,7 @@ foreach ($industryOptionKeys as $industryKey) {
                                     <?php endif; ?>
                                     <div class="job-meta-row">
                                         <div class="job-meta-item">
-                                            <?php echo htmlspecialchars((string) ($row['salary'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                            <?php echo htmlspecialchars((string) $jobSalaryLabel, ENT_QUOTES, 'UTF-8'); ?>
                                         </div>
                                         <span class="job-meta-divider" aria-hidden="true"></span>
                                         <div class="job-meta-item">
@@ -875,7 +905,7 @@ foreach ($industryOptionKeys as $industryKey) {
                         <div class="job-footer">
                             <div class="job-footer-meta">
                                 <div class="job-footer-pill">
-                                    <?php echo htmlspecialchars((string) ($row['job_type'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php echo htmlspecialchars(translateJobType($row['job_type'] ?? '', $lang), ENT_QUOTES, 'UTF-8'); ?>
                                 </div>
                                 <?php if ($jobExperienceLabel !== ''): ?>
                                     <div class="job-footer-pill">

@@ -371,11 +371,12 @@ if ($cv_file_path) {
             left: 0;
             width: 100vw;
             height: 100vh;
+            box-sizing: border-box;
             background: rgba(0, 0, 0, 0.5);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 2100;
         }
 
         /* === Modal Content === */
@@ -388,7 +389,23 @@ if ($cv_file_path) {
             position: relative;
             max-height: 90vh;
             overflow-y: auto;
+            box-sizing: border-box;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .modal {
+                align-items: flex-start;
+                padding: 76px 12px 20px;
+                overflow-y: auto;
+            }
+
+            .modal-content {
+                width: 100%;
+                max-height: calc(100vh - 96px);
+                margin: 0 auto;
+                padding: 20px 16px;
+            }
         }
 
         /* === Close Button === */
@@ -624,6 +641,9 @@ if ($cv_file_path) {
                 <div class="status">● Online</div>
             </div>
         </div>
+        <button class="profile-sidebar-toggle" type="button" aria-label="Toggle profile menu">
+            <span></span><span></span><span></span>
+        </button>
     </div>
     <!-- Main layout -->
     <div class="main">
@@ -632,6 +652,7 @@ if ($cv_file_path) {
             <button id="btn-myprofile" class="active" onclick="window.location.href='ho_so_ung_vien.php'"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications" onclick="window.location.href='don_ung_tuyen.php'"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs" onclick="window.location.href='cong_viec_da_luu.php'"><?= $lang['btn_savedjobs'] ?></button>
+            <button id="btn-followed-companies" onclick="window.location.href='followed_company.php'"><?= $lang['btn_followed_companies'] ?></button>
             <div class="change-info-wrap">
                 <button id="btn-changeinfo" type="button"><?= $lang['btn_changeinfo'] ?></button>
                 <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
@@ -1253,4 +1274,5 @@ if ($cv_file_path) {
     ?>
 </footer>
 
+<?php include 'mobile_sidebar.php'; ?>
 </html>

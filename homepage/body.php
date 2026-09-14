@@ -1017,7 +1017,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
               </a>
               <div class="job-footer">
                 <div class="job-footer-meta">
-                  <div class="job-footer-pill"><?php echo htmlspecialchars($row['job_type'] ?? ''); ?></div>
+                  <div class="job-footer-pill"><?php echo htmlspecialchars(translateJobType($row['job_type'] ?? '', $lang), ENT_QUOTES, 'UTF-8'); ?></div>
                   <div class="job-footer-pill"><?php echo htmlspecialchars($jobExperienceLabel); ?></div>
                   <div class="job-footer-pill"><?php echo $days_left_text; ?></div>
                 </div>

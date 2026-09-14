@@ -96,7 +96,6 @@ if ($jobseeker_id > 0) {
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         border-radius: 5px;
         flex-direction: column;
-        min-width: 120px;
         z-index: 1000;
     }
 
@@ -341,10 +340,6 @@ if ($jobseeker_id > 0) {
             box-shadow: none;
         }
 
-        .dropdown-menu a {
-            padding: 12px 32px;
-        }
-
         .header-nav #lang-switch-btn {
             margin: 0;
             width: 100%;
@@ -380,6 +375,13 @@ if ($jobseeker_id > 0) {
         .header-right .user-dropdown {
             display: inline-block;
             margin-right: 0;
+            padding: 0;
+        }
+
+        .header-right .user-info {
+            margin-right: 0;
+            gap: 0;
+            padding: 0;
         }
 
         .header-right .user-info span {
@@ -389,6 +391,20 @@ if ($jobseeker_id > 0) {
         .header-right .dropdown-menu {
             left: auto;
             right: 0;
+            min-width: 0;
+            width: max-content;
+            align-items: flex-start;
+        }
+
+        .header-right .dropdown-menu a {
+            width: max-content;
+            align-self: flex-start;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        .loggined_option .user-dropdown {
+            display: none;
         }
     }
 </style>
@@ -484,9 +500,6 @@ if ($jobseeker_id > 0) {
                     <?php
                     $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
                     ?>
-                    <a href="ho_so_ung_vien.php">
-                        <?= $lang['profile']; ?>
-                    </a>
                     <a href="../jobseekerlogout.php">
                         <?= $lang['logout']; ?>
                     </a>

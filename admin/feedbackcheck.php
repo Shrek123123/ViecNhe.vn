@@ -216,6 +216,7 @@ if (isset($conn) && $conn->ping()) {
 </head>
 
 <body>
+    <?php include __DIR__ . '/mobile_sidebar.php'; ?>
     <div class="sidebar">
         <h2>Quản trị</h2>
         <div class="user-status">

@@ -737,32 +737,11 @@ if ($cv_file_path) {
     <div class="top-bar">
         <div class="title"><?= $lang['jobseekerprofile'] ?></div>
         <div class="company">
-            <?php
-            // Lấy jobseeker_id từ session hoặc từ URL
-            $jobseeker_id = $_SESSION['jobseeker_id'] ?? 0;
-
-            // Lấy ảnh đại diện jobseeker
-            $sql = "SELECT profile_pic FROM jobseeker_profile WHERE jobseeker_id = $jobseeker_id LIMIT 1";
-            $result = $conn->query($sql);
-            $profile_pic = "../image/defaultavatar.jpg";
-            if ($result && $row = $result->fetch_assoc()) {
-                if (!empty($row['profile_pic'])) {
-                    if (strpos($row['profile_pic'], 'uploads/') === 0) {
-                        $profile_pic = '../' . $row['profile_pic'];
-                    } else {
-                        $profile_pic = '../uploads/' . basename($row['profile_pic']);
-                    }
-                }
-            }
-
-            // KHÔNG đóng kết nối ở đây nếu còn dùng $conn ở dưới
-            ?>
-            <img src="<?php echo htmlspecialchars($profile_pic); ?>" alt="jobseeker logo">
-            <div class="company-info">
-                <div><strong><?php echo $user_display_name; ?></strong></div>
-                <div class="status">● Online</div>
-            </div>
+            
         </div>
+        <button class="profile-sidebar-toggle" type="button" aria-label="Toggle profile menu">
+            <span></span><span></span><span></span>
+        </button>
     </div>
     <!-- Main layout -->
     <div class="main">
@@ -771,6 +750,7 @@ if ($cv_file_path) {
             <button id="btn-myprofile" onclick="window.location.href='ho_so_ung_vien.php'"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications" onclick="window.location.href='don_ung_tuyen.php'"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs" class="active" onclick="window.location.href='cong_viec_da_luu.php'"><?= $lang['btn_savedjobs'] ?></button>
+            <button id="btn-followed-companies" onclick="window.location.href='followed_company.php'"><?= $lang['btn_followed_companies'] ?></button>
             <div class="change-info-wrap">
                 <button id="btn-changeinfo" type="button"><?= $lang['btn_changeinfo'] ?></button>
                 <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
@@ -1316,4 +1296,5 @@ if ($cv_file_path) {
     ?>
 </footer>
 
+<?php include 'mobile_sidebar.php'; ?>
 </html>

@@ -43,8 +43,9 @@ $lang = [
     ],
 
     //body
+    "post_job_form_company_name_select" => "-- Chọn tên công ty --",
     "job_search" => "Tìm việc nhanh 24/7, việc làm mới nhất toàn quốc.",
-    "job_search_subtitle" => "Truy cập hơn 40.000 tin tuyển dụng mới mỗi ngày từ hàng ngàn công ty uy tín tại Việt Nam.",
+    "job_search_subtitle" => "Truy cập hơn hàng nghìn tin tuyển dụng mới mỗi ngày từ hàng ngàn công ty uy tín tại Việt Nam.",
     "job_category" => "Danh mục công việc",
     "job_title" => "Chức danh công việc, tên công ty",
     "location" => "Vị trí",
@@ -59,6 +60,7 @@ $lang = [
     "job_type_filters" => [
         "full_time" => "Toàn thời gian",
         "part_time" => "Bán thời gian",
+        "intern" => "Thực tập",
         "internship" => "Thực tập",
         "freelance" => "Thời vụ",
         "remote" => "Làm việc từ xa"
@@ -171,6 +173,14 @@ $lang = [
     "post_job_form_job_description" => "Mô tả công việc",
     "post_job_form_job_location" => "Thành phố",
     "post_job_form_salary" => "Mức lương",
+    "salary_label" => "Nhập mức lương (đơn vị: triệu đồng)",
+    "salary_select" => "Nhập lựa chọn lương",
+    "salary_range" => "Khoảng lương",
+    "salary_fixed" => "Mức lương cố định",
+    "salary_negotiate" => "Thỏa thuận",
+    "salary_min_placeholder" => "Từ",
+    "salary_max_placeholder" => "Đến",
+    "salary_amount_placeholder" => "Số tiền",
     "employee_gender" => "Chọn giới tính nhân viên muốn tuyển dụng",
     "employee_gender_quick_post" => "Chọn giới tính nhân viên <br>muốn tuyển dụng",
     "employee_gender_male" => "Nam",
@@ -198,14 +208,14 @@ $lang = [
         "no_experience" => "Không yêu cầu kinh nghiệm"
     ],
     "job_experience_labels" => [
-        "under_1_year" => ["en" => "Under 1 year experience", "vi" => "Dưới 1 năm kinh nghiệm"],
-        "1_year" => ["en" => "1 year experience", "vi" => "1 năm kinh nghiệm"],
-        "2_years" => ["en" => "2 years experience", "vi" => "2 năm kinh nghiệm"],
-        "3_years" => ["en" => "3 years experience", "vi" => "3 năm kinh nghiệm"],
-        "4_years" => ["en" => "4 years experience", "vi" => "4 năm kinh nghiệm"],
-        "5_years_plus" => ["en" => "5 years + experience", "vi" => "5 năm kinh nghiệm +"],
-        "6_months" => ["en" => "6 months experience", "vi" => "6 tháng kinh nghiệm"],
-        "no_experience" => ["en" => "No experience required", "vi" => "Không yêu cầu kinh nghiệm"]
+        "under_1_year" => ["en" => "Under 1 year experience", "vi" => "Dưới 1 năm KN"],
+        "1_year" => ["en" => "1 year experience", "vi" => "1 năm KN"],
+        "2_years" => ["en" => "2 years experience", "vi" => "2 năm KN"],
+        "3_years" => ["en" => "3 years experience", "vi" => "3 năm KN"],
+        "4_years" => ["en" => "4 years experience", "vi" => "4 năm KN"],
+        "5_years_plus" => ["en" => "5 years + experience", "vi" => "5 năm KN +"],
+        "6_months" => ["en" => "6 months experience", "vi" => "6 tháng KN"],
+        "no_experience" => ["en" => "No experience required", "vi" => "Không yêu cầu KN"]
     ],
     "post_job_form_job_requirement" => "Yêu cầu công việc",
     "post_job_form_job_benefit" => "Phúc lợi",
@@ -454,6 +464,7 @@ $lang = [
     'btn_myprofile' => 'Hồ sơ của tôi',
     'btn_myapplications' => 'Đơn ứng tuyển của tôi',
     'btn_savedjobs' => 'Công việc đã lưu',
+    'btn_followed_companies' => 'Công ty đã theo dõi',
     'btn_changeinfo' => 'Thay đổi thông tin cá nhân',
     'change_email_action' => 'Thay đổi email',
     'change_password_action' => 'Thay đổi mật khẩu',
@@ -475,6 +486,9 @@ $lang = [
     'jobseekerprofile_appliedjobs' => 'Công việc đã ứng tuyển',
     'my_applications' => 'Danh mục đơn ứng tuyển',
     'saved_jobs_title' => 'Công việc đã lưu',
+    'followed_companies_title' => 'Công ty đã theo dõi',
+    'no_followed_companies' => 'Bạn chưa theo dõi công ty nào.',
+    'number_of_job_company_has' => ':count công việc đang tuyển',
 
     'addmobilephone' => 'Thêm số điện thoại di động',
     'adddateofbirth' => 'Thêm ngày sinh',
@@ -592,7 +606,7 @@ $lang = [
     'delete_application_success_message' => 'Đơn ứng tuyển đã được xóa thành công.',
     //searchpage
     'find_jobs_title' => 'Tìm việc làm nhanh 24/7, việc làm mới nhất toàn quốc.',
-    'find_jobs_subtitle' => 'Truy cập hơn 40.000 tin tuyển dụng mới mỗi ngày từ hàng ngàn công ty uy tín tại Việt Nam.',
+    'find_jobs_subtitle' => 'Truy cập hơn hàng nghìn tin tuyển dụng mới mỗi ngày từ hàng ngàn công ty uy tín tại Việt Nam.',
     'job_category_select_menu' => 'Chọn danh mục công việc',
     'job_title_company_placeholder' => 'Tiêu đề công việc, tên công ty',
     'location_placeholder' => 'Địa điểm',
@@ -600,6 +614,12 @@ $lang = [
     'sort_oldest_first' => 'Ngày đăng cũ nhất trước',
     'sort_salary_highest' => 'Mức lương từ cao xuống thấp',
     'sort_salary_lowest' => 'Mức lương từ thấp lên cao',
+    'filter_type' => 'Lọc theo',
+    'filter_value' => 'Chọn tùy chọn',
+    'filter_salary' => 'Mức lương',
+    'filter_experience' => 'Kinh nghiệm',
+    'filter_position' => 'Vị trí',
+    'filter_job_type' => 'Loại hình công việc',
     'days_left' => 'Còn %d ngày',
     //application form
     'application_form' => 'Biểu mẫu ứng tuyển',

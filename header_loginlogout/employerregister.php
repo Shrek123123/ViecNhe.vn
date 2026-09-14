@@ -341,9 +341,6 @@ if ($auth_header_mode === 'login') {
             <a href="#" style="text-decoration: none; color: #333;">
                 <?= $lang['create_cv']; ?>
             </a>
-            <a href="contactus_employer.php" style="text-decoration: none; color: #333;">
-                <?= $lang['contact_us']; ?>
-            </a>
             <a href="feedback_employer.php" style="text-decoration: none; color: #333;">
                 <?= $lang['feedback']; ?>
             </a>

@@ -452,6 +452,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Top bar -->
     <div class="top-bar">
         <div class="title"><?= $lang['jobseekerprofile'] ?></div>
+        <button class="profile-sidebar-toggle" type="button" aria-label="Toggle profile menu">
+            <span></span><span></span><span></span>
+        </button>
         
     </div>
     <!-- Main layout -->
@@ -461,6 +464,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button id="btn-myprofile" onclick="window.location.href='ho_so_ung_vien.php'"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications" onclick="window.location.href='don_ung_tuyen.php'"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs" onclick="window.location.href='cong_viec_da_luu.php'"><?= $lang['btn_savedjobs'] ?></button>
+            <button id="btn-followed-companies" onclick="window.location.href='followed_company.php'"><?= $lang['btn_followed_companies'] ?></button>
             <div class="change-info-wrap">
                 <button id="btn-changeinfo" class="active" type="button"><?= $lang['btn_changeinfo'] ?></button>
                 <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
@@ -549,4 +553,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ?>
 </footer>
 
+<?php include 'mobile_sidebar.php'; ?>
 </html>

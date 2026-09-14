@@ -21,7 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $jobTitle = $_POST['jobTitle'];
   $jobDescription = $_POST['jobDescription'];
   $jobLocation = $_POST['jobLocation'];
-  $salary = $_POST['salary'];
+  $salaryType = $_POST['salary_type'] ?? '';
+  $salaryMin = preg_replace('/[^0-9.]/', '', (string)($_POST['salary_min'] ?? ''));
+  $salaryMax = preg_replace('/[^0-9.]/', '', (string)($_POST['salary_max'] ?? ''));
+  $salaryAmount = preg_replace('/[^0-9.]/', '', (string)($_POST['salary_amount'] ?? ''));
+  $salary = $salaryType === 'negotiate' ? 'thoa_thuan' : ($salaryType === 'range' ? $salaryMin . '-' . $salaryMax . ' triệu' : $salaryAmount . ' triệu');
   $contactEmail = $_POST['contactEmail'];
   $contactPhone = $_POST['contactPhone'];
   $jobType = $_POST['jobType'];
@@ -411,8 +415,23 @@ if (isset($_SESSION['employerid'])) {
               required></td>
         </tr>
         <tr>
-          <td><label for="salary"><?= $lang['post_job_form_salary']; ?>:</label></td>
-          <td><input type="text" id="salary" name="salary" placeholder="<?= $lang['required']; ?>" required></td>
+          <td><label for="salary_type"><?= $lang['salary_label']; ?>:</label></td>
+          <td>
+            <select id="salary_type" name="salary_type" class="salary-type" onchange="toggleSalaryFields(this)" required>
+              <option value="" selected disabled><?= $lang['salary_select']; ?></option>
+              <option value="range"><?= $lang['salary_range']; ?></option>
+              <option value="fixed"><?= $lang['salary_fixed']; ?></option>
+              <option value="negotiate"><?= $lang['salary_negotiate']; ?></option>
+            </select>
+            <div class="salary-controls" data-salary-controls style="display:none;">
+              <input type="number" name="salary_min" min="0" step="0.01" placeholder="<?= $lang['salary_min_placeholder']; ?>">
+              <span aria-hidden="true">-</span>
+              <input type="number" name="salary_max" min="0" step="0.01" placeholder="<?= $lang['salary_max_placeholder']; ?>">
+            </div>
+            <div class="salary-controls" data-salary-fixed style="display:none;">
+              <input type="number" name="salary_amount" min="0" step="0.01" placeholder="<?= $lang['salary_amount_placeholder']; ?>">
+            </div>
+          </td>
         </tr>
         <tr>
           <td><label for="employee_gender"><?= $lang['employee_gender_quick_post']; ?></label></td>
@@ -547,10 +566,42 @@ if (isset($_SESSION['employerid'])) {
     font-weight: bold;
     cursor: pointer;
   }
+
+  .salary-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .salary-controls input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media (max-width: 600px) {
+    .salary-controls { gap: 5px; }
+  }
 </style>
 
 
 <script>
+  function toggleSalaryFields(select) {
+    const form = select.closest('form');
+    const range = form.querySelector('[data-salary-controls]');
+    const fixed = form.querySelector('[data-salary-fixed]');
+    const isRange = select.value === 'range';
+    const isFixed = select.value === 'fixed';
+    range.style.display = isRange ? 'flex' : 'none';
+    fixed.style.display = isFixed ? 'flex' : 'none';
+    range.querySelectorAll('input').forEach(input => input.required = isRange);
+    fixed.querySelectorAll('input').forEach(input => input.required = isFixed);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.salary-type').forEach(toggleSalaryFields);
+  });
+
   const modal = document.getElementById("myModal");
   const openBtn = document.getElementById("openModalBtn");
   const closeBtn = document.querySelector(".closeBtn");

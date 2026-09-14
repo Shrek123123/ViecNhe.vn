@@ -173,6 +173,9 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
     <!-- Top bar -->
     <div class="top-bar">
         <div class="title"><?= $lang['jobseekerprofile'] ?></div>
+        <button class="profile-sidebar-toggle" type="button" aria-label="Toggle profile menu">
+            <span></span><span></span><span></span>
+        </button>
     </div>
 
     <!-- Main layout -->
@@ -182,12 +185,13 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             <button id="btn-myprofile" class="active"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs"><?= $lang['btn_savedjobs'] ?></button>
+            <button id="btn-followed-companies" onclick="window.location.href='followed_company.php'"><?= $lang['btn_followed_companies'] ?></button>
             <button id="btn-changeinfo"><?= $lang['btn_changeinfo'] ?></button>
 
 
             <!-- Applicants -->
             
-
+        </div>
         <!-- Right side content -->
         <div class="content-area">
 
@@ -246,4 +250,5 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
 
 </body>
 
+<?php include 'mobile_sidebar.php'; ?>
 </html>

@@ -230,6 +230,42 @@ function translateJobPosition($value, $lang = [], $displayLanguage = null) {
     return ucfirst(str_replace('_', ' ', $normalizedKey));
 }
 
+function translateJobSalary($value, $lang = []) {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '';
+    }
+
+    $key = strtolower(preg_replace('/[\s\-]+/', '_', $raw));
+    if ($key === 'thoa_thuan' || $key === 'negotiable') {
+        return $lang['salary_negotiate'] ?? ($key === 'thoa_thuan' ? 'Thỏa thuận' : 'Negotiable');
+    }
+
+    return $raw;
+}
+
+function translateJobType($value, $lang = []) {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '';
+    }
+
+    $key = strtolower(preg_replace('/[\s\-]+/', '_', $raw));
+    if ($key === 'internship') {
+        $key = 'intern';
+    }
+    if (isset($lang['job_type_filters'][$key])) {
+        $label = $lang['job_type_filters'][$key];
+        if (is_array($label)) {
+            $locale = $_SESSION['lang'] ?? 'en';
+            return (string) ($label[$locale] ?? $label['en'] ?? reset($label));
+        }
+        return (string) $label;
+    }
+
+    return $raw;
+}
+
 // format ngày theo session ngôn ngữ
 function formatDateByLocale($datetime) {
     $created_at = new DateTime($datetime);

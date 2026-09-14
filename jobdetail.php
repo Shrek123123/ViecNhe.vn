@@ -1,6 +1,7 @@
 <?php
 require_once 'config.php';
 require_once 'helpers.php';
+session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,6 +71,26 @@ require_once 'helpers.php';
 
         .related-jobs-mobile {
             display: none;
+        }
+
+        @media (max-width: 767.98px) {
+            .job-summary-row {
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: flex-start;
+            }
+
+            .job-summary-row > .job-summary-label {
+                flex: 0 0 42%;
+                max-width: 42%;
+            }
+
+            .job-summary-row > .job-summary-value {
+                flex: 0 0 58%;
+                max-width: 58%;
+                min-width: 0;
+                overflow-wrap: anywhere;
+            }
         }
 
         @media (max-width: 991.98px) {
@@ -197,27 +218,27 @@ require_once 'helpers.php';
                             </div>
                         </div>
                         <hr>
-                        <div class="row mb-3">
-                            <div class="col-md-4 d-flex align-items-center">
+                        <div class="row mb-3 job-summary-row">
+                            <div class="col-md-4 d-flex align-items-center job-summary-label">
                                 <i class="bi bi-currency-dollar me-2"></i>
                                 <strong><?= $lang['jobdetail_salary'] ?></strong>
                             </div>
-                            <div class="col-md-8 text-danger fw-bold">
+                            <div class="col-md-8 text-danger fw-bold job-summary-value">
                                 <?= htmlspecialchars($job['salary'] ?? $lang['jobdetail_no_data']) ?>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 d-flex align-items-center">
+                        <div class="row mb-3 job-summary-row">
+                            <div class="col-md-4 d-flex align-items-center job-summary-label">
                                 <i class="bi bi-geo-alt me-2"></i> <strong><?= $lang['jobdetail_location'] ?></strong>
                             </div>
-                            <div class="col-md-8"><?= htmlspecialchars($job['job_location'] ?? $lang['jobdetail_no_data']) ?></div>
+                            <div class="col-md-8 job-summary-value"><?= htmlspecialchars($job['job_location'] ?? $lang['jobdetail_no_data']) ?></div>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 d-flex align-items-center">
+                        <div class="row mb-3 job-summary-row">
+                            <div class="col-md-4 d-flex align-items-center job-summary-label">
                                 <i class="bi bi-person-workspace me-2"></i>
                                 <strong><?= $lang['jobdetail_experience'] ?></strong>
                             </div>
-                            <div class="col-md-8"><?= htmlspecialchars(translateJobExperience($job['job_experience'] ?? '', $lang) ?: $lang['jobdetail_no_data']) ?>
+                            <div class="col-md-8 job-summary-value"><?= htmlspecialchars(translateJobExperience($job['job_experience'] ?? '', $lang) ?: $lang['jobdetail_no_data']) ?>
                             </div>
                         </div>
                         <div class="text-muted mb-3">
@@ -360,7 +381,7 @@ require_once 'helpers.php';
                     <p><strong><?= $lang['jobdetail_quantity'] ?></strong>
                         <?= sprintf('%s', htmlspecialchars($job['no_employee_needed'] ?? 'N/A')) ?><?= $lang['jobdetail_person'] ?></p>
                     <p><strong><?= $lang['jobdetail_type'] ?></strong>
-                        <?= htmlspecialchars($job['job_type'] ?? 'N/A') ?></p>
+                        <?= htmlspecialchars(translateJobType($job['job_type'] ?? '', $lang) ?: 'N/A') ?></p>
                 </div>
 
                 <div class="bg-white p-3 mb-4 shadow rounded">
@@ -462,7 +483,9 @@ require_once 'helpers.php';
     <?php
     // Xử lý AJAX tăng/giảm interest_count khi lưu/huỷ lưu job
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['job_id'])) {
-        session_start();
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'jobseeker') {
             http_response_code(403);
             exit('Unauthorized');

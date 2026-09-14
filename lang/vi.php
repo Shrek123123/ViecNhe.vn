@@ -6,6 +6,17 @@ $lang = [
     "create_cv" => "Tạo CV",
     "contact_us" => "Liên hệ với chúng tôi",
     "feedback" => "Phản hồi",
+    "feedback_page_title" => "Gửi phản hồi",
+    "feedback_rating_label" => "Đánh giá (1-5 sao):",
+    "feedback_star_label" => ":count sao",
+    "feedback_note_label" => "Ghi chú (không bắt buộc):",
+    "feedback_note_placeholder" => "Nhập phản hồi của bạn...",
+    "feedback_submit" => "Gửi",
+    "feedback_login_required" => "Vui lòng đăng nhập để gửi phản hồi.",
+    "feedback_success" => "Cảm ơn bạn đã gửi phản hồi!",
+    "feedback_submit_error" => "Lỗi khi gửi phản hồi: ",
+    "feedback_prepare_error" => "Lỗi khi chuẩn bị truy vấn: ",
+    "feedback_invalid_rating" => "Vui lòng chọn đánh giá từ 1 đến 5 sao và đảm bảo bạn đã đăng nhập.",
     "profile" => "Tài khoản",
     "logout" => "Đăng xuất",
     "login/register_jobseeker" => "Đăng nhập/Đăng ký cho người tìm việc",
@@ -652,4 +663,3 @@ $lang = [
     'company_under_review_notice' => 'Trang công ty này đang được kiểm duyệt trong thời gian sớm nhất',
     'ok' => 'OK',
 ];
-

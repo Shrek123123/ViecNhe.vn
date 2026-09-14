@@ -308,6 +308,7 @@ if ($cv_file_path) {
             padding: 18px;
             display: flex;
             align-items: flex-start;
+            gap: 16px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
@@ -317,14 +318,20 @@ if ($cv_file_path) {
             display: flex;
             flex: 1;
             gap: 18px;
+            min-width: 0;
         }
 
         .saved-job-logo {
             width: 120px;
             height: 70px;
+            flex: 0 0 120px;
             border-radius: 8px;
             object-fit: cover;
             border: 1px solid #eee;
+        }
+
+        .saved-job-link > div {
+            min-width: 0;
         }
 
         .saved-job-title {
@@ -332,12 +339,16 @@ if ($cv_file_path) {
             font-size: 18px;
             margin-bottom: 4px;
             color: #333;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
         }
 
         .saved-job-company {
             color: #888;
             font-size: 13px;
             margin-bottom: 8px;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
         }
 
         .saved-job-tags {
@@ -366,8 +377,9 @@ if ($cv_file_path) {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-left: 18px;
+            margin-left: auto;
             align-items: flex-end;
+            flex: 0 0 auto;
         }
 
         .remove-btn {
@@ -631,6 +643,62 @@ if ($cv_file_path) {
                 margin-top: 5px;
                 box-shadow: none;
                 border: 1px solid #eee;
+            }
+
+            .content-area > div {
+                padding: 22px 16px !important;
+            }
+
+            .saved-job-item {
+                flex-direction: column;
+                gap: 14px;
+                padding: 14px;
+            }
+
+            .saved-job-link {
+                width: 100%;
+                gap: 12px;
+            }
+
+            .saved-job-logo {
+                width: 76px;
+                height: 64px;
+                flex-basis: 76px;
+            }
+
+            .saved-job-title {
+                font-size: 16px;
+            }
+
+            .saved-job-company {
+                font-size: 12px;
+            }
+
+            .saved-job-tags {
+                gap: 6px;
+                margin-bottom: 8px;
+            }
+
+            .saved-job-tag,
+            .saved-job-tags span[style] {
+                padding: 4px 8px !important;
+                font-size: 11px !important;
+                line-height: 1.25;
+            }
+
+            .saved-job-salary {
+                font-size: 14px;
+            }
+
+            .saved-job-actions {
+                width: 100%;
+                margin-left: 0;
+                align-items: stretch;
+            }
+
+            .remove-btn {
+                width: 100%;
+                min-height: 40px;
             }
         }
 

@@ -259,10 +259,10 @@
         <div class="footer-column">
             <h4><?= $lang['footer_about_us']; ?></h4>
             <p>
-                <strong><?= $lang['footer_company_full']; ?></strong><br>
+                <!-- <strong><?= $lang['footer_company_full']; ?></strong><br>
                 <?= $lang['footer_address_hcm']; ?><br>
                 <?= $lang['footer_address_hn']; ?><br>
-                <?= $lang['footer_license']; ?><br>
+                <?= $lang['footer_license']; ?><br> -->
                 <?= $lang['footer_phone']; ?><br>
                 <?= $lang['footer_email_job_seeker']; ?><br>
                 <?= $lang['footer_email_employer']; ?>
@@ -270,7 +270,7 @@
         </div>
 
         <!-- Cột 2: Information -->
-        <div class="footer-column">
+        <!-- <div class="footer-column">
             <h4><?= $lang['footer_information']; ?></h4>
             <ul>
                 <li><?= $lang['footer_career_handbook']; ?></li>
@@ -281,19 +281,19 @@
                 <li><?= $lang['footer_personal_data_policy']; ?></li>
                 <li><?= $lang['footer_compliance_consent']; ?></li>
             </ul>
-        </div>
+        </div> -->
 
         <!-- Cột 3: Kết nối & App -->
-        <div class="footer-column">
+        <!-- <div class="footer-column">
             <h4><?= $lang['footer_connect_with_us']; ?></h4>
             <div class="social-icons">
                 <a href=""><i class="fab fa-facebook-f facebook"></i></a>
                 <a href=""><i class="fab fa-tiktok tiktok"></i></a>
                 <a href=""><i class="fab fa-telegram telegram"></i></a>
                 <a href=""><i class="fab fa-instagram instagram"></i></a>
-            </div>
+            </div> -->
 
-            <h4><?= $lang['footer_download_app']; ?></h4>
+            <!-- <h4><?= $lang['footer_download_app']; ?></h4>
             <div class="qr-and-apps">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://jobhive.vn&size=100x100"
                     alt="QR Code">
@@ -303,7 +303,7 @@
                     <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
                         alt="App Store">
                 </div>
-            </div>
+            </div> -->
         </div>
 
     </div>

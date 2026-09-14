@@ -411,28 +411,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="top-bar">
         <div class="title"><?= $lang['jobseekerprofile'] ?></div>
-        <div class="company">
-            <?php
-            $jobseeker_id = $_SESSION['jobseeker_id'] ?? 0;
-            $sql = "SELECT profile_pic FROM jobseeker_profile WHERE jobseeker_id = $jobseeker_id LIMIT 1";
-            $result = $conn->query($sql);
-            $profile_pic = "../image/defaultavatar.jpg";
-            if ($result && $row = $result->fetch_assoc()) {
-                if (!empty($row['profile_pic'])) {
-                    if (strpos($row['profile_pic'], 'uploads/') === 0) {
-                        $profile_pic = '../' . $row['profile_pic'];
-                    } else {
-                        $profile_pic = '../uploads/' . basename($row['profile_pic']);
-                    }
-                }
-            }
-            ?>
-            <img src="<?php echo htmlspecialchars($profile_pic); ?>" alt="jobseeker logo">
-            <div class="company-info">
-                <div><strong><?php echo htmlspecialchars($user_display_name); ?></strong></div>
-                <div class="status">● Online</div>
-            </div>
-        </div>
+        
     </div>
 
     <div class="main">

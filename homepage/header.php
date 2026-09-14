@@ -155,6 +155,7 @@ if ($jobseeker_id > 0) {
         display: flex;
         gap: 15px;
         margin-left: auto;
+        margin-right: 50px;
     }
 
     .btn-login,

@@ -278,6 +278,8 @@ foreach ($industryOptionKeys as $industryKey) {
 
     .section-3 {
         background-color: #eee;
+        position: relative;
+        z-index: 1;
     }
 
     .section-3 .container {

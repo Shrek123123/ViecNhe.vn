@@ -269,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $stmt->bind_param("ssss", $username, $email, $hashed_password, $phone_number);
 
   if ($stmt->execute()) {
-    echo "<script>alert('Registration successful!'); window.location.href = 'jobseekerlogin.php';</script>";
+    echo "<script>alert('" . addslashes($lang['registration_successful']) . "'); window.location.href = 'jobseekerlogin.php';</script>";
     exit;
   } else {
     echo "<script>alert('Error: " . $stmt->error . "');</script>";

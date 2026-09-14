@@ -170,7 +170,6 @@ if ($auth_header_mode === 'login') {
         background: #f5f5f5;
         cursor: pointer;
         border-radius: 4px;
-        margin-left: auto;
         margin-right: 15px;
     }
 

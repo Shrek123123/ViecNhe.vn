@@ -250,6 +250,33 @@ if (isset($_SESSION['employerid'])) {
         display: block;
     }
 
+    .dashboard-sidebar-toggle {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 4px;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .dashboard-sidebar-toggle span {
+        display: block;
+        width: 22px;
+        height: 2px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 2px;
+    }
+
+    .dashboard-sidebar-overlay {
+        display: none;
+    }
+
     @media (max-width: 768px) {
         .logo-wrap {
             min-width: 0;
@@ -415,6 +442,61 @@ if (isset($_SESSION['employerid'])) {
             left: auto;
             right: 0;
         }
+
+        .dashboard-topbar {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 0 !important;
+        }
+
+        .dashboard-sidebar-toggle {
+            display: flex;
+            flex: 0 0 auto;
+            margin-left: auto;
+        }
+
+        .dashboard-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 2100;
+            width: min(320px, 85vw) !important;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto;
+            border: 0 !important;
+            padding: 24px 16px;
+            box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+            transform: translateX(105%);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-sidebar.is-open {
+            transform: translateX(0);
+        }
+
+        .dashboard-sidebar-overlay {
+            display: block;
+            position: fixed;
+            inset: 0;
+            z-index: 2050;
+            background: rgba(0, 0, 0, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .dashboard-sidebar-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-sidebar,
+        .dashboard-sidebar-overlay {
+            transition: none;
+        }
     }
 </style>
 
@@ -512,6 +594,68 @@ if (isset($_SESSION['employerid'])) {
             });
         }
 
+        function initializeDashboardDrawer() {
+            var topbar = document.querySelector('.dashboard-topbar');
+            var dashboardSidebar = document.querySelector('.dashboard-sidebar');
+            if (!topbar || !dashboardSidebar || topbar.querySelector('.dashboard-sidebar-toggle')) {
+                return;
+            }
+
+            var dashboardToggle = document.createElement('button');
+            dashboardToggle.type = 'button';
+            dashboardToggle.className = 'dashboard-sidebar-toggle';
+            dashboardToggle.setAttribute('aria-label', 'Open dashboard menu');
+            dashboardToggle.setAttribute('aria-controls', 'dashboard-sidebar');
+            dashboardToggle.setAttribute('aria-expanded', 'false');
+            dashboardToggle.innerHTML = '<span></span><span></span><span></span>';
+            dashboardSidebar.id = 'dashboard-sidebar';
+            topbar.appendChild(dashboardToggle);
+
+            var dashboardOverlay = document.createElement('div');
+            dashboardOverlay.className = 'dashboard-sidebar-overlay';
+            dashboardOverlay.id = 'dashboard-sidebar-overlay';
+            dashboardOverlay.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(dashboardOverlay);
+
+            function closeDashboardDrawer() {
+                dashboardSidebar.classList.remove('is-open');
+                dashboardOverlay.classList.remove('is-open');
+                dashboardToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+
+            function openDashboardDrawer() {
+                dashboardSidebar.classList.add('is-open');
+                dashboardOverlay.classList.add('is-open');
+                dashboardToggle.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            }
+
+            dashboardToggle.addEventListener('click', function () {
+                if (dashboardSidebar.classList.contains('is-open')) {
+                    closeDashboardDrawer();
+                } else {
+                    openDashboardDrawer();
+                }
+            });
+            dashboardOverlay.addEventListener('click', closeDashboardDrawer);
+            dashboardSidebar.addEventListener('click', function (event) {
+                if (event.target.closest('button') && !event.target.closest('#btn-changeinfo')) {
+                    closeDashboardDrawer();
+                }
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeDashboardDrawer();
+                }
+            });
+            window.addEventListener('resize', function () {
+                if (window.matchMedia('(min-width: 769px)').matches) {
+                    closeDashboardDrawer();
+                }
+            });
+        }
+
         var applicantSidebar = null;
         var applicantItems = [];
         var applicantPlaceholders = [];
@@ -567,9 +711,13 @@ if (isset($_SESSION['employerid'])) {
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', moveApplicantPreview);
+            document.addEventListener('DOMContentLoaded', function () {
+                moveApplicantPreview();
+                initializeDashboardDrawer();
+            });
         } else {
             moveApplicantPreview();
+            initializeDashboardDrawer();
         }
         window.addEventListener('resize', moveApplicantPreview);
     })();

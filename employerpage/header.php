@@ -170,7 +170,8 @@ if (isset($_SESSION['employerid'])) {
     .logo-wrap img {
         display: block;
         width: auto;
-        max-width: 180px;
+        max-width: 300
+        px;
     }
 
     .header-nav {

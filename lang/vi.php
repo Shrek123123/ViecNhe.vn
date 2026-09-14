@@ -382,7 +382,7 @@ $lang = [
     'my_job_post' => 'Bài đăng tuyển dụng',
     'edit' => 'Chỉnh sửa',
     'delete' => 'Xóa',
-    'check_submitted_applications' => 'Xem hồ sơ ứng viên nộp',
+    'check_submitted_applications' => 'Xem ứng viên',
     'confirm-deletejobpost' => 'Bạn có chắc muốn xóa bài đăng không? Việc này sẽ không thể hoàn tác được.',
     'delete_job_post_success' => 'Bài đăng đã được xóa thành công.',
     'employerprofile' => 'Hồ sơ nhà tuyển dụng',
@@ -589,7 +589,7 @@ $lang = [
     'sort_oldest_first' => 'Ngày đăng cũ nhất trước',
     'sort_salary_highest' => 'Mức lương từ cao xuống thấp',
     'sort_salary_lowest' => 'Mức lương từ thấp lên cao',
-    'days_left' => 'Hạn còn lại: %d ngày',
+    'days_left' => 'Còn %d ngày',
     //application form
     'application_form' => 'Biểu mẫu ứng tuyển',
     'close' => 'Đóng',

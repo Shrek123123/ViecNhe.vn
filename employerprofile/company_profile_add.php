@@ -681,6 +681,72 @@ if (!$company_data && $company_id > 0) {
             transform: translateY(-1px);
         }
 
+        @media (max-width: 768px) {
+            .dashboard-topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .dashboard-main {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                box-sizing: border-box;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .dashboard-sidebar h3 {
+                margin-top: 15px;
+            }
+
+            .dashboard-content {
+                padding: 15px !important;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-actions button,
+            .form-actions a {
+                width: 100%;
+                text-align: center;
+            }
+
+            .change-info-menu {
+                position: static;
+                width: 100%;
+                margin-top: 5px;
+                box-shadow: none;
+                border: 1px solid #eee;
+            }
+            
+            .footer-column {
+                min-width: 100%;
+                margin: 20px 0;
+            }
+            
+            .hotline-section {
+                flex-direction: column;
+            }
+            
+            .hotline-box {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 20px 0;
+            }
+
+            .company-form-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+        }
+
         /* ===== CONTENT ===== */
         .dashboard-content {
             flex: 1;

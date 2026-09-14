@@ -124,6 +124,9 @@ if (isset($_SESSION['employerid'])) {
         border-bottom: 1px solid #ddd;
         width: 100%;
         box-sizing: border-box;
+        position: sticky;
+        top: 0;
+        z-index: 2000;
     }
 
     .header nav {
@@ -302,17 +305,16 @@ if (isset($_SESSION['employerid'])) {
             border-bottom: 1px solid #eee;
         }
 
-        .user-info {
+        .header-nav .user-info {
             padding: 14px 20px;
             justify-content: flex-start;
         }
 
-        .user-dropdown {
-            margin-right: 0;
-            width: 100%;
+        .header-nav .user-dropdown {
+            display: none;
         }
 
-        .dropdown-menu {
+        .header-nav .dropdown-menu {
             position: static;
             display: flex;
             width: 100%;
@@ -322,7 +324,7 @@ if (isset($_SESSION['employerid'])) {
             box-shadow: none;
         }
 
-        .dropdown-menu a {
+        .header-nav .dropdown-menu a {
             padding: 12px 32px;
         }
 
@@ -356,6 +358,20 @@ if (isset($_SESSION['employerid'])) {
 
         .header-nav .guest-options .btn-login {
             display: none;
+        }
+
+        .header-right .user-dropdown {
+            display: inline-block;
+            margin-right: 0;
+        }
+
+        .header-right .user-info span {
+            display: none;
+        }
+
+        .header-right .dropdown-menu {
+            left: auto;
+            right: 0;
         }
     }
 </style>
@@ -408,7 +424,17 @@ if (isset($_SESSION['employerid'])) {
     </div>
 
     <div class="header-right">
-        <?php if (!isset($_SESSION['usernameemployer'])): ?>
+        <?php if (isset($_SESSION['usernameemployer'])): ?>
+            <div class="user-dropdown">
+                <div class="user-info">
+                    <img src="<?= htmlspecialchars($header_avatar) ?>" alt="User Avatar">
+                    <span><?php echo htmlspecialchars($_SESSION['usernameemployer']); ?></span>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="../employerlogout.php"><?php echo $lang['logout']; ?></a>
+                </div>
+            </div>
+        <?php else: ?>
             <a href="employerlogin.php" class="btn-login mobile-login-btn">
                 <?php echo $lang['login']; ?>
             </a>

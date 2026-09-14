@@ -180,6 +180,31 @@ if ($row = $result->fetch_assoc()) {
 ?>
 
 
+<style>
+    @media (max-width: 768px) {
+        .application-card > div:first-child,
+        .application-card > div:last-child {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+        }
+        
+        .application-card > div:last-child div:last-child {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .application-card > div:last-child button,
+        .application-card > div:last-child a {
+            width: 100%;
+            text-align: center;
+            margin-right: 0 !important;
+        }
+    }
+</style>
+
 <div style="color: #b23b3b; font-weight: bold; font-size: 20px; text-align: center;"><?php echo $message ?><span></span>
 </div>
 <div style="padding: 10px;">

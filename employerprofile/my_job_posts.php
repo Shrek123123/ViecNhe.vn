@@ -700,6 +700,85 @@ $employer_id = $_SESSION['employerid'] ?? 0;
             transform: translateY(-3px);
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
         }
+
+        @media (max-width: 768px) {
+            .dashboard-topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .dashboard-company {
+                display: none;
+            }
+
+            .dashboard-main {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                box-sizing: border-box;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .dashboard-sidebar h3 {
+                margin-top: 15px;
+            }
+
+            .dashboard-content {
+                padding: 10px !important;
+            }
+
+            .dashboard-content > div {
+                padding: 15px !important;
+            }
+
+            /* Target job card flex container */
+            .dashboard-content .dashboard-job-card {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+
+            .dashboard-content .dashboard-job-card img {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-right: 0 !important;
+                margin-bottom: 15px !important;
+            }
+
+            .dashboard-content .dashboard-job-card div:last-child {
+                margin-left: 0 !important;
+                margin-top: 15px !important;
+                align-items: flex-start !important;
+                flex-direction: row !important;
+                flex-wrap: wrap;
+            }
+
+            .change-info-menu {
+                position: static;
+                width: 100%;
+                margin-top: 5px;
+                box-shadow: none;
+                border: 1px solid #eee;
+            }
+            
+            .footer-column {
+                min-width: 100%;
+                margin: 20px 0;
+            }
+            
+            .hotline-section {
+                flex-direction: column;
+            }
+            
+            .hotline-box {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 20px 0;
+            }
+        }
     </style>
 </head>
 
@@ -901,7 +980,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                 $admin_notes = trim((string) ($row['admin_notes'] ?? ''));
 
                                 ?>
-                                <div
+                                <div class="dashboard-job-card"
                                     style="background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 18px; display: flex; align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                                     <img src="<?= $logo ?>" alt="logo"
                                         style="width: 120px; height: auto; max-height: 140px; border-radius: 8px; object-fit: contain; margin-right: 18px; border: 1px solid #eee; background: #fff;">

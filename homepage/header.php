@@ -132,6 +132,9 @@ if ($jobseeker_id > 0) {
         border-bottom: 1px solid #ddd;
         width: 100%;
         box-sizing: border-box;
+        position: sticky;
+        top: 0;
+        z-index: 2000;
     }
 
     .header nav {

@@ -752,6 +752,102 @@ $employer_id = $_SESSION['employerid'] ?? 0;
             transform: translateY(-3px);
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
         }
+
+        @media (max-width: 768px) {
+            .dashboard-topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .dashboard-company {
+                display: none;
+            }
+
+            .dashboard-main {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                box-sizing: border-box;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .dashboard-sidebar h3 {
+                margin-top: 15px;
+            }
+
+            .dashboard-content {
+                padding: 15px !important;
+            }
+
+            .company-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .company-logo-wrap {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            .company-logo {
+                height: 200px;
+            }
+
+            .company-card-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .company-card-actions a,
+            .company-card-actions button {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+
+            .change-info-menu {
+                position: static;
+                width: 100%;
+                margin-top: 5px;
+                box-shadow: none;
+                border: 1px solid #eee;
+            }
+            
+            .footer-column {
+                min-width: 100%;
+                margin: 20px 0;
+            }
+            
+            .hotline-section {
+                flex-direction: column;
+            }
+            
+            .hotline-box {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 20px 0;
+            }
+
+            .company-card {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+
+            .company-logo-wrap {
+                width: 100% !important;
+                min-width: 100% !important;
+                margin-bottom: 15px;
+            }
+
+            .company-card-actions {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+        }
     </style>
 </head>
 

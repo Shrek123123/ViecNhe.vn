@@ -129,6 +129,9 @@ if ($jobseeker_id > 0) {
         border-bottom: 1px solid #ddd;
         width: 100%;
         box-sizing: border-box;
+        position: sticky;
+        top: 0;
+        z-index: 2000;
     }
 
     .header nav {
@@ -299,17 +302,17 @@ if ($jobseeker_id > 0) {
             border-bottom: 1px solid #eee;
         }
 
-        .user-info {
+        .header-nav .user-info {
             margin-right: 0;
             padding: 14px 20px;
             justify-content: flex-start;
         }
 
-        .user-dropdown {
-            width: 100%;
+        .header-nav .user-dropdown {
+            display: none;
         }
 
-        .dropdown-menu {
+        .header-nav .dropdown-menu {
             position: static;
             display: flex;
             width: 100%;
@@ -353,6 +356,20 @@ if ($jobseeker_id > 0) {
 
         .header-nav .guest-options .btn-login {
             display: none;
+        }
+
+        .header-right .user-dropdown {
+            display: inline-block;
+            margin-right: 0;
+        }
+
+        .header-right .user-info span {
+            display: none;
+        }
+
+        .header-right .dropdown-menu {
+            left: auto;
+            right: 0;
         }
     }
 </style>
@@ -438,7 +455,25 @@ if ($jobseeker_id > 0) {
     </div>
 
     <div class="header-right">
-        <?php if (!isset($_SESSION['username'])): ?>
+        <?php if (isset($_SESSION['username'])): ?>
+            <div class="user-dropdown">
+                <div class="user-info">
+                    <img src="<?= htmlspecialchars($profilePic); ?>" alt="User Avatar">
+                    <span><?= htmlspecialchars($username ?? 'Người dùng'); ?></span>
+                </div>
+                <div class="dropdown-menu">
+                    <?php
+                    $jobseekerId = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
+                    ?>
+                    <a href="ho_so_ung_vien.php">
+                        <?= $lang['profile']; ?>
+                    </a>
+                    <a href="../jobseekerlogout.php">
+                        <?= $lang['logout']; ?>
+                    </a>
+                </div>
+            </div>
+        <?php else: ?>
             <a href="../jobseekerlogin.php" class="btn-login mobile-login-btn">
                 <?= $lang['login']; ?>
             </a>

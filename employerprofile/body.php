@@ -196,6 +196,30 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
             text-decoration: none;
             cursor: pointer;
         }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                box-sizing: border-box;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .custom-modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
     </style>
 </head>
 
@@ -203,54 +227,6 @@ require_once 'config.php'; // Đảm bảo config.php được bao gồm
 
     <div class="top-bar">
         <div class="title"><?= $lang['employerprofile'] ?></div>
-        <div class="company">
-            <?php
-            // Lấy employer_id từ URL
-            $employer_id = isset($_SESSION['employerid']) ? intval($_SESSION['employerid']) : 0;
-
-            // Lấy ảnh đại diện employer
-            $sql = "SELECT profile_pic FROM employer_profile WHERE id = $employer_id LIMIT 1";
-            // Check if $conn is defined and connected before querying
-            if (isset($conn) && $conn->ping()) {
-                $result = $conn->query($sql);
-            } else {
-                // Handle case where $conn is not available or not connected
-                // For now, setting a default, but in production, you might want an error log or redirection
-                $result = false;
-            }
-
-            // Lấy thông tin user từ bảng user dựa trên $employer_id
-            $row = null;
-            if (isset($conn) && $conn->ping()) {
-                $user_sql = "SELECT * FROM user WHERE id = $employer_id LIMIT 1";
-                $user_result = $conn->query($user_sql);
-                if ($user_result && $user_result->num_rows > 0) {
-                    $row = $user_result->fetch_assoc();
-                }
-            }
-
-            $profile_pic = "https://via.placeholder.com/34"; // Default placeholder
-            if ($result && $profile_row = $result->fetch_assoc()) {
-                $profile_pic = !empty($profile_row['profile_pic']) ? htmlspecialchars($profile_row['profile_pic']) : $profile_pic;
-            }
-            // Gán tên employer từ cột username nếu có
-            $employername = "";
-            if ($row && isset($row['username'])) {
-                $employername = htmlspecialchars($row['username']);
-            }
-            // Close connection after use if it's not needed for the rest of the page
-            // If config.php creates a global $conn that is used elsewhere, don't close it here.
-            // For this example, assuming it can be closed.
-            if (isset($conn) && $conn->ping()) {
-                $conn->close();
-            }
-            ?>
-            <img src="<?php echo $profile_pic; ?>" alt="company logo">
-            <div class="company-info">
-                <div><strong><?php echo $employername; ?></strong></div>
-                <div class="status">● Online</div>
-            </div>
-        </div>
     </div>
 
     <div class="main">

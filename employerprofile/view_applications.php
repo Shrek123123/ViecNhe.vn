@@ -744,6 +744,56 @@ if (isset($_SESSION['flash_message'])) {
             transform: translateY(-3px);
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
         }
+
+        @media (max-width: 768px) {
+            .dashboard-topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .dashboard-main {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                box-sizing: border-box;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .dashboard-sidebar h3 {
+                margin-top: 15px;
+            }
+
+            .dashboard-content {
+                padding: 15px !important;
+            }
+
+            .change-info-menu {
+                position: static;
+                width: 100%;
+                margin-top: 5px;
+                box-shadow: none;
+                border: 1px solid #eee;
+            }
+            
+            .footer-column {
+                min-width: 100%;
+                margin: 20px 0;
+            }
+            
+            .hotline-section {
+                flex-direction: column;
+            }
+            
+            .hotline-box {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 20px 0;
+            }
+        }
     </style>
 </head>
 

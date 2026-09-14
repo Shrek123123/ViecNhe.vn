@@ -158,6 +158,37 @@
         display: block;
         height: 60px;
     }
+
+    @media (max-width: 768px) {
+        .hotline-section {
+            flex-direction: column;
+        }
+
+        .hotline-box {
+            border-right: none;
+            border-bottom: 1px solid #ddd;
+            padding: 20px 0;
+        }
+
+        .hotline-box:last-child {
+            border-bottom: none;
+        }
+
+        .footer-container {
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .footer-column {
+            min-width: 100%;
+            margin: 10px 0 20px 0;
+        }
+
+        .qr-and-apps {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
 </style>
 </head>
 

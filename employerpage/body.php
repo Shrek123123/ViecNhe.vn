@@ -250,6 +250,60 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     font-size: 24px;
     cursor: pointer;
   }
+
+  @media (max-width: 768px) {
+    .hero {
+      height: auto;
+      padding: 20px;
+      justify-content: center;
+    }
+
+    .hero-overlay {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 28px;
+    }
+
+    .hero ul {
+      font-size: 16px;
+      text-align: left;
+    }
+
+    .hero-buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .hero-buttons button {
+      width: 100%;
+    }
+
+    .form-table,
+    .form-table tr,
+    .form-table td {
+      display: block;
+      width: 100%;
+    }
+
+    .form-table td {
+      padding: 5px 0;
+    }
+
+    .form-table label {
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .form-table input,
+    .form-table select,
+    .form-table textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
 </style>
 <section class="hero" style="background: url('image/employerpagebackground.png') no-repeat center center/cover;">
   <div class="hero-overlay">

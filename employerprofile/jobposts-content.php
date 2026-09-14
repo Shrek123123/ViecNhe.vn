@@ -7,6 +7,31 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 // Load file ngôn ngữ tương ứng
 ?>
+<style>
+    @media (max-width: 768px) {
+        .dashboard-job-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+
+        .dashboard-job-card img {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-right: 0 !important;
+            margin-bottom: 15px !important;
+        }
+
+        .dashboard-job-card div:last-child {
+            margin-left: 0 !important;
+            margin-top: 15px !important;
+            align-items: flex-start !important;
+            flex-direction: row !important;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    }
+</style>
+
 <div style="padding: 30px; border-radius: 8px;">
     <h2 style="color: #b23b3b; margin-bottom: 20px;"><?= $lang['my_job_post'] ?></h2>
     <div style="display: flex; flex-direction: column; gap: 18px;">
@@ -99,7 +124,7 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
                     // Lấy bản dịch từ file ngôn ngữ
                     $job_status = isset($status_lang_keys[$job_status_raw]) ? $lang[$status_lang_keys[$job_status_raw]] : $job_status_raw;
                     ?>
-                    <div
+                    <div class="dashboard-job-card"
                         style="background: #fff; border: 1px solid black; border-radius: 10px; padding: 18px 18px 18px 0; display: flex; align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                         <img src="<?php echo $logo; ?>" alt="job"
                             style="width: 120px; height: 70px; border-radius: 8px; object-fit: cover; margin-right: 18px;">

@@ -682,6 +682,94 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
             margin: 0;
             font-size: 16px;
         }
+
+        @media (max-width: 768px) {
+            .dashboard-topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .dashboard-main {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                box-sizing: border-box;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .dashboard-sidebar h3 {
+                margin-top: 15px;
+            }
+
+            .dashboard-content {
+                padding: 15px !important;
+            }
+
+            .application-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .application-card {
+                padding: 15px !important;
+            }
+
+            /* Target the flex containers inside the card */
+            .application-card > div:nth-child(1),
+            .application-card > div:nth-child(5) {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+            
+            .application-card > div:nth-child(5) div:last-child {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .application-card > div:nth-child(5) button,
+            .application-card > div:nth-child(5) a {
+                width: 100%;
+                text-align: center;
+                margin-right: 0 !important;
+            }
+
+            .change-info-menu {
+                position: static;
+                width: 100%;
+                margin-top: 5px;
+                box-shadow: none;
+                border: 1px solid #eee;
+            }
+            
+            .footer-column {
+                min-width: 100%;
+                margin: 20px 0;
+            }
+            
+            .hotline-section {
+                flex-direction: column;
+            }
+            
+            .hotline-box {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 20px 0;
+            }
+
+            .application-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .posting-options {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 

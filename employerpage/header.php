@@ -114,6 +114,9 @@ if (isset($_SESSION['employerid'])) {
         border-bottom: 1px solid #ddd;
         width: 100%;
         box-sizing: border-box;
+        position: sticky;
+        top: 0;
+        z-index: 2000;
     }
 
     .header nav {

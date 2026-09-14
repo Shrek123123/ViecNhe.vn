@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Nếu người dùng bấm đổi ngôn ngữ
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
@@ -11,8 +13,24 @@ if (!isset($_SESSION['lang'])) {
 }
 
 // Load file ngôn ngữ tương ứng
-include 'lang/' . $_SESSION['lang'] . '.php';
+include __DIR__ . '/../lang/' . $_SESSION['lang'] . '.php';
 $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
+$user_data = null;
+if ($jobseeker_id > 0) {
+    $conn = new mysqli("localhost", "root", "", "jobhive");
+    if (!$conn->connect_error) {
+        $sql = "SELECT username FROM user WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $jobseeker_id);
+        $stmt->execute();
+        $stmt->bind_result($username);
+        if ($stmt->fetch()) {
+            $user_data = $username;
+        }
+        $stmt->close();
+        $conn->close();
+    }
+}
 ?>
 <style>
     .loggined_option {
@@ -114,6 +132,9 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
         border-bottom: 1px solid #ddd;
         width: 100%;
         box-sizing: border-box;
+        position: sticky;
+        top: 0;
+        z-index: 2000;
     }
 
     .header nav {
@@ -211,6 +232,11 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
             display: flex;
         }
 
+        #lang-switch-btn {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
         .header-nav {
             position: fixed;
             top: 0;
@@ -278,18 +304,17 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
             border-bottom: 1px solid #eee;
         }
 
-        .user-info {
+        .header-nav .user-info {
             margin-right: 0;
             padding: 14px 20px;
             justify-content: flex-start;
         }
 
-        .user-dropdown {
-            margin-right: 0;
-            width: 100%;
+        .header-nav .user-dropdown {
+            display: none;
         }
 
-        .dropdown-menu {
+        .header-nav .dropdown-menu {
             position: static;
             display: flex;
             width: 100%;
@@ -299,7 +324,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
             box-shadow: none;
         }
 
-        .dropdown-menu a {
+        .header-nav .dropdown-menu a {
             padding: 12px 32px;
         }
 
@@ -333,6 +358,30 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
 
         .header-nav .guest-options .btn-login {
             display: none;
+        }
+
+        .header-right .user-dropdown {
+            display: inline-block;
+            margin-right: 0;
+        }
+
+        .header-right .user-info {
+            margin-right: 0;
+            gap: 0;
+        }
+
+        .header-right .user-info span {
+            display: none;
+        }
+
+        .header-right .user-info img {
+            width: 36px;
+            height: 36px;
+        }
+
+        .header-right .dropdown-menu {
+            left: auto;
+            right: 0;
         }
     }
 </style>
@@ -387,7 +436,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
                     }
                     ?>
                     <img src="<?= htmlspecialchars($profilePic); ?>" alt="User Avatar">
-                    <span><?= htmlspecialchars($_SESSION['username'] ?? 'Người dùng'); ?></span>
+                    <span><?= htmlspecialchars($username ?? 'Người dùng'); ?></span>
                 </div>
                 <div class="dropdown-menu">
                     <?php
@@ -409,9 +458,7 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
                 <a href="employerpage.php" class="btn-register">
                     <?= $lang['employer_redirect']; ?>
                 </a>
-                <a href="admin/adminlogin.php" class="btn-register">
-                    <?= $lang['admin_login']; ?>
-                </a>
+
             </div>
         <?php endif; ?>
         </div>
@@ -421,8 +468,23 @@ $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_i
         </button>
     </div>
 
-    <div class="header-right">
-        <?php if (!isset($_SESSION['username'])): ?>
+        <div class="header-right">
+        <?php if (isset($_SESSION['username'])): ?>
+            <div class="user-dropdown">
+                <div class="user-info">
+                    <img src="<?= htmlspecialchars($profilePic); ?>" alt="User Avatar">
+                    <span><?= htmlspecialchars($username ?? 'Người dùng'); ?></span>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="jobseekerprofile/ho_so_ung_vien.php">
+                        <?= $lang['profile']; ?>
+                    </a>
+                    <a href="jobseekerlogout.php">
+                        <?= $lang['logout']; ?>
+                    </a>
+                </div>
+            </div>
+        <?php else: ?>
             <a href="jobseekerlogin.php" class="btn-login mobile-login-btn">
                 <?= $lang['login']; ?>
             </a>

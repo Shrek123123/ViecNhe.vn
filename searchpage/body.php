@@ -371,7 +371,7 @@ foreach ($industryOptionKeys as $industryKey) {
 
     .save-btn {
         background: #fff1f3;
-        border: 1px solid #e74c3c;
+        border: 1px #e74c3c;
         border-radius: 50%;
         width: 25px;
         height: 25px;
@@ -511,15 +511,53 @@ foreach ($industryOptionKeys as $industryKey) {
     }
 
     @media (max-width: 768px) {
+        .container {
+            padding: 24px 16px;
+        }
+
+        .title {
+            font-size: 20px;
+        }
+
+        .search-box {
+            margin-top: 20px;
+        }
+
+        .search-box form {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            width: 100%;
+        }
+
+        .search-box input,
+        .search-box select,
+        .search-box button {
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
         .job-section {
             max-width: 95%;
-            padding: 30px 15px;
+            padding: 24px 12px;
             grid-template-columns: 1fr;
         }
 
         .sort-by-container {
             max-width: 95%;
             padding: 0 15px;
+            justify-content: center;
+        }
+
+        .sort-by-form {
+            flex-direction: column;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .sort-by-form select,
+        .sort-by-form button {
+            width: 100%;
         }
     }
 
@@ -536,25 +574,9 @@ foreach ($industryOptionKeys as $industryKey) {
             justify-content: center;
         }
 
-        .job-body {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
         .company-logo {
-            width: 70px;
-            height: 70px;
-            margin: 0 0 10px;
-        }
-
-        .job-info {
-            width: 100%;
-            text-align: center;
-        }
-
-        .job-meta-row {
-            justify-content: center;
+            width: 60px;
+            height: 60px;
         }
 
         .job-footer {
@@ -564,6 +586,20 @@ foreach ($industryOptionKeys as $industryKey) {
         .save-btn {
             width: 28px;
             height: 28px;
+        }
+
+        .logos {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .logos img {
+            max-height: 40px;
+        }
+
+        .section-3 .header {
+            flex-wrap: wrap;
+            gap: 10px;
         }
     }
 

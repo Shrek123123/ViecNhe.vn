@@ -65,6 +65,39 @@ if ($application_id > 0 && isset($conn) && $conn->ping()) {
 }
 ?>
 
+<style>
+    .status-button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .status-action-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: opacity 0.2s;
+    }
+
+    .status-action-button.interviewed { background-color: #ffc107; }
+    .status-action-button.hired { background-color: #28a745; }
+    .status-action-button.rejected { background-color: #dc3545; }
+    .status-action-button:hover { opacity: 0.8; }
+
+    @media (max-width: 768px) {
+        .status-button-group {
+            flex-direction: column;
+        }
+        .status-action-button {
+            width: 100%;
+        }
+    }
+</style>
+
 <div style="font-size: 16px; margin-bottom: 15px;">
     Change status for application of <strong><?php echo $applicant_name; ?></strong> (ID: <?php echo $application_id; ?>)<br>
     Current Status: <span style="font-weight: bold; color: #b23b3b;"><?php echo ucfirst($current_status); ?></span>

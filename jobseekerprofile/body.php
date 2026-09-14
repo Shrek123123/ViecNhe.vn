@@ -146,6 +146,25 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             color: #fff;
             font-weight: bold;
         }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                box-sizing: border-box;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+        }
     </style>
 </head>
 
@@ -154,28 +173,6 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
     <!-- Top bar -->
     <div class="top-bar">
         <div class="title"><?= $lang['jobseekerprofile'] ?></div>
-        <div class="company">
-            <img src="https://via.placeholder.com/34" alt="jobseeker logo">
-            <?php
-            // Lấy jobseeker_id từ session hoặc từ URL
-            $jobseeker_id = $_SESSION['jobseeker_id'] ?? 0;
-
-            // Lấy ảnh đại diện jobseeker
-            $sql = "SELECT profile_pic FROM jobseeker_profile WHERE id = $jobseeker_id LIMIT 1";
-            $result = $conn->query($sql);
-            $profile_pic = "../image/defaultavatar.jpg";
-            if ($result && $row = $result->fetch_assoc()) {
-                $profile_pic = !empty($row['profile_pic']) ? $row['profile_pic'] : $profile_pic;
-            }
-            $conn->close();
-            $jobseeker_name = "Tên ứng viên";
-            ?>
-            <img src="<?php echo (preg_match('/^(https?:|data:|\.{2}\/)/', $profile_pic) ? $profile_pic : '../' . ltrim($profile_pic, '/')); ?>" alt="jobseeker logo">
-            <div class="company-info">
-                <div><strong><?php echo $jobseeker_name; ?></strong></div>
-                <div class="status">● Online</div>
-            </div>
-        </div>
     </div>
 
     <!-- Main layout -->

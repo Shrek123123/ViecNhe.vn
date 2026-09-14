@@ -96,6 +96,12 @@ if ($job_id > 0 && isset($conn) && $conn->ping()) {
         margin-bottom: 15px;
         text-align: center;
     }
+
+    @media (max-width: 768px) {
+        .edit-form-container {
+            padding: 15px;
+        }
+    }
 </style>
 
 <div class="edit-form-container">

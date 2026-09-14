@@ -78,6 +78,11 @@ if (isset($_SESSION['employerid'])) {
         cursor: pointer;
         margin-right: 50px;
     }
+    .ra_trang_tim_viec {
+        text-decoration: none;
+        color: #333;
+        margin-right: 15px;
+    }
 
     .dropdown-menu {
         display: none;
@@ -168,6 +173,11 @@ if (isset($_SESSION['employerid'])) {
         margin-left: auto;
         align-items: center;
     }
+    .loggined_option .ra_trang_tim_viec {
+            margin-right: 0;
+            padding: 14px 20px;
+            border-bottom: 1px solid #eee;
+        }
 
     #lang-switch-btn {
         padding: 8px 16px;
@@ -396,6 +406,7 @@ if (isset($_SESSION['employerid'])) {
             <a href="feedback_employer.php" style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
         </div>
         <div class="loggined_option">
+        <a class="ra_trang_tim_viec" href="../index.php"><?php echo $lang['Ra_trang_tim_viec'] ?></a>
         <?php if (isset($_SESSION['usernameemployer'])): ?>
             <div class="user-dropdown">
                 <div class="user-info">

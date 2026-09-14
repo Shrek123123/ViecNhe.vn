@@ -743,19 +743,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
                 <?= $lang['employerprofile'] ?>
             </div>
 
-            <div class="dashboard-company">
-
-                <div class="dashboard-company-info">
-                    <div class="company-name">
-                        <?= $employername ?? 'Employer' ?>
-                    </div>
-                    <div class="company-status">● Online</div>
-                </div>
-            </div>
         </div>
 
         <!-- MAIN -->
-        <div class="dashboard-main">
+        <div class="dashboard-main has-applicant-preview">
 
             <!-- SIDEBAR -->
             <div class="dashboard-sidebar">
@@ -789,7 +780,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
                 }
                 ?>
 
-                <h3><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+                <h3 class="applicant-preview-heading"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
 
                 <?php
                 // Lấy 2 đơn ứng tuyển đầu tiên từ database

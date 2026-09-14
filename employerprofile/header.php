@@ -185,12 +185,18 @@ if (isset($_SESSION['employerid'])) {
         background: #f5f5f5;
         cursor: pointer;
         border-radius: 4px;
-        margin-right: 50px;
+        margin-right: 10px;
     }
 
     .logo-wrap {
         display: flex;
         align-items: center;
+    }
+
+    .logo-wrap img {
+        display: block;
+        width: auto;
+        max-width: 300px;
     }
 
     .header-nav {
@@ -245,6 +251,18 @@ if (isset($_SESSION['employerid'])) {
     }
 
     @media (max-width: 768px) {
+        .logo-wrap {
+            min-width: 0;
+            flex: 0 1 auto;
+        }
+
+        .logo-wrap img {
+            width: auto !important;
+            max-width: 300px;
+            height: 65px !important;
+            object-fit: contain;
+        }
+
         .menu-toggle {
             display: flex;
         }
@@ -507,7 +525,7 @@ if (isset($_SESSION['employerid'])) {
                 }
 
                 applicantItems = Array.prototype.slice.call(
-                    applicantSidebar.querySelectorAll('.applicant-card, .view-more')
+                    applicantSidebar.querySelectorAll('.applicant-preview-heading, .applicant-card, .view-more')
                 );
                 if (!applicantItems.length) {
                     return;
@@ -520,16 +538,21 @@ if (isset($_SESSION['employerid'])) {
                 });
             }
 
-            var dashboardMain = applicantSidebar.parentElement;
+            var dashboardMain = applicantSidebar.closest('.dashboard-main');
             if (!dashboardMain) {
                 return;
             }
 
-            var preview = applicantPreview || dashboardMain.querySelector('.mobile-applicant-preview');
+            var dashboardContainer = dashboardMain.parentElement;
+            if (!dashboardContainer) {
+                return;
+            }
+
+            var preview = applicantPreview || dashboardContainer.querySelector('.mobile-applicant-preview');
             if (!preview) {
                 preview = document.createElement('div');
                 preview.className = 'mobile-applicant-preview';
-                dashboardMain.insertBefore(preview, applicantSidebar.nextElementSibling);
+                dashboardContainer.insertBefore(preview, dashboardMain.nextElementSibling);
             }
             applicantPreview = preview;
 

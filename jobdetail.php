@@ -67,6 +67,20 @@ require_once 'helpers.php';
             margin-top: 20px;
             margin-bottom: 10px;
         }
+
+        .related-jobs-mobile {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .related-jobs-desktop {
+                display: none;
+            }
+
+            .related-jobs-mobile {
+                display: block;
+            }
+        }
     </style>
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -297,7 +311,7 @@ require_once 'helpers.php';
                 ?>
 
                 <?php if (!empty($related_jobs)): ?>
-                    <div class="bg-white p-4 shadow rounded mt-5">
+                    <div class="related-jobs-desktop bg-white p-4 shadow rounded mt-5">
                         <h4 class="text-danger"><?= $lang['jobdetail_related_jobs'] ?></h4>
                         <div class="list-group">
                             <?php foreach ($related_jobs as $rjob): ?>
@@ -370,6 +384,20 @@ require_once 'helpers.php';
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>
+
+                <?php if (!empty($related_jobs)): ?>
+                    <div class="related-jobs-mobile bg-white p-4 shadow rounded mt-4">
+                        <h4 class="text-danger"><?= $lang['jobdetail_related_jobs'] ?></h4>
+                        <div class="list-group">
+                            <?php foreach ($related_jobs as $rjob): ?>
+                                <a href="jobdetail.php?id=<?= htmlspecialchars($rjob['id']) ?>"
+                                    class="list-group-item list-group-item-action">
+                                    <?= htmlspecialchars($rjob['job_title']) ?>: <?= htmlspecialchars($rjob['salary']) ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

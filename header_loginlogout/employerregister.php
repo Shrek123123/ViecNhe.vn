@@ -36,7 +36,7 @@ if ($auth_header_mode === 'login') {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-right: 50px;
+        margin-right: 10px;
     }
 
     .user-info img {
@@ -121,7 +121,7 @@ if ($auth_header_mode === 'login') {
         display: flex;
         gap: 15px;
         margin-left: auto;
-        margin-right: 50px;
+        margin-right: 10px;
     }
 
     .btn-login,
@@ -171,12 +171,18 @@ if ($auth_header_mode === 'login') {
         cursor: pointer;
         border-radius: 4px;
         margin-left: auto;
-        margin-right: 50px;
+        margin-right: 15px;
     }
 
     .logo-wrap {
         display: flex;
         align-items: center;
+    }
+
+    .logo-wrap img {
+        display: block;
+        width: auto;
+        max-width: 180px;
     }
 
     .header-nav-links {
@@ -229,6 +235,13 @@ if ($auth_header_mode === 'login') {
     }
 
     @media (max-width: 768px) {
+        .logo-wrap img {
+            width: auto !important;
+            max-width: 300px;
+            height: 65px !important;
+            object-fit: contain;
+        }
+
         .menu-toggle {
             display: flex;
         }

@@ -43,7 +43,7 @@ if ($jobseeker_id > 0) {
         cursor: pointer;
         border-radius: 4px;
         padding: 8px 16px;
-        margin-right: 50px;
+        margin-right: 20px;
     }
     .ra_trang_ntd {
         text-decoration: none;
@@ -54,13 +54,13 @@ if ($jobseeker_id > 0) {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-right: 50px;
     }
 
     .user-info img {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
+        object-fit: cover;
     }
 
     .user-info button {
@@ -82,6 +82,7 @@ if ($jobseeker_id > 0) {
         position: relative;
         display: inline-block;
         cursor: pointer;
+        margin-right: 50px;
     }
 
     .dropdown-menu {
@@ -174,6 +175,12 @@ if ($jobseeker_id > 0) {
         align-items: center;
     }
 
+    .logo-wrap img {
+        display: block;
+        width: auto;
+        max-width: 180px;
+    }
+
     .header-nav {
         display: flex;
         align-items: center;
@@ -226,6 +233,18 @@ if ($jobseeker_id > 0) {
     }
 
     @media (max-width: 768px) {
+        .logo-wrap {
+            min-width: 0;
+            flex: 0 1 auto;
+        }
+
+        .logo-wrap img {
+            width: auto !important;
+            max-width: 300px;
+            height: 65px !important;
+            object-fit: contain;
+        }
+
         .menu-toggle {
             display: flex;
         }

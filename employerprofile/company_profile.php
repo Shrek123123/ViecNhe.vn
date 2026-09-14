@@ -754,6 +754,14 @@ $employer_id = $_SESSION['employerid'] ?? 0;
         }
 
         @media (max-width: 768px) {
+            .company-card,
+            .company-card-body,
+            .company-description {
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
             .dashboard-topbar {
                 flex-direction: column;
                 align-items: flex-start;
@@ -846,6 +854,15 @@ $employer_id = $_SESSION['employerid'] ?? 0;
             .company-card-actions {
                 flex-direction: column !important;
                 align-items: stretch !important;
+                width: 100%;
+            }
+
+            .company-card-actions a,
+            .company-card-actions form,
+            .company-card-actions button {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
             }
         }
     </style>
@@ -863,19 +880,10 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                 <?= $lang['employerprofile'] ?>
             </div>
 
-            <div class="dashboard-company">
-
-                <div class="dashboard-company-info">
-                    <div class="company-name">
-                        <?= $employername ?? 'Employer' ?>
-                    </div>
-                    <div class="company-status">● Online</div>
-                </div>
-            </div>
         </div>
 
         <!-- MAIN -->
-        <div class="dashboard-main">
+        <div class="dashboard-main has-applicant-preview">
 
             <!-- SIDEBAR -->
             <div class="dashboard-sidebar">
@@ -909,7 +917,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                 }
                 ?>
 
-                <h3><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
+                <h3 class="applicant-preview-heading"><?= $lang['employerprofile_applicantprofiles'] ?> <span style="color: #b23b3b; font-weight: bold;">(<?php echo $total_applications; ?>)</span></h3>
 
                 <?php
                 // Lấy 2 đơn ứng tuyển đầu tiên từ database

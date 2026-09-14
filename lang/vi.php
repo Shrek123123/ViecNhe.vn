@@ -5,7 +5,7 @@ $lang = [
     //header
     "create_cv" => "Tạo CV",
     "contact_us" => "Liên hệ với chúng tôi",
-    "feedback" => "Phản hồi",
+    "feedback" => "Gửi phản hồi",
     "feedback_page_title" => "Gửi phản hồi",
     "feedback_rating_label" => "Đánh giá (1-5 sao):",
     "feedback_star_label" => ":count sao",

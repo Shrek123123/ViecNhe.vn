@@ -43,6 +43,7 @@ if (isset($_SESSION['employerid'])) {
         display: flex;
         align-items: center;
         gap: 10px;
+        margin-right: 20px;
     }
 
     .user-info img {
@@ -166,6 +167,12 @@ if (isset($_SESSION['employerid'])) {
         align-items: center;
     }
 
+    .logo-wrap img {
+        display: block;
+        width: auto;
+        max-width: 180px;
+    }
+
     .header-nav {
         display: flex;
         align-items: center;
@@ -218,6 +225,22 @@ if (isset($_SESSION['employerid'])) {
     }
 
     @media (max-width: 768px) {
+        .header {
+            padding: 10px;
+        }
+
+        .logo-wrap {
+            min-width: 0;
+            flex: 0 1 auto;
+        }
+
+        .logo-wrap img {
+            width: auto !important;
+            max-width: 300px;
+            height: 65px !important;
+            object-fit: contain;
+        }
+
         .menu-toggle {
             display: flex;
         }
@@ -335,10 +358,12 @@ if (isset($_SESSION['employerid'])) {
         .header-right {
             display: flex;
             align-items: center;
+            flex: 0 0 auto;
             margin-left: auto;
         }
 
         .mobile-login-btn {
+            display: inline-block;
             padding: 8px 12px;
             color: #d90000;
             font-weight: bold;

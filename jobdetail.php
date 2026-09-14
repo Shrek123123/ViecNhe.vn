@@ -73,7 +73,31 @@ session_start();
             display: none;
         }
 
+        #applyModal {
+            z-index: 3000;
+        }
+
+        .modal-backdrop {
+            z-index: 2990;
+        }
+
+        #applyModal .modal-dialog {
+            position: relative;
+            z-index: 3001;
+        }
+
         @media (max-width: 767.98px) {
+            #applyModal .modal-dialog {
+                width: calc(100% - 24px);
+                max-width: none;
+                margin: 72px auto 12px;
+            }
+
+            #applyModal .modal-content {
+                max-height: calc(100vh - 84px);
+                overflow-y: auto;
+            }
+
             .job-summary-row {
                 display: flex;
                 flex-wrap: nowrap;

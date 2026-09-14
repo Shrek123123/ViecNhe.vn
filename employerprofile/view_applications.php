@@ -1140,7 +1140,7 @@ if (isset($_SESSION['flash_message'])) {
                                                             class="btn-manage-application"
                                                             data-application-id="<?php echo $application_id; ?>"
                                                             data-application-name="<?php echo $fullname; ?>"
-                                                            data-current-status="<?php echo $job_status_raw; ?>"
+                                                            data-current-status="<?php echo htmlspecialchars($display_status, ENT_QUOTES, 'UTF-8'); ?>"
                                                             style="background: #007bff; color: #fff; border: none; border-radius: 5px; padding: 6px 12px; font-size: 13px; cursor: pointer; margin-right: 8px;"><?= $lang['manage'] ?></button>
                                                     <?php endif; ?>
 

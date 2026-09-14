@@ -58,7 +58,7 @@ $lang = [
     "view_all" => "Xem tất cả →",
     "opportunities_at_top_companies" => "Cơ hội ứng tuyển vào các công việc hấp dẫn tại các công ty hàng đầu",
     "opportunities_at_top_companies_desc" => "Với sự phát triển nhanh chóng của nền kinh tế... môi trường chuyên nghiệp.",
-    "why_jobhive" => "Tại sao bạn nên tìm việc tại JobHive?",
+    "why_viecnhe" => "Tại sao bạn nên tìm việc tại Việc Nhẹ.vn?",
     "quality_jobs" => "Công việc chất lượng",
     "quality_jobs_desc" => "Hàng ngàn tin tuyển dụng chất lượng cao... phù hợp với CV của bạn.",
     "free_cv_builder" => "Trình tạo CV đẹp miễn phí",
@@ -89,13 +89,13 @@ $lang = [
 
     // Footer section
     "footer_about_us" => "Về chúng tôi",
-    "footer_company_full" => "JobHive.vn - Công Ty Cổ Phần Tìm Việc 24h",
+    "footer_company_full" => "ViecNhe.vn - Trang Web Tìm Việc Nhẹ Uy Tín",
     "footer_address_hcm" => "Phòng 102, Tòa nhà 20–208 Trần Cao Vân, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh",
     "footer_address_hn" => "Chi nhánh: Tầng 4, Times Tower, 35 Lê Văn Lương, Thanh Xuân, Hà Nội.",
     "footer_license" => "Giấy phép dịch vụ việc làm số: 2893/2022/S8LĐTBXH-VLATLĐ do Sở Lao động Thương binh và Xã hội cấp ngày 18/11/2024",
     "footer_phone" => "Điện thoại: +84 9818 52782 ",
-    "footer_email_job_seeker" => "Email hỗ trợ người tìm việc: ntv@jobhive.vn",
-    "footer_email_employer" => "Email hỗ trợ nhà tuyển dụng: ntd@jobhive.vn",
+    "footer_email_job_seeker" => "Email hỗ trợ người tìm việc: qudominh16@gmail.com",
+    "footer_email_employer" => "Email hỗ trợ nhà tuyển dụng: qudominh16@gmail.com",
 
     "footer_information" => "Thông tin",
     "footer_career_handbook" => "Cẩm nang nghề nghiệp",

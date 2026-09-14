@@ -394,7 +394,7 @@ if ($jobseeker_id > 0) {
     </button>
     <div class="logo-wrap">
         <a href="index.php">
-            <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
+            <img src="image/logo.png" alt="ViecNhe Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
 
@@ -403,9 +403,9 @@ if ($jobseeker_id > 0) {
             <a href="#" style="text-decoration: none; color: #333;">
                 <?= $lang['create_cv']; ?>
             </a>
-            <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
+            <!-- <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
                 <?= $lang['contact_us']; ?>
-            </a>
+            </a> -->
             <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">
                 <?= $lang['feedback']; ?>
             </a>

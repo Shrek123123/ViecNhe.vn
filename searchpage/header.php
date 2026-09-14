@@ -403,9 +403,9 @@ if ($jobseeker_id > 0) {
             <a href="#" style="text-decoration: none; color: #333;">
                 <?= $lang['create_cv']; ?>
             </a>
-            <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
+            <!-- <a href="contactus_jobseeker.php" style="text-decoration: none; color: #333;">
                 <?= $lang['contact_us']; ?>
-            </a>
+            </a> -->
             <a href="feedback_jobseeker.php" style="text-decoration: none; color: #333;">
                 <?= $lang['feedback']; ?>
             </a>

@@ -390,8 +390,8 @@ if (isset($_SESSION['employerid'])) {
     <div class="header-nav" id="header-nav">
         <div class="header-nav-links">
             <a href="#" style="text-decoration: none; color: #333;"><?php echo $lang['create_cv']; ?></a>
-            <a href="contactus_employer.php"
-                style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a>
+            <!-- <a href="contactus_employer.php"
+                style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a> -->
             <a href="feedback_employer.php" style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
         </div>
         <div class="loggined_option">

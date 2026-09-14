@@ -983,41 +983,48 @@ foreach ($industryOptionKeys as $industryKey) {
 
 
     <section class="section-3">
-        <div class="container">
-            <div class="header">
-                <h2>🌟 Featured Companies</h2>
-                <a href="#" class="view-all">View all →</a>
-            </div>
-            <div class="logos">
-                <img src="image/logo1.png" alt="Tabtab.me" />
-                <img src="image/logo2.png" alt="DIC" />
-                <img src="image/logo3.png" alt="NhanHoa" />
-                <img src="image/logo4.png" alt="EY" />
-                <img src="image/logo5.png" alt="Karofi" />
-            </div>
-        </div>
-    </section>
+    <div class="container">
+      <div class="header">
+        <h2><?= $lang['featured_companies']; ?></h2>
+        <a href="#" class="view-all"><?= $lang['view_all']; ?></a>
+      </div>
 
-    <section class="section-4">
-        <div class="container">
-            <h3>Opportunities to apply for attractive jobs at top companies</h3>
-            <p>With the rapid development of the economy... professional environment.</p>
+      <div class="logos">
+        <img src="image/logo1.png" alt="Tabtab.me" />
+        <img src="image/logo2.png" alt="DIC" />
+        <img src="image/logo3.png" alt="NhanHoa" />
+        <img src="image/logo4.png" alt="EY" />
+        <img src="image/logo5.png" alt="Karofi" />
+      </div>
+    </div>
+  </section>
 
-            <h3>Why should you look for jobs at JobHive?</h3>
-            <ul>
-                <li><strong>Quality Jobs</strong><br />
-                    Thousands of high-quality job postings... to your CV.</li>
-                <li><strong>Free Beautiful CV Builder</strong><br />
-                    Many beautiful CV templates... in just 5 minutes.</li>
-                <li><strong>Job Seeker Support</strong><br />
-                    Employers... view your CV and send invitations.</li>
-                <li><strong>Data Protection</strong><br />
-                    We commit to protecting your personal information...</li>
-            </ul>
+  <section class="section-4">
+    <div class="container">
+      <h3><?= $lang['opportunities_at_top_companies']; ?></h3>
+      <p><?= $lang['opportunities_at_top_companies_desc']; ?></p>
 
-            <p>At JobHive, you can find... the best salary!</p>
-        </div>
-    </section>
+      <h3><?= $lang['why_viecnhe']; ?></h3>
+      <ul>
+        <li>
+          <strong><?= $lang['quality_jobs']; ?></strong><br />
+          <?= $lang['quality_jobs_desc']; ?>
+        </li>
+
+        <li>
+          <strong><?= $lang['free_cv_builder']; ?></strong><br />
+          <?= $lang['free_cv_builder_desc']; ?>
+        </li>
+
+        <li>
+          <strong><?= $lang['job_seeker_support']; ?></strong><br />
+          <?= $lang['job_seeker_support_desc']; ?>
+        </li>
+      </ul>
+
+      <p><?= $lang['find_best_salary']; ?></p>
+    </div>
+  </section>
 
 </div>
 

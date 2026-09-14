@@ -56,7 +56,7 @@ $lang = [
     "view_all" => "View All →",
     "opportunities_at_top_companies" => "Opportunities to apply for attractive jobs at top companies",
     "opportunities_at_top_companies_desc" => "With the rapid development of the economy... professional environment.",
-    "why_jobhive" => "Why should you find a job at JobHive?",
+    "why_viecnhe" => "Why should you find a job at ViecNhe?",
     "quality_jobs" => "Quality Jobs",
     "quality_jobs_desc" => "Thousands of high-quality job postings... suitable for your CV.",
     "free_cv_builder" => "Free Beautiful CV Builder",
@@ -87,13 +87,13 @@ $lang = [
 
     // Footer section
     "footer_about_us" => "About Us",
-    "footer_company_full" => "JobHive.vn - Job Search Joint Stock Company 24h",
+    "footer_company_full" => "ViecNhe.vn - Job Search Joint Stock Company 24h",
     "footer_address_hcm" => "Room 102, Building 20–208 Tran Cao Van, Da Kao Ward, District 1, Ho Chi Minh City",
     "footer_address_hn" => "Branch: 4th Floor, Times Tower, 35 Le Van Luong, Thanh Xuan, Hanoi.",
     "footer_license" => "Employment service license No: 2893/2022/S8LĐTBXH-VLATLĐ issued by the Department of Labor, War Invalids and Social Affairs on 18/11/2024",
     "footer_phone" => "Phone: +84 9818 52782",
-    "footer_email_job_seeker" => "Job seeker support email: ntv@jobhive.vn",
-    "footer_email_employer" => "Employer support email: ntd@jobhive.vn",
+    "footer_email_job_seeker" => "Job seeker support email: qudominh16@gmail.com",
+    "footer_email_employer" => "Employer support email: qudominh16@gmail.com",
 
     "footer_information" => "Information",
     "footer_career_handbook" => "Career Handbook",

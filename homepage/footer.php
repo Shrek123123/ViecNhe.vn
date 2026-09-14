@@ -199,10 +199,10 @@
 <footer class="footer-new">
 
     <!-- Hotline -->
-    <div class="hotline-section">
+    <!-- <div class="hotline-section">
 
-        <!-- Box 1 – Người tìm việc -->
-        <div class="hotline-box">
+        Box 1 – Người tìm việc -->
+        <!-- <div class="hotline-box">
             <h3><?= $lang['hotline_job_seekers_title']; ?></h3>
 
             <div class="hotline-item">
@@ -211,9 +211,9 @@
                     <strong><?= $lang['hotline_southern_support']; ?></strong><br>
                     HCM: (028) 7109 440
                 </div>
-            </div>
+            </div> -->
 
-            <div class="hotline-item">
+            <!-- <div class="hotline-item">
                 <i class="fas fa-headset"></i>
                 <div>
                     <strong><?= $lang['hotline_northern_support']; ?></strong><br>
@@ -224,10 +224,10 @@
             <button class="hotline-btn">
                 <?= $lang['hotline_job_seekers_consult_btn']; ?>
             </button>
-        </div>
+        </div> -->
 
         <!-- Box 2 – Nhà tuyển dụng -->
-        <div class="hotline-box">
+        <!-- <div class="hotline-box">
             <h3><?= $lang['hotline_employers_title']; ?></h3>
 
             <div class="hotline-item">
@@ -236,9 +236,9 @@
                     <strong><?= $lang['hotline_southern_support']; ?></strong><br>
                     HCM: (029) 7109 440
                 </div>
-            </div>
+            </div> -->
 
-            <div class="hotline-item">
+            <!-- <div class="hotline-item">
                 <i class="fas fa-headset"></i>
                 <div>
                     <strong><?= $lang['hotline_northern_support']; ?></strong><br>
@@ -250,7 +250,7 @@
                 <?= $lang['hotline_employers_consult_btn']; ?>
             </button>
         </div>
-    </div>
+    </div> -->
 
     <!-- Thông tin & liên kết -->
     <div class="footer-container">
@@ -260,9 +260,6 @@
             <h4><?= $lang['footer_about_us']; ?></h4>
             <p>
                 <strong><?= $lang['footer_company_full']; ?></strong><br>
-                <?= $lang['footer_address_hcm']; ?><br>
-                <?= $lang['footer_address_hn']; ?><br>
-                <?= $lang['footer_license']; ?><br>
                 <?= $lang['footer_phone']; ?><br>
                 <?= $lang['footer_email_job_seeker']; ?><br>
                 <?= $lang['footer_email_employer']; ?>
@@ -270,7 +267,7 @@
         </div>
 
         <!-- Cột 2: Information -->
-        <div class="footer-column">
+        <!-- <div class="footer-column">
             <h4><?= $lang['footer_information']; ?></h4>
             <ul>
                 <li><?= $lang['footer_career_handbook']; ?></li>
@@ -281,10 +278,10 @@
                 <li><?= $lang['footer_personal_data_policy']; ?></li>
                 <li><?= $lang['footer_compliance_consent']; ?></li>
             </ul>
-        </div>
+        </div> -->
 
         <!-- Cột 3: Kết nối & App -->
-        <div class="footer-column">
+        <!-- <div class="footer-column">
             <h4><?= $lang['footer_connect_with_us']; ?></h4>
             <div class="social-icons">
                 <a href=""><i class="fab fa-facebook-f facebook"></i></a>
@@ -304,7 +301,7 @@
                         alt="App Store">
                 </div>
             </div>
-        </div>
+        </div> -->
 
     </div>
 </footer>

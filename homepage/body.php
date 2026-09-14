@@ -1271,7 +1271,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
       <h3><?= $lang['opportunities_at_top_companies']; ?></h3>
       <p><?= $lang['opportunities_at_top_companies_desc']; ?></p>
 
-      <h3><?= $lang['why_jobhive']; ?></h3>
+      <h3><?= $lang['why_viecnhe']; ?></h3>
       <ul>
         <li>
           <strong><?= $lang['quality_jobs']; ?></strong><br />

@@ -199,10 +199,10 @@
 <footer class="footer-new">
 
     <!-- Hotline -->
-    <div class="hotline-section">
+    <!-- <div class="hotline-section"> -->
 
         <!-- Box 1 – Người tìm việc -->
-        <div class="hotline-box">
+        <!-- <div class="hotline-box">
             <h3><?= $lang['hotline_job_seekers_title']; ?></h3>
 
             <div class="hotline-item">
@@ -224,9 +224,9 @@
             <button class="hotline-btn">
                 <?= $lang['hotline_job_seekers_consult_btn']; ?>
             </button>
-        </div>
+        </div> -->
 
-        <!-- Box 2 – Nhà tuyển dụng -->
+        <!-- Box 2 – Nhà tuyển dụng
         <div class="hotline-box">
             <h3><?= $lang['hotline_employers_title']; ?></h3>
 
@@ -236,8 +236,8 @@
                     <strong><?= $lang['hotline_southern_support']; ?></strong><br>
                     HCM: (029) 7109 440
                 </div>
-            </div>
-
+            </div> -->
+<!-- 
             <div class="hotline-item">
                 <i class="fas fa-headset"></i>
                 <div>
@@ -249,8 +249,8 @@
             <button class="hotline-btn">
                 <?= $lang['hotline_employers_consult_btn']; ?>
             </button>
-        </div>
-    </div>
+        </div> -->
+    <!-- </div> -->
 
     <!-- Thông tin & liên kết -->
     <div class="footer-container">

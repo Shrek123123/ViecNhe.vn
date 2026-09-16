@@ -181,7 +181,7 @@ if ($auth_header_mode === 'login') {
     .logo-wrap img {
         display: block;
         width: auto;
-        max-width: 180px;
+        max-width: 300px;
     }
 
     .header-nav-links {

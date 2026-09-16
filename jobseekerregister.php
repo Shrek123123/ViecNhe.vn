@@ -205,6 +205,7 @@ session_start();
 
 <?php
 require_once('config.php');
+require_once __DIR__ . '/helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $username = $_POST['username'];
@@ -269,6 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $stmt->bind_param("ssss", $username, $email, $hashed_password, $phone_number);
 
   if ($stmt->execute()) {
+    sendRegistrationSuccessEmail($email, 'jobseeker', 'jobseekerlogin.php');
     echo "<script>alert('" . addslashes($lang['registration_successful']) . "'); window.location.href = 'jobseekerlogin.php';</script>";
     exit;
   } else {

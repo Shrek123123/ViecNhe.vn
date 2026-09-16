@@ -1,5 +1,27 @@
 <?php
 
+function sendRegistrationSuccessEmail($recipientEmail, $accountType, $loginPath) {
+    $recipientEmail = trim((string) $recipientEmail);
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+
+    $accountLabel = $accountType === 'employer' ? 'nhà tuyển dụng' : 'ứng viên';
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+    $loginUrl = $scheme . '://' . $host . ($basePath ? $basePath . '/' : '/') . ltrim($loginPath, '/');
+
+    $subject = 'Việc Nhẹ.VN - Tạo tài khoản thành công';
+    $safeLoginUrl = htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8');
+    $message = '<p>Việc Nhẹ.VN thông báo bạn đã tạo tài khoản ' . $accountLabel . ' thành công!</p>'
+        . '<p>Đăng nhập tại: <a href="' . $safeLoginUrl . '">' . $safeLoginUrl . '</a></p>';
+
+    return sendEmail($recipientEmail, '', $subject, $message);
+}
+
 function trans($key, $replace = []) {
     global $lang;
     $text = $lang[$key] ?? $key;

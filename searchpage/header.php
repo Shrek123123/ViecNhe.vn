@@ -181,7 +181,7 @@ if ($jobseeker_id > 0) {
     .logo-wrap img {
         display: block;
         width: auto;
-        max-width: 180px;
+        max-width: 300px;
     }
 
     .header-nav {

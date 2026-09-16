@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($lang['admin_login'] ?? 'Admin Login', ENT_QUOTES, 'UTF-8') ?> - JobHive</title>
+    <title><?= htmlspecialchars($lang['admin_login'] ?? 'Admin Login', ENT_QUOTES, 'UTF-8') ?> - Việc Nhẹ.vn</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {

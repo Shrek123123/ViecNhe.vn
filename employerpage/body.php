@@ -227,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 2100;
     left: 0;
     top: 0;
     width: 100%;

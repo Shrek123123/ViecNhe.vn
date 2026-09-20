@@ -1,4 +1,5 @@
 <?php require_once '../config.php';
+require_once __DIR__ . '/../helpers.php';
 session_start();
 if (!isset($_SESSION['username'])) {
     $redirect = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php';
@@ -86,6 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($update_stmt) {
                 $update_stmt->bind_param('si', $new_email, $jobseeker_id);
                 if ($update_stmt->execute()) {
+                    if (strcasecmp($current_email, $new_email) !== 0) {
+                        sendEmailChangeNotification($new_email, 'jobseeker');
+                    }
                     $current_email = $new_email;
                     $form_message = $lang['email_update_success'] ?? 'Email updated successfully.';
                 } else {

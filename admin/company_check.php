@@ -2,6 +2,7 @@
 // admin/company_check.php
 session_start();
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../helpers.php';
 
 if (!isset($_SESSION['usernameadmin'])) {
     header('Location: adminlogin.php');
@@ -67,7 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $companyId = (int) $companyId;
-    $checkStmt = $conn->prepare("SELECT id, company_name, status FROM company WHERE id = ? LIMIT 1");
+    $checkStmt = $conn->prepare("SELECT c.id, c.company_name, c.status, u.email AS employer_email
+        FROM company c
+        JOIN user u ON u.id = c.employer_id
+        WHERE c.id = ?
+        LIMIT 1");
     $company = null;
     if ($checkStmt) {
         $checkStmt->bind_param('i', $companyId);
@@ -119,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($updated) {
+        sendCompanyReviewEmail($company['employer_email'], $companyName, $newStatus, $adminNote);
         setCompanyFlash('success', $action === 'approve'
             ? 'Đã phê duyệt thông tin công ty ' . $companyName . '.'
             : 'Đã từ chối thông tin công ty ' . $companyName . '.');

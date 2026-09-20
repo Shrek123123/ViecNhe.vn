@@ -394,6 +394,9 @@ $lang = [
     'email_already_exists' => 'Email already exists',
     'registration_successful' => 'Registration successful!',
     'error_prefix' => 'Error: ',
+    'email_update_success' => 'Email updated successfully!',
+    'email_update_failed' => 'Failed to update email.',
+    'email_in_use' => 'Email is already in use. Please use a different email.',
     'terms_not_checked' => 'Please read the terms and check the box',
     //employerprofile
     'choose_image_label' => 'Choose profile picture',

@@ -597,6 +597,11 @@ session_start();
                 e.preventDefault();
 
                 const form = e.target;
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.setAttribute('aria-busy', 'true');
+                }
                 const formData = new FormData(form);
 
                 fetch('applyform.php?id=' + encodeURIComponent(formData.get('job_id') || ''), {

@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once __DIR__ . '/helpers.php';
 session_start();
 // Nếu người dùng bấm đổi ngôn ngữ
 if (isset($_GET['lang'])) {
@@ -110,6 +111,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $conn->begin_transaction();
 
+    $latest_application_stmt = $conn->prepare(
+        'SELECT numbered_of_fifth_application
+         FROM application
+         WHERE job_id = ?
+         ORDER BY created_at DESC, id DESC
+         LIMIT 1
+         FOR UPDATE'
+    );
+    if (!$latest_application_stmt) {
+        $conn->rollback();
+        @unlink($file_path);
+        $respond(['success' => false, 'error' => 'Unable to determine the application number. Please try again.']);
+    }
+
+    $latest_application_stmt->bind_param('i', $job_id);
+    if (!$latest_application_stmt->execute()) {
+        $latest_application_stmt->close();
+        $conn->rollback();
+        @unlink($file_path);
+        $respond(['success' => false, 'error' => 'Unable to determine the application number. Please try again.']);
+    }
+
+    $latest_application_result = $latest_application_stmt->get_result();
+    $latest_application = $latest_application_result->fetch_assoc();
+    $latest_application_stmt->close();
+
+    $latest_number = (int) ($latest_application['numbered_of_fifth_application'] ?? 0);
+    $application_number = $latest_number >= 1 && $latest_number < 5
+        ? $latest_number + 1
+        : 1;
+
     // Chỉ bổ sung số điện thoại nếu tài khoản chưa có số.
     if ($user_phone_number === '') {
         $update_phone_stmt = $conn->prepare(
@@ -138,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt = $conn->prepare(
-        'INSERT INTO application (job_id, jobseeker_id, fullname, email, phonenumber, cv_file, cover_letter, allow_search, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO application (job_id, jobseeker_id, fullname, email, phonenumber, cv_file, cover_letter, allow_search, status, numbered_of_fifth_application) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     if (!$stmt) {
         $conn->rollback();
@@ -147,11 +179,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $status = 'pending';
-    $stmt->bind_param('iisssssis', $job_id, $jobseeker_id, $fullname, $email, $phone, $file_path, $cover_letter, $allow_search, $status);
+    $stmt->bind_param('iisssssisi', $job_id, $jobseeker_id, $fullname, $email, $phone, $file_path, $cover_letter, $allow_search, $status, $application_number);
 
     if ($stmt->execute()) {
         $stmt->close();
         $conn->commit();
+        if ($application_number === 5) {
+            sendFiveApplicationsNotification($conn, $job_id);
+        }
         $respond([
             'success' => true,
             'message' => $lang['applied_successfully'] ?? 'Applied successfully!'

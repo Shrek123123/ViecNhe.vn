@@ -157,6 +157,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS application (
     allow_search BOOLEAN DEFAULT FALSE,
     hidden_from_employer BOOLEAN DEFAULT FALSE,
     UNIQUE (job_id, jobseeker_id),
+    numbered_of_fifth_application INT UNSIGNED DEFAULT 1,
     FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
     FOREIGN KEY (jobseeker_id) REFERENCES user(id) ON DELETE CASCADE
 )");

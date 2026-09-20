@@ -22,6 +22,186 @@ function sendRegistrationSuccessEmail($recipientEmail, $accountType, $loginPath)
     return sendEmail($recipientEmail, '', $subject, $message);
 }
 
+function sendApplicationStatusEmail($recipientEmail, $jobTitle, $companyName, $status) {
+    $recipientEmail = trim((string) $recipientEmail);
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+
+    $statusLabels = [
+        'pending' => 'Đang chờ',
+        'viewed' => 'Đã xem',
+        'interviewed' => 'Đã phỏng vấn',
+        'hired' => 'Đã tuyển dụng',
+        'rejected' => 'Đã từ chối',
+    ];
+    $statusLabel = $statusLabels[strtolower((string) $status)] ?? (string) $status;
+    $jobTitle = trim((string) $jobTitle);
+    $companyName = trim((string) $companyName);
+
+    $subject = 'Việc Nhẹ.VN thông báo trạng thái đơn ứng tuyển của bạn cho vị trí '
+        . $jobTitle . ' - ' . $companyName;
+    $detailsUrl = 'http://localhost/JobHive-main/jobseekerprofile/don_ung_tuyen.php';
+    $safeJobTitle = htmlspecialchars($jobTitle, ENT_QUOTES, 'UTF-8');
+    $safeCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
+    $safeStatus = htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8');
+    $safeDetailsUrl = htmlspecialchars($detailsUrl, ENT_QUOTES, 'UTF-8');
+    $message = '<p>Nhà tuyển dụng công ty ' . $safeCompanyName . '</p>'
+        . '<p>đã cập nhật trạng thái đơn ứng tuyển của bạn là: <strong>' . $safeStatus . '</strong>'
+        . ' cho vị trí <strong>' . $safeJobTitle . '</strong></p>'
+        . '<p>Vào trang sau để xem chi tiết: <a href="' . $safeDetailsUrl . '">' . $safeDetailsUrl . '</a></p>'
+        . '<p>Trân trọng,<br>ViecNhe.vn</p>';
+
+    return sendEmail($recipientEmail, '', $subject, $message);
+}
+
+function sendEmailChangeNotification($newEmail, $userType) {
+    $newEmail = trim((string) $newEmail);
+    if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+
+    $accountLabel = strtolower((string) $userType) === 'employer' ? 'nhà tuyển dụng' : 'tìm việc';
+    $safeEmail = htmlspecialchars($newEmail, ENT_QUOTES, 'UTF-8');
+    $subject = 'Việc Nhẹ.VN thông báo bạn đã đổi email tài khoản ' . $accountLabel;
+    $message = '<p>Việc Nhẹ.VN thông báo bạn đã đổi email tài khoản ' . $accountLabel
+        . ' sang email mới có địa chỉ: <strong>' . $safeEmail . '</strong></p>'
+        . '<p>Trân trọng,<br>ViecNhe.vn</p>';
+
+    return sendEmail($newEmail, '', $subject, $message);
+}
+
+function sendCompanyReviewEmail($recipientEmail, $companyName, $status, $adminNote = '') {
+    $recipientEmail = trim((string) $recipientEmail);
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+
+    $isApproved = strtolower((string) $status) === 'approved';
+    $statusLabel = $isApproved ? 'đã được phê duyệt' : 'đã bị từ chối';
+    $safeCompanyName = htmlspecialchars(trim((string) $companyName), ENT_QUOTES, 'UTF-8');
+    $subject = 'Việc Nhẹ.VN thông báo kết quả duyệt thông tin công ty ' . trim((string) $companyName);
+    $message = '<p>Việc Nhẹ.VN thông báo thông tin công ty <strong>' . $safeCompanyName
+        . '</strong> của bạn ' . $statusLabel . '.</p>';
+
+    if (!$isApproved && trim((string) $adminNote) !== '') {
+        $message .= '<p>Lý do từ chối: <strong>'
+            . htmlspecialchars(trim((string) $adminNote), ENT_QUOTES, 'UTF-8') . '</strong></p>';
+    }
+
+    $message .= '<p>Trân trọng,<br>ViecNhe.vn</p>';
+    return sendEmail($recipientEmail, '', $subject, $message);
+}
+
+function sendJobReviewEmail($recipientEmail, $jobTitle, $companyName, $status, $adminNote = '') {
+    $recipientEmail = trim((string) $recipientEmail);
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+
+    $isApproved = strtolower((string) $status) === 'approved';
+    $statusLabel = $isApproved ? 'đã được phê duyệt' : 'đã bị từ chối';
+    $jobTitle = trim((string) $jobTitle);
+    $companyName = trim((string) $companyName);
+    $safeJobTitle = htmlspecialchars($jobTitle, ENT_QUOTES, 'UTF-8');
+    $safeCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
+    $subject = 'Việc Nhẹ.VN thông báo kết quả duyệt bài đăng tuyển dụng ' . $jobTitle;
+    $message = '<p>Việc Nhẹ.VN thông báo bài đăng tuyển dụng <strong>' . $safeJobTitle
+        . '</strong> của công ty <strong>' . $safeCompanyName . '</strong> ' . $statusLabel . '.</p>';
+
+    if (!$isApproved && trim((string) $adminNote) !== '') {
+        $message .= '<p>Lý do từ chối: <strong>'
+            . htmlspecialchars(trim((string) $adminNote), ENT_QUOTES, 'UTF-8') . '</strong></p>';
+    }
+
+    $message .= '<p>Trân trọng,<br>ViecNhe.vn</p>';
+    return sendEmail($recipientEmail, '', $subject, $message);
+}
+
+function sendFiveApplicationsNotification($conn, $jobId) {
+    $jobId = (int) $jobId;
+    if ($jobId <= 0 || !($conn instanceof mysqli)) {
+        return false;
+    }
+
+    $jobStmt = $conn->prepare(
+        'SELECT u.email, j.job_title
+         FROM job j
+         JOIN user u ON u.id = j.posted_by_employer_id
+         WHERE j.id = ?
+         LIMIT 1'
+    );
+    if (!$jobStmt) {
+        return false;
+    }
+
+    $jobStmt->bind_param('i', $jobId);
+    $jobStmt->execute();
+    $jobResult = $jobStmt->get_result();
+    $jobData = $jobResult->fetch_assoc();
+    $jobStmt->close();
+
+    $recipientEmail = trim((string) ($jobData['email'] ?? ''));
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+    $jobTitle = trim((string) ($jobData['job_title'] ?? ''));
+
+    $applicationsStmt = $conn->prepare(
+        'SELECT fullname
+         FROM application
+         WHERE job_id = ?
+         ORDER BY created_at DESC, id DESC
+         LIMIT 5'
+    );
+    if (!$applicationsStmt) {
+        return false;
+    }
+
+    $applicationsStmt->bind_param('i', $jobId);
+    $applicationsStmt->execute();
+    $applicationsResult = $applicationsStmt->get_result();
+    $applications = [];
+    while ($application = $applicationsResult->fetch_assoc()) {
+        $applications[] = $application;
+    }
+    $applicationsStmt->close();
+
+    if (count($applications) < 5) {
+        return false;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+
+    $applicationUrl = 'http://localhost/JobHive-main/employerprofile/view_applications.php?job_id=' . $jobId;
+    $safeApplicationUrl = htmlspecialchars($applicationUrl, ENT_QUOTES, 'UTF-8');
+    $applicationLinks = '';
+    foreach ($applications as $index => $application) {
+        $safeFullname = htmlspecialchars((string) ($application['fullname'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $applicationLinks .= '<li>Ứng viên <strong>' . $safeFullname . '</strong>, '
+            . '<a href="' . $safeApplicationUrl . '">truy cập trang xem hồ sơ ứng tuyển</a></li>';
+    }
+
+    $subject = 'Việc Nhẹ.vn thông báo bạn có thêm 5 đơn ứng tuyển mới từ người tìm việc cho vị trí '
+        . $jobTitle;
+    $safeJobTitle = htmlspecialchars($jobTitle, ENT_QUOTES, 'UTF-8');
+    $message = '<p>Việc Nhẹ.vn thông báo bạn có thêm 5 đơn ứng tuyển mới từ người tìm việc cho vị trí '
+        . '<strong>' . $safeJobTitle . '</strong>.</p>'
+        . '<p>Hãy rà soát hồ sơ ứng viên ngay tại đây:</p>'
+        . '<ol>' . $applicationLinks . '</ol>'
+        . '<p>Trân trọng,<br>ViecNhe.vn</p>';
+
+    return sendEmail($recipientEmail, '', $subject, $message);
+}
+
 function trans($key, $replace = []) {
     global $lang;
     $text = $lang[$key] ?? $key;

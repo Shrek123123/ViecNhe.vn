@@ -117,11 +117,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
 
         if (isset($conn) && $conn->ping()) {
+            $detailsSql = "SELECT a.email, j.job_title, c.company_name
+                           FROM application a
+                           JOIN job j ON a.job_id = j.id
+                           JOIN company c ON j.company_id = c.id
+                           WHERE a.id = ? AND j.posted_by_employer_id = ?
+                           LIMIT 1";
+            $detailsStmt = $conn->prepare($detailsSql);
+            $detailsStmt->bind_param("ii", $application_id, $employerid);
+            $detailsStmt->execute();
+            $detailsResult = $detailsStmt->get_result();
+            $applicationDetails = $detailsResult->fetch_assoc();
+            $detailsStmt->close();
+
+            if (!$applicationDetails) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Application not found']);
+                exit;
+            }
+
             $sql = "UPDATE application SET status = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
                 $stmt->bind_param("si", $new_status, $application_id);
                 if ($stmt->execute()) {
+                    sendApplicationStatusEmail(
+                        $applicationDetails['email'],
+                        $applicationDetails['job_title'],
+                        $applicationDetails['company_name'],
+                        $new_status
+                    );
                     echo json_encode(['success' => true]);
                 } else {
                     http_response_code(500);

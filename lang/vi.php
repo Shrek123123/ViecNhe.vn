@@ -28,6 +28,9 @@ $lang = [
     "Ra_trang_nha_tuyen_dung" => "Ra trang nhà tuyển dụng",
     "employerregister_title" => "Đăng ký tài khoản nhà tuyển dụng - ViecNheVN",
     "choose_company" => "Chọn công ty",
+    "email_update_success" => "Cập nhật email thành công!",
+    "email_update_failed" => "Cập nhật email thất bại.",
+    "email_in_use" => "Email đã tồn tại, vui lòng sử dụng email khác.",
     "job_position_options" => [
         "senior" => ["en" => "Senior", "vi" => "Chuyên viên cấp cao"],
         "junior" => ["en" => "Junior", "vi" => "Chuyên viên"],

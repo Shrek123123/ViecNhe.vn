@@ -19,6 +19,7 @@ if (!isset($_SESSION['employerid'])) {
 }
 
 require_once '../config.php';
+require_once __DIR__ . '/../helpers.php';
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -48,12 +49,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => false, 'message' => 'Invalid status']);
             exit();
         }
+
+        $detailsStmt = $conn->prepare(
+            "SELECT a.email, j.job_title, c.company_name
+             FROM application a
+             JOIN job j ON a.job_id = j.id
+             JOIN company c ON j.company_id = c.id
+             WHERE a.id = ? AND j.posted_by_employer_id = ?
+             LIMIT 1"
+        );
+        $detailsStmt->bind_param("ii", $application_id, $employerid);
+        $detailsStmt->execute();
+        $detailsResult = $detailsStmt->get_result();
+        $applicationDetails = $detailsResult->fetch_assoc();
+        $detailsStmt->close();
+
+        if (!$applicationDetails) {
+            echo json_encode(['success' => false, 'message' => 'Application not found']);
+            exit();
+        }
         
         $sql = "UPDATE application SET status = ? WHERE id = ? AND job_id IN (SELECT id FROM job WHERE posted_by_employer_id = ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sii", $new_status, $application_id, $employerid);
         
         if ($stmt->execute()) {
+            sendApplicationStatusEmail(
+                $applicationDetails['email'],
+                $applicationDetails['job_title'],
+                $applicationDetails['company_name'],
+                $new_status
+            );
             echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Failed to update status']);

@@ -26,6 +26,7 @@ if (!isset($_SESSION['lang'])) {
 include '../lang/' . $_SESSION['lang'] . '.php';
 
 require_once '../config.php';
+require_once __DIR__ . '/../helpers.php';
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 $employerid = $_SESSION['employerid'] ?? 0;
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
         $form_error = 'Vui lòng nhập email cũ để xác nhận.';
     } elseif (strtolower($old_email) !== strtolower($current_profile['email'])) {
         $form_error = 'Email cũ không đúng. Vui lòng nhập đúng email hiện tại.';
-    } elseif (!preg_match('/^(0|\+84)(3|5|7|8|9)\d{8,9}$/', $new_phone)) {
+    } elseif (!empty($new_phone) && !preg_match('/^(0|\+84)(3|5|7|8|9)\d{8,9}$/', $new_phone)) {
         $form_error = 'Số điện thoại không hợp lệ. Ví dụ: 0901234567 hoặc +84901234567.';
     } elseif ($email_choice === 'new') {
         if (empty($entered_new_email)) {
@@ -102,6 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
         if ($stmt_update) {
             $stmt_update->bind_param("sssi", $new_username, $new_phone, $final_email, $employerid);
             if ($stmt_update->execute()) {
+                if ($email_choice === 'new' && strcasecmp($current_profile['email'], $final_email) !== 0) {
+                    sendEmailChangeNotification($final_email, 'employer');
+                }
                 $current_profile['username'] = $new_username;
                 $current_profile['phone_number'] = $new_phone;
                 $current_profile['email'] = $final_email;
@@ -889,7 +893,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
 
                         <div>
                             <label for="phone_number" style="display: block; margin-bottom: 8px; font-weight: 600;"><?= $lang['phone_number'] ?? 'Phone number' ?></label>
-                            <input type="text" id="phone_number" name="phone_number" required value="<?= htmlspecialchars($current_profile['phone_number']) ?>" placeholder="<?= $lang['enter_phone'] ?? 'Example: 0901234567' ?>" style="width: 100%; padding: 11px 12px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box;">
+                            <input type="text" id="phone_number" name="phone_number" value="<?= htmlspecialchars($current_profile['phone_number']) ?>" placeholder="<?= $lang['enter_phone'] ?? 'Example: 0901234567' ?>" style="width: 100%; padding: 11px 12px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box;">
                         </div>
 
                         <div>

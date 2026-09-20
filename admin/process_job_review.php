@@ -2,6 +2,7 @@
 // admin/process_job_review.php
 session_start();
 require_once '../config.php'; // Điều chỉnh đường dẫn đến config.php
+require_once __DIR__ . '/../helpers.php';
 
 // --- Kiểm tra quyền Admin (quan trọng) ---
 if (!isset($_SESSION['usernameadmin'])) {
@@ -31,10 +32,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_id'], $_POST['act
         exit();
     }
 
+    $detailsStmt = $conn->prepare("SELECT j.job_title, c.company_name, u.email AS employer_email
+        FROM job j
+        LEFT JOIN company c ON c.id = j.company_id
+        JOIN user u ON u.id = j.posted_by_employer_id
+        WHERE j.id = ?
+        LIMIT 1");
+    $jobDetails = null;
+    if ($detailsStmt) {
+        $detailsStmt->bind_param('i', $jobId);
+        $detailsStmt->execute();
+        $detailsResult = $detailsStmt->get_result();
+        $jobDetails = $detailsResult ? $detailsResult->fetch_assoc() : null;
+        $detailsStmt->close();
+    }
+
+    if (!$jobDetails) {
+        echo "<script>alert('Không tìm thấy tin tuyển dụng.'); window.history.back();</script>";
+        exit();
+    }
+
     $stmt = $conn->prepare("UPDATE job SET status = ?, admin_notes = ? WHERE id = ?");
     if ($stmt) {
         $stmt->bind_param("ssi", $newStatus, $adminNote, $jobId);
         if ($stmt->execute()) {
+            sendJobReviewEmail(
+                $jobDetails['employer_email'],
+                $jobDetails['job_title'],
+                $jobDetails['company_name'],
+                $newStatus,
+                $adminNote
+            );
             echo "<script>alert('Đã " . ($newStatus === 'approved' ? 'phê duyệt' : 'từ chối') . " tin tuyển dụng thành công!'); window.location.href = 'jobpending.php';</script>";
         } else {
             echo "<script>alert('Lỗi khi cập nhật trạng thái tin tuyển dụng: " . $stmt->error . "'); window.history.back();</script>";

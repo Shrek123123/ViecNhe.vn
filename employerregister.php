@@ -349,6 +349,7 @@ include __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
 
 <?php
 require_once('config.php');
+require_once __DIR__ . '/helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
@@ -489,6 +490,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if ($stmt->affected_rows > 0) {
+        sendRegistrationSuccessEmail($email, 'employer', 'employerlogin.php');
         $stmt->close();
         echo "<script>
                 alert('" . addslashes($lang['registration_successful']) . "');

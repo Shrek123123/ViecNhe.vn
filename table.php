@@ -39,7 +39,72 @@ if ($user_status_column && $user_status_column->num_rows === 0) {
     }
 }
 
+$stmt = $conn->query("CREATE TABLE IF NOT EXISTS password_reset (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    otp_hash VARCHAR(255) NOT NULL,
+    attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_password_reset_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+)");
+if ($stmt !== TRUE) {
+    echo "Error creating password_reset table: " . $conn->error . "<br>";
+}
+
 // Tạo bảng jobseeker_profile
+
+$stmt = $conn->query("CREATE TABLE IF NOT EXISTS payment_orders (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    invoice_number VARCHAR(100) NOT NULL UNIQUE,
+    transaction_code VARCHAR(100) NOT NULL,
+    amount BIGINT UNSIGNED NOT NULL,
+    currency CHAR(3) NOT NULL DEFAULT 'VND',
+    status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+    employer_id INT UNSIGNED NULL,
+    job_payload JSON NULL,
+    job_id INT UNSIGNED NULL,
+    provider_transaction_id VARCHAR(100) NULL UNIQUE,
+    provider_reference VARCHAR(255) NULL,
+    raw_webhook JSON NULL,
+    paid_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)");
+if ($stmt !== TRUE) {
+    echo "Error creating payment_orders table: " . $conn->error . "<br>";
+}
+$conn->query("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS employer_id INT UNSIGNED NULL");
+$conn->query("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS job_payload JSON NULL");
+$conn->query("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS job_id INT UNSIGNED NULL");
+
+$stmt = $conn->query("CREATE TABLE IF NOT EXISTS sepay_transactions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    sepay_id VARCHAR(100) NOT NULL UNIQUE,
+    gateway VARCHAR(100) NOT NULL,
+    transaction_date DATETIME NOT NULL,
+    account_number VARCHAR(100) NULL,
+    sub_account VARCHAR(250) NULL,
+    code VARCHAR(250) NULL,
+    amount_in BIGINT NOT NULL DEFAULT 0,
+    amount_out BIGINT NOT NULL DEFAULT 0,
+    accumulated BIGINT NOT NULL DEFAULT 0,
+    content TEXT NULL,
+    reference_code VARCHAR(255) NULL,
+    body JSON NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_sepay_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+if ($stmt !== TRUE) {
+    echo "Error creating sepay_transactions table: " . $conn->error . "<br>";
+}
+$paymentProviderColumn = $conn->query("SHOW COLUMNS FROM payment_orders LIKE 'provider_transaction_id'");
+if ($paymentProviderColumn && $paymentProviderColumn->num_rows > 0) {
+    $paymentProviderDefinition = $paymentProviderColumn->fetch_assoc();
+    if (stripos((string) ($paymentProviderDefinition['Type'] ?? ''), 'bigint') === 0) {
+        $conn->query("ALTER TABLE payment_orders MODIFY provider_transaction_id VARCHAR(100) NULL UNIQUE");
+    }
+}
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS jobseeker_profile (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     jobseeker_id INT UNSIGNED NOT NULL,

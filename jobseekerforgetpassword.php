@@ -1,179 +1,66 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once __DIR__ . '/config.php';
 
-// Nếu người dùng bấm đổi ngôn ngữ
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
-
-// Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
 if (!isset($_SESSION['lang'])) {
     $_SESSION['lang'] = 'vi';
 }
-
-// Load file ngôn ngữ tương ứng
-include 'lang/' . $_SESSION['lang'] . '.php';
+include __DIR__ . '/lang/' . basename($_SESSION['lang']) . '.php';
 ?>
 <!DOCTYPE html>
-<html lang="vi">
-
+<html lang="<?= htmlspecialchars($_SESSION['lang'], ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $lang['jobseekerforgetpassword_title'] ?> - ViecNhe</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-
+    <title><?= htmlspecialchars($lang['jobseekerforgetpassword_title'] ?? 'Password recovery', ENT_QUOTES, 'UTF-8') ?></title>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            background-color: #f3f3f3;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .form-container {
-            background: #ffffff;
-            color: #8B0000;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        h2 {
-            color: #d90000;
-            margin-bottom: 10px;
-        }
-
-        p {
-            margin-top: 0;
-            margin-bottom: 25px;
-            color: #555;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 12px;
-            background-color: #d90000;
-            color: #ffffff;
-            font-size: 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-login:hover {
-            background-color: #a60000;
-        }
-
-        .signup {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 15px;
-            color: #555;
-        }
-
-        .signup a {
-            color: #d90000;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .signup a:hover {
-            color: #a60000;
-        }
-
-        .redirect {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .redirect a {
-            color: #d90000;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .redirect a:hover {
-            color: #a60000;
-        }
-
-        @media (max-width: 600px) {
-            .form-container {
-                padding: 25px;
-                margin: 0 15px;
-            }
-        }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 20px; background: linear-gradient(135deg, #fff4f2, #f4f7fb); font-family: Arial, sans-serif; }
+        .recovery-card { width: min(100%, 420px); padding: 30px; border: 1px solid #e4e7ec; border-radius: 16px; background: #fff; box-shadow: 0 18px 55px rgba(16, 24, 40, .12); }
+        h1 { margin: 0 0 10px; color: #b42318; font-size: 24px; text-align: center; }
+        p { color: #667085; line-height: 1.5; }
+        label { display: block; margin: 20px 0 7px; font-weight: 700; }
+        input { width: 100%; padding: 12px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 16px; }
+        button { width: 100%; margin-top: 18px; padding: 12px; border: 0; border-radius: 8px; color: #fff; background: #b42318; font-size: 16px; font-weight: 700; cursor: pointer; }
+        button:disabled { opacity: .6; cursor: wait; }
+        .message { min-height: 21px; margin: 14px 0 0; color: #b42318; text-align: center; }
     </style>
 </head>
-
 <body>
-    <?php include_once(__DIR__ . '/header_loginlogout/jobseekerregister.php'); ?>
-
-    <div class="main-content">
-        <div class="form-container">
-            <h2><?= $lang['jobseekerforgetpassword_title']; ?></h2>
-            <p><?= $lang['jobseekerforgetpassword_intro'] ?? 'Type in your email and we\'ll check if there\'s a match.'; ?></p>
-
-            <form action="jobseekerforgetpassword_process.php" method="POST">
-                <div class="form-group">
-                    <label for="emailInput"><?= $lang['email']; ?></label>
-                    <input type="email" id="emailInput" name="email" placeholder="<?= $lang['jobseeker_login_email_placeholder']; ?>" required>
-                </div>
-                <button type="submit" class="btn-login"><?= $lang['jobseekerforgetpassword_button'] ?? 'Submit'; ?></button>
-            </form>
-
-            <div class="signup">
-                <?= $lang['jobseeker_login_signup'] ?>
-            </div>
-
-            <div class="redirect">
-                <p><?= $lang['jobseeker_login_redirect_employer'] ?></p>
-            </div>
-        </div>
-    </div>
-
+    <main class="recovery-card">
+        <h1><?= htmlspecialchars($lang['jobseekerforgetpassword_title'] ?? 'Jobseeker password recovery', ENT_QUOTES, 'UTF-8') ?></h1>
+        <p><?= htmlspecialchars($lang['jobseekerforgetpassword_intro'] ?? 'Enter your email and we will help you recover your password.', ENT_QUOTES, 'UTF-8') ?></p>
+        <form id="forgot-password-form">
+            <label for="email-input"><?= htmlspecialchars($lang['email'] ?? 'Email', ENT_QUOTES, 'UTF-8') ?></label>
+            <input id="email-input" name="email" type="email" required autocomplete="email">
+            <button type="submit" id="send-otp"><?= htmlspecialchars($lang['jobseekerforgetpassword_button'] ?? 'Send code', ENT_QUOTES, 'UTF-8') ?></button>
+            <p class="message" id="form-message" role="alert"></p>
+        </form>
+    </main>
+    <script>
+        document.getElementById('forgot-password-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const button = document.getElementById('send-otp');
+            const message = document.getElementById('form-message');
+            button.disabled = true;
+            message.textContent = '';
+            try {
+                const body = new URLSearchParams({ action: 'send_otp', email: document.getElementById('email-input').value });
+                const response = await fetch('jobseekerforgetpassword_process.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = 'jobseekerpasswordrecover.php';
+                    return;
+                }
+                message.textContent = data.message || '<?= addslashes($lang['reset_generic_error'] ?? 'An error occurred. Please try again.') ?>';
+            } catch (error) {
+                message.textContent = '<?= addslashes($lang['reset_generic_error'] ?? 'An error occurred. Please try again.') ?>';
+            }
+            button.disabled = false;
+        });
+    </script>
 </body>
-
 </html>

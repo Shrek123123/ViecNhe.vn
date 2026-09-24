@@ -153,80 +153,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   //     echo "<script>alert('Please fill out all required information.');</script>";
   //   }
   // }
-  $jobStatus = 'pending_review'; // Mặc định là chờ duyệt
-
-  // Database connection and insertion logic here
-  // Lấy số thứ tự bài đăng mới nhất của employer này
-  $sql = "SELECT MAX(job_post_number_by_employer) AS last_number FROM job WHERE posted_by_employer_id = ?";
-  $stmt_number = $conn->prepare($sql);
-  if (!$stmt_number) {
-    echo "<script>alert('Error preparing statement for job number: {$conn->error}');</script>";
-    exit;
-  }
-  $stmt_number->bind_param("i", $employerid);
-  $stmt_number->execute();
-  $result = $stmt_number->get_result();
-  $row = $result ? $result->fetch_assoc() : null;
-  $last_number = $row && isset($row['last_number']) ? (int)$row['last_number'] : 0;
-  $stmt_number->close();
-
-  $new_job_number = $last_number + 1;
-
   $company_id = $selected_company_id > 0 ? $selected_company_id : null;
   if (!$company_id) {
     echo "<script>alert('Vui lòng chọn công ty đã đăng ký để tạo bài đăng.'); window.history.back();</script>";
     exit;
   }
 
-  $job_insert_sql = "INSERT INTO job (
-    posted_by_employer_id,
-    company_id,
-    job_post_number_by_employer,
-    job_title,
-    job_description,
-    job_location,
-    salary,
-    post_duration,
-    contact_email,
-    contact_phone,
-    required_certification,
-    job_experience,
-    job_requirement,
-    job_benefit,
-    no_employee_needed,
-    job_position,
-    job_detailed_location,
-    job_location_district,
-    status
-  ) VALUES (
-    " . (int)$employerid . ",
-    " . (int)$company_id . ",
-    " . (int)$new_job_number . ",
-    '" . $conn->real_escape_string($jobTitle) . "',
-    '" . $conn->real_escape_string($jobDescription) . "',
-    '" . $conn->real_escape_string($jobLocation) . "',
-    '" . $conn->real_escape_string($salary) . "',
-    " . (int)$post_duration . ",
-    '" . $conn->real_escape_string($contactEmail) . "',
-    '" . $conn->real_escape_string($contactPhone) . "',
-    '" . $conn->real_escape_string($requiredcertification) . "',
-    '" . $conn->real_escape_string($jobExperience) . "',
-    '" . $conn->real_escape_string($jobRequirementText) . "',
-    '" . $conn->real_escape_string($jobBenefit) . "',
-    " . (int)$noEmplpoyeeNeeeded . ",
-    '" . $conn->real_escape_string($jobPosition) . "',
-    '" . $conn->real_escape_string($jobDetailedLocation) . "',
-    '" . $conn->real_escape_string($jobLocationDistrict) . "',
-    '" . $conn->real_escape_string($jobStatus) . "'
-  )";
-
-  if ($conn->query($job_insert_sql) === TRUE) {
-    echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
-  } else {
-    echo "<script>alert('Error posting job: {$conn->error}');</script>";
-  }
-
-  $conn->close();
+    try {
+    $jobPayment = createJobPaymentCheckout($conn, $employerid, $company_id, $post_duration, 250000, [
+        'company_id' => $company_id, 'job_title' => $jobTitle, 'job_description' => $jobDescription,
+        'job_location' => $jobLocation, 'salary' => $salary, 'contact_email' => $contactEmail,
+        'contact_phone' => $contactPhone, 'required_certification' => $requiredcertification,
+        'job_experience' => $jobExperience, 'job_requirement' => $jobRequirementText, 'job_benefit' => $jobBenefit,
+        'no_employee_needed' => (int) $noEmplpoyeeNeeeded, 'job_position' => $jobPosition,
+        'job_detailed_location' => $jobDetailedLocation, 'job_location_district' => $jobLocationDistrict,
+        'job_type' => $jobType, 'status' => 'pending_review',
+    ]);
+    echo '<div style="max-width:520px;margin:40px auto;font-family:Arial"><h2>Thanh toán để đăng tin</h2><p>Mã giao dịch: '
+            . htmlspecialchars($jobPayment['transaction_code'], ENT_QUOTES, 'UTF-8') . '</p>' . $jobPayment['checkout_html'] . '</div>';
+    } catch (Throwable $exception) {
+        $errorId = bin2hex(random_bytes(4));
+        error_log('Job payment error [' . $errorId . ']: ' . $exception->getMessage());
+        echo '<div style="max-width:720px;margin:40px auto;padding:20px;border:1px solid #f0a0a0;background:#fff4f4;color:#8b0000;font-family:Arial"><h2>Không thể tạo thanh toán</h2><p><strong>Lỗi:</strong> ' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</p><p><strong>Mã lỗi:</strong> ' . $errorId . '</p><p>Kiểm tra dữ liệu bài đăng, cấu hình SePay và cơ sở dữ liệu.</p></div>';
+    }
   exit;
 }
 ?>

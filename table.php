@@ -216,6 +216,7 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS job_payments (
     checkout_url TEXT NULL,
     amount BIGINT UNSIGNED NOT NULL,
     status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+    confirmation_email_status ENUM('pending', 'sending', 'sent') NOT NULL DEFAULT 'pending',
     job_payload JSON NOT NULL,
     provider_reference VARCHAR(255) NULL,
     raw_response JSON NULL,

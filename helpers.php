@@ -1,5 +1,14 @@
 <?php
 
+function getAppBaseUrl(): string {
+    $baseUrl = getenv('APP_URL');
+    if ($baseUrl === false || trim($baseUrl) === '') {
+        $baseUrl = 'https://unmade-petite-carefully.ngrok-free.dev/ViecNhe';
+    }
+
+    return rtrim(trim($baseUrl), '/');
+}
+
 function sendRegistrationSuccessEmail($recipientEmail, $accountType, $loginPath) {
     $recipientEmail = trim((string) $recipientEmail);
     if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
@@ -9,10 +18,7 @@ function sendRegistrationSuccessEmail($recipientEmail, $accountType, $loginPath)
     require_once __DIR__ . '/config/mail.php';
 
     $accountLabel = $accountType === 'employer' ? 'nhà tuyển dụng' : 'ứng viên';
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
-    $loginUrl = $scheme . '://' . $host . ($basePath ? $basePath . '/' : '/') . ltrim($loginPath, '/');
+    $loginUrl = getAppBaseUrl() . '/' . ltrim($loginPath, '/');
 
     $subject = 'Việc Nhẹ.VN - Tạo tài khoản thành công';
     $safeLoginUrl = htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8');
@@ -43,7 +49,7 @@ function sendApplicationStatusEmail($recipientEmail, $jobTitle, $companyName, $s
 
     $subject = 'Việc Nhẹ.VN thông báo trạng thái đơn ứng tuyển của bạn cho vị trí '
         . $jobTitle . ' - ' . $companyName;
-    $detailsUrl = 'http://localhost/JobHive-main/jobseekerprofile/don_ung_tuyen.php';
+    $detailsUrl = getAppBaseUrl() . '/jobseekerprofile/don_ung_tuyen.php';
     $safeJobTitle = htmlspecialchars($jobTitle, ENT_QUOTES, 'UTF-8');
     $safeCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
     $safeStatus = htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8');
@@ -136,6 +142,7 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
         checkout_url TEXT NULL,
         amount BIGINT UNSIGNED NOT NULL,
         status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+        confirmation_email_status ENUM('pending', 'sending', 'sent') NOT NULL DEFAULT 'pending',
         job_payload JSON NOT NULL,
         provider_reference VARCHAR(255) NULL,
         raw_response JSON NULL,
@@ -145,6 +152,10 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
         INDEX idx_job_payments_employer (employer_id),
         INDEX idx_job_payments_job (job_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $emailStatusColumn = $conn->query("SHOW COLUMNS FROM job_payments LIKE 'confirmation_email_status'");
+    if ($emailStatusColumn && $emailStatusColumn->num_rows === 0) {
+        $conn->query("ALTER TABLE job_payments ADD COLUMN confirmation_email_status ENUM('pending', 'sending', 'sent') NOT NULL DEFAULT 'pending'");
+    }
     $orderCode = random_int(100000, 999999999);
     $stmt = $conn->prepare('INSERT INTO job_payments (employer_id, amount, order_code, job_payload, status) VALUES (?, ?, ?, ?, \'pending\')');
     if (!$stmt) {
@@ -192,13 +203,87 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
     }
 }
 
+function sendEmployerJobPaymentConfirmation($conn, int $paymentId): bool {
+    $tierDetails = [
+        30 => ['label' => '30 ngày', 'amount' => 50000, 'subject' => 'Thanh toán gói đăng tin 30 ngày thành công'],
+        60 => ['label' => '60 ngày', 'amount' => 80000, 'subject' => 'Thanh toán gói đăng tin 60 ngày thành công'],
+        180 => ['label' => '6 tháng', 'amount' => 250000, 'subject' => 'Thanh toán gói đăng tin 6 tháng thành công'],
+        365 => ['label' => '1 năm', 'amount' => 430000, 'subject' => 'Thanh toán gói đăng tin 1 năm thành công'],
+    ];
+
+    $conn->query("UPDATE job_payments SET confirmation_email_status = 'pending' WHERE id = " . $paymentId . " AND status = 'paid' AND confirmation_email_status = 'sending' AND updated_at < NOW() - INTERVAL 10 MINUTE");
+    $claimStmt = $conn->prepare("UPDATE job_payments SET confirmation_email_status = 'sending' WHERE id = ? AND status = 'paid' AND job_id IS NOT NULL AND confirmation_email_status = 'pending'");
+    if (!$claimStmt) {
+        return false;
+    }
+    $claimStmt->bind_param('i', $paymentId);
+    $claimed = $claimStmt->execute() && $claimStmt->affected_rows === 1;
+    $claimStmt->close();
+    if (!$claimed) {
+        return false;
+    }
+
+    $stmt = $conn->prepare('SELECT u.email, j.job_title, j.post_duration, p.amount FROM job_payments p JOIN user u ON u.id = p.employer_id JOIN job j ON j.id = p.job_id WHERE p.id = ? AND p.status = \'paid\' LIMIT 1');
+    if (!$stmt) {
+        $conn->query("UPDATE job_payments SET confirmation_email_status = 'pending' WHERE id = " . $paymentId . " AND confirmation_email_status = 'sending'");
+        return false;
+    }
+    $stmt->bind_param('i', $paymentId);
+    $stmt->execute();
+    $payment = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    $duration = (int) ($payment['post_duration'] ?? 0);
+    $tier = $tierDetails[$duration] ?? null;
+    $recipientEmail = trim((string) ($payment['email'] ?? ''));
+    if (!$payment || !$tier || !filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)
+        || (int) $payment['amount'] !== $tier['amount']) {
+        $conn->query("UPDATE job_payments SET confirmation_email_status = 'pending' WHERE id = " . $paymentId . " AND confirmation_email_status = 'sending'");
+        error_log('Job payment confirmation email skipped: invalid recipient, tier, or amount for payment ' . $paymentId);
+        return false;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+    $safeJobTitle = htmlspecialchars((string) $payment['job_title'], ENT_QUOTES, 'UTF-8');
+    $safeTierLabel = htmlspecialchars($tier['label'], ENT_QUOTES, 'UTF-8');
+    $amountLabel = number_format($tier['amount'], 0, ',', ',');
+    $subject = 'ViecNhe | ' . $tier['subject'];
+    $message = '<div style="max-width:600px;margin:0 auto;padding:28px 24px;color:#20332e;font-family:Arial,sans-serif;line-height:1.65">'
+        . '<p style="margin:0 0 8px;color:#19765b;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase">ViecNhe | Xác nhận thanh toán</p>'
+        . '<h1 style="margin:0 0 18px;font-size:24px;line-height:1.3">Thanh toán thành công</h1>'
+        . '<p>Xin chào Nhà tuyển dụng,</p>'
+        . '<p>ViecNhe đã xác nhận thanh toán của bạn. Thông tin giao dịch:</p>'
+        . '<div style="padding:16px 18px;border:1px solid #dce8e2;border-radius:8px;background:#f6faf8">'
+        . '<p style="margin:0 0 8px"><strong>Số tiền:</strong> ' . $amountLabel . ' VND</p>'
+        . '<p style="margin:0 0 8px"><strong>Công việc:</strong> ' . $safeJobTitle . '</p>'
+        . '<p style="margin:0"><strong>Thời hạn đăng:</strong> ' . $safeTierLabel . '</p>'
+        . '</div>'
+        . '<p>Bài đăng đã được gửi tới đội ngũ ViecNhe để xét duyệt. Chúng tôi sẽ thông báo kết quả khi quá trình xét duyệt hoàn tất.</p>'
+        . '<p>Trân trọng,<br><strong>Đội ngũ ViecNhe</strong></p></div>';
+
+    $sent = false;
+    try {
+        $sent = sendEmail($recipientEmail, '', $subject, $message);
+    } catch (Throwable $exception) {
+        error_log('Job payment confirmation email error for payment ' . $paymentId . ': ' . $exception->getMessage());
+    }
+    $emailStatus = $sent ? 'sent' : 'pending';
+    $updateStmt = $conn->prepare('UPDATE job_payments SET confirmation_email_status = ? WHERE id = ? AND confirmation_email_status = \'sending\'');
+    if ($updateStmt) {
+        $updateStmt->bind_param('si', $emailStatus, $paymentId);
+        $updateStmt->execute();
+        $updateStmt->close();
+    }
+    return $sent;
+}
+
 function reconcileJobPaymentOrder($conn, $orderCode) {
     $orderCode = (int) $orderCode;
     if ($orderCode <= 0) {
         return false;
     }
 
-    $stmt = $conn->prepare('SELECT amount, status, job_id FROM job_payments WHERE order_code = ? LIMIT 1');
+    $stmt = $conn->prepare('SELECT id, amount, status, job_id FROM job_payments WHERE order_code = ? LIMIT 1');
     $stmt->bind_param('i', $orderCode);
     $stmt->execute();
     $order = $stmt->get_result()->fetch_assoc();
@@ -207,6 +292,7 @@ function reconcileJobPaymentOrder($conn, $orderCode) {
         return false;
     }
     if (!empty($order['job_id'])) {
+        sendEmployerJobPaymentConfirmation($conn, (int) $order['id']);
         return true;
     }
 
@@ -288,6 +374,7 @@ function reconcileJobPaymentOrder($conn, $orderCode) {
         }
         $updateStmt->close();
         $conn->commit();
+        sendEmployerJobPaymentConfirmation($conn, (int) $order['id']);
         return true;
     } catch (Throwable $exception) {
         $conn->rollback();
@@ -406,7 +493,7 @@ function sendFiveApplicationsNotification($conn, $jobId) {
 
     require_once __DIR__ . '/config/mail.php';
 
-    $applicationUrl = 'http://localhost/JobHive-main/employerprofile/view_applications.php?job_id=' . $jobId;
+    $applicationUrl = getAppBaseUrl() . '/employerprofile/view_applications.php?job_id=' . $jobId;
     $safeApplicationUrl = htmlspecialchars($applicationUrl, ENT_QUOTES, 'UTF-8');
     $applicationLinks = '';
     foreach ($applications as $index => $application) {

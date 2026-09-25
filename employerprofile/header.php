@@ -517,7 +517,7 @@ if (isset($_SESSION['employerid'])) {
             <a href="#" style="text-decoration: none; color: #333;"><?php echo $lang['create_cv']; ?></a>
             <!-- <a href="contactus_employer.php"
                 style="text-decoration: none; color: #333;"><?php echo $lang['contact_us']; ?></a> -->
-            <a href="feedback_employer.php" style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
+            <a href="../feedback_employer.php" style="text-decoration: none; color: #333;"><?php echo $lang['feedback']; ?></a>
         </div>
         <div class="loggined_option">
         <a class="ra_trang_tim_viec" href="../index.php"><?php echo $lang['Ra_trang_tim_viec'] ?></a>

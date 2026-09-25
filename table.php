@@ -207,6 +207,30 @@ if ($stmt === TRUE) {
     echo "Error creating table: " . $conn->error;
 }
 
+$stmt = $conn->query("CREATE TABLE IF NOT EXISTS job_payments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    employer_id INT UNSIGNED NOT NULL,
+    job_id INT UNSIGNED NULL,
+    order_code BIGINT UNSIGNED NOT NULL UNIQUE,
+    payment_link_id VARCHAR(100) NULL,
+    checkout_url TEXT NULL,
+    amount BIGINT UNSIGNED NOT NULL,
+    status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+    job_payload JSON NOT NULL,
+    provider_reference VARCHAR(255) NULL,
+    raw_response JSON NULL,
+    paid_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_job_payments_employer (employer_id),
+    INDEX idx_job_payments_job (job_id),
+    CONSTRAINT fk_job_payments_employer FOREIGN KEY (employer_id) REFERENCES user(id) ON DELETE CASCADE,
+    CONSTRAINT fk_job_payments_job FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+if ($stmt !== TRUE) {
+    echo "Error creating job_payments table: " . $conn->error . "<br>";
+}
+
 // Tạo bảng application
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS application (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

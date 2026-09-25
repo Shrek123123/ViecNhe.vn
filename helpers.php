@@ -92,9 +92,23 @@ function sendPasswordResetOtp($recipientEmail, $otp) {
     return sendEmail($recipientEmail, '', $subject, $message);
 }
 
-function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $amount, array $jobData) {
+function getJobPayOSClient(): PayOS\PayOS {
     require_once __DIR__ . '/vendor/autoload.php';
+    $config = require __DIR__ . '/config/payos.php';
+    foreach (['client_id', 'api_key', 'checksum_key'] as $key) {
+        if (empty($config[$key])) {
+            throw new RuntimeException('Thiếu cấu hình PayOS: ' . $key);
+        }
+    }
 
+    return new PayOS\PayOS(
+        clientId: $config['client_id'],
+        apiKey: $config['api_key'],
+        checksumKey: $config['checksum_key']
+    );
+}
+
+function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $amount, array $jobData) {
     foreach (['job_title', 'job_description', 'job_location', 'salary', 'contact_email', 'contact_phone', 'job_type', 'job_position', 'job_experience', 'job_requirement'] as $requiredField) {
         if (trim((string) ($jobData[$requiredField] ?? '')) === '') {
             throw new InvalidArgumentException('Vui lòng điền đầy đủ thông tin bắt buộc của bài đăng.');
@@ -104,120 +118,140 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
         throw new InvalidArgumentException('Thông tin email hoặc số lượng tuyển dụng không hợp lệ.');
     }
 
-    $planCode = match ((int) $duration) {
-        30 => 'tin_30_ngay',
-        60 => 'tin_60_ngay',
-        180 => 'tin_6_thang',
-        365 => 'tin_1_nam',
-        default => throw new InvalidArgumentException('Invalid job duration'),
-    };
-    $transactionCode = $planCode . '_ntd_' . (int) $employerId . '_' . bin2hex(random_bytes(5));
+    $duration = (int) $duration;
+    if (!in_array($duration, [30, 60, 180, 365], true)) {
+        throw new InvalidArgumentException('Thời hạn đăng tin không hợp lệ.');
+    }
+    $jobData['company_id'] = (int) $companyId;
+    $jobData['post_duration'] = $duration;
     $payload = json_encode($jobData, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-
-    $conn->query("CREATE TABLE IF NOT EXISTS payment_orders (
+    $employerId = (int) $employerId;
+    $amount = (int) $amount;
+    $conn->query("CREATE TABLE IF NOT EXISTS job_payments (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        invoice_number VARCHAR(100) NOT NULL UNIQUE,
-        transaction_code VARCHAR(100) NOT NULL,
-        amount BIGINT UNSIGNED NOT NULL,
-        currency CHAR(3) NOT NULL DEFAULT 'VND',
-        status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
-        employer_id INT UNSIGNED NULL,
-        job_payload JSON NULL,
+        employer_id INT UNSIGNED NOT NULL,
         job_id INT UNSIGNED NULL,
-        provider_transaction_id VARCHAR(100) NULL UNIQUE,
+        order_code BIGINT UNSIGNED NOT NULL UNIQUE,
+        payment_link_id VARCHAR(100) NULL,
+        checkout_url TEXT NULL,
+        amount BIGINT UNSIGNED NOT NULL,
+        status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+        job_payload JSON NOT NULL,
         provider_reference VARCHAR(255) NULL,
-        raw_webhook JSON NULL,
+        raw_response JSON NULL,
         paid_at DATETIME NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    )");
-    foreach (['employer_id' => 'INT UNSIGNED NULL', 'job_payload' => 'JSON NULL', 'job_id' => 'INT UNSIGNED NULL'] as $column => $definition) {
-        $columnCheck = $conn->query("SHOW COLUMNS FROM payment_orders LIKE '" . $column . "'");
-        if ($columnCheck && $columnCheck->num_rows === 0) {
-            $conn->query("ALTER TABLE payment_orders ADD COLUMN {$column} {$definition}");
-        }
-    }
-
-    $stmt = $conn->prepare('INSERT INTO payment_orders (invoice_number, transaction_code, amount, employer_id, job_payload) VALUES (?, ?, ?, ?, ?)');
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_job_payments_employer (employer_id),
+        INDEX idx_job_payments_job (job_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $orderCode = random_int(100000, 999999999);
+    $stmt = $conn->prepare('INSERT INTO job_payments (employer_id, amount, order_code, job_payload, status) VALUES (?, ?, ?, ?, \'pending\')');
     if (!$stmt) {
-        throw new RuntimeException('Cannot create payment order: ' . $conn->error);
+        throw new RuntimeException('Không thể tạo giao dịch thanh toán: ' . $conn->error);
     }
-    $employerId = (int) $employerId;
-    $companyId = (int) $companyId;
-    $stmt->bind_param('ssiis', $transactionCode, $transactionCode, $amount, $employerId, $payload);
+    $stmt->bind_param('iiis', $employerId, $amount, $orderCode, $payload);
     if (!$stmt->execute()) {
-        throw new RuntimeException('Cannot save payment order: ' . $stmt->error);
+        throw new RuntimeException('Không thể lưu giao dịch thanh toán: ' . $stmt->error);
     }
+    $paymentId = (int) $conn->insert_id;
     $stmt->close();
 
-    $config = require __DIR__ . '/config/sepay.php';
-    $sepay = new SePay\SePayClient($config['merchant_id'], $config['secret_key'], $config['environment']);
-    $baseUrl = $config['public_url'];
-    $checkoutData = SePay\Builders\CheckoutBuilder::make()
-        ->paymentMethod('BANK_TRANSFER')
-        ->currency('VND')
-        ->orderInvoiceNumber($transactionCode)
-        ->orderAmount((int) $amount)
-        ->operation('PURCHASE')
-        ->orderDescription('Thanh toan ' . $transactionCode)
-        ->successUrl($baseUrl . '/employerprofile/payment-result.php?status=success&invoice=' . rawurlencode($transactionCode))
-        ->errorUrl($baseUrl . '/employerprofile/payment-result.php?status=error&invoice=' . rawurlencode($transactionCode))
-        ->cancelUrl($baseUrl . '/employerprofile/payment-result.php?status=cancel&invoice=' . rawurlencode($transactionCode))
-        ->build();
+    try {
+        $config = require __DIR__ . '/config/payos.php';
+        $baseUrl = rtrim((string) ($config['public_url'] ?? ''), '/');
+        if ($baseUrl === '') {
+            throw new RuntimeException('Thiếu cấu hình PAYOS_PUBLIC_URL.');
+        }
+        $returnUrl = $baseUrl . '/public/success.html';
+        $cancelUrl = $baseUrl . '/public/cancel.html';
+        $response = getJobPayOSClient()->paymentRequests->create([
+            'orderCode' => $orderCode,
+            'amount' => $amount,
+            'description' => 'Dang tin ' . $orderCode,
+            'returnUrl' => $returnUrl,
+            'cancelUrl' => $cancelUrl,
+        ]);
+        $stmt = $conn->prepare('UPDATE job_payments SET payment_link_id = ?, checkout_url = ? WHERE id = ?');
+        $stmt->bind_param('ssi', $response->paymentLinkId, $response->checkoutUrl, $paymentId);
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Không thể lưu liên kết thanh toán: ' . $stmt->error);
+        }
+        $stmt->close();
 
-    return [
-        'transaction_code' => $transactionCode,
-        'checkout_html' => $sepay->checkout()->generateFormHtml($checkoutData),
-    ];
+        return [
+            'order_code' => $orderCode,
+            'checkout_url' => $response->checkoutUrl,
+        ];
+    } catch (Throwable $exception) {
+        $stmt = $conn->prepare("UPDATE job_payments SET status = 'failed' WHERE id = ? AND status = 'pending'");
+        $stmt->bind_param('i', $paymentId);
+        $stmt->execute();
+        $stmt->close();
+        throw $exception;
+    }
 }
 
-function reconcileJobPaymentOrder($conn, $invoiceNumber) {
-    require_once __DIR__ . '/vendor/autoload.php';
-
-    $config = require __DIR__ . '/config/sepay.php';
-    $sepay = new SePay\SePayClient($config['merchant_id'], $config['secret_key'], $config['environment']);
-    $response = $sepay->orders()->list(['q' => $invoiceNumber, 'per_page' => 20]);
-    $json = json_encode($response, JSON_UNESCAPED_UNICODE);
-    $matched = null;
-
-    $findOrder = function ($value) use (&$findOrder, $invoiceNumber, &$matched): void {
-        if ($matched !== null || !is_array($value)) {
-            return;
-        }
-        if (($value['order_invoice_number'] ?? null) === $invoiceNumber
-            || ($value['invoice_number'] ?? null) === $invoiceNumber) {
-            $matched = $value;
-            return;
-        }
-        foreach ($value as $child) {
-            $findOrder($child);
-        }
-    };
-    $findOrder($response);
-
-    if ($matched === null || !in_array((string) ($matched['order_status'] ?? $matched['status'] ?? ''), ['CAPTURED', 'PAID', 'paid'], true)) {
+function reconcileJobPaymentOrder($conn, $orderCode) {
+    $orderCode = (int) $orderCode;
+    if ($orderCode <= 0) {
         return false;
     }
 
-    $providerId = (string) ($matched['id'] ?? $matched['order_id'] ?? $invoiceNumber);
+    $stmt = $conn->prepare('SELECT amount, status, job_id FROM job_payments WHERE order_code = ? LIMIT 1');
+    $stmt->bind_param('i', $orderCode);
+    $stmt->execute();
+    $order = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$order) {
+        return false;
+    }
+    if (!empty($order['job_id'])) {
+        return true;
+    }
+
+    try {
+        $paymentInfo = getJobPayOSClient()->paymentRequests->get($orderCode);
+    } catch (Throwable $exception) {
+        error_log('PayOS payment lookup failed: ' . $exception->getMessage());
+        return false;
+    }
+    $providerStatus = $paymentInfo->status->value ?? '';
+    if ((int) $paymentInfo->orderCode !== $orderCode || (int) $paymentInfo->amount !== (int) $order['amount']) {
+        error_log('PayOS order mismatch for orderCode ' . $orderCode);
+        return false;
+    }
+    if ($providerStatus !== 'PAID' || (int) $paymentInfo->amountPaid !== (int) $order['amount'] || (int) $paymentInfo->amountRemaining !== 0) {
+        if (in_array($providerStatus, ['CANCELLED', 'EXPIRED', 'FAILED'], true)) {
+            $stmt = $conn->prepare("UPDATE job_payments SET status = 'failed' WHERE order_code = ? AND status = 'pending' AND job_id IS NULL");
+            $stmt->bind_param('i', $orderCode);
+            $stmt->execute();
+            $stmt->close();
+        }
+        return false;
+    }
+
     $conn->begin_transaction();
     try {
-        $stmt = $conn->prepare('SELECT id, status, job_id, employer_id, job_payload FROM payment_orders WHERE invoice_number = ? LIMIT 1 FOR UPDATE');
-        $stmt->bind_param('s', $invoiceNumber);
+        $stmt = $conn->prepare('SELECT id, employer_id, amount, status, job_id, job_payload FROM job_payments WHERE order_code = ? LIMIT 1 FOR UPDATE');
+        $stmt->bind_param('i', $orderCode);
         $stmt->execute();
         $order = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         if (!$order) {
-            throw new RuntimeException('Payment order not found');
+            throw new RuntimeException('Không tìm thấy giao dịch thanh toán.');
         }
         if (!empty($order['job_id'])) {
             $conn->commit();
             return true;
         }
+        if ($order['status'] !== 'pending' || (int) $order['amount'] !== (int) $paymentInfo->amount) {
+            throw new RuntimeException('Trạng thái hoặc số tiền giao dịch không hợp lệ.');
+        }
 
-        $job = json_decode((string) $order['job_payload'], true);
+        $job = json_decode((string) $order['job_payload'], true, 512, JSON_THROW_ON_ERROR);
         if (!is_array($job)) {
-            throw new RuntimeException('Job draft is invalid');
+            throw new RuntimeException('Dữ liệu bài đăng không hợp lệ.');
         }
         $employerId = (int) $order['employer_id'];
         $companyId = (int) $job['company_id'];
@@ -225,7 +259,7 @@ function reconcileJobPaymentOrder($conn, $invoiceNumber) {
         $companyStmt->bind_param('ii', $companyId, $employerId);
         $companyStmt->execute();
         if (!$companyStmt->get_result()->fetch_assoc()) {
-            throw new RuntimeException('Company does not belong to employer');
+            throw new RuntimeException('Công ty không thuộc nhà tuyển dụng này.');
         }
         $companyStmt->close();
 
@@ -239,22 +273,25 @@ function reconcileJobPaymentOrder($conn, $invoiceNumber) {
         $jobStatus = 'pending_review';
         $jobStmt->bind_param('iiissssissssssisssss', $employerId, $companyId, $nextNumber, $job['job_title'], $job['job_description'], $job['job_location'], $job['salary'], $job['post_duration'], $job['contact_email'], $job['contact_phone'], $job['required_certification'], $job['job_experience'], $job['job_requirement'], $job['job_benefit'], $job['no_employee_needed'], $job['job_position'], $job['job_detailed_location'], $job['job_location_district'], $job['job_type'], $jobStatus);
         if (!$jobStmt->execute()) {
-            throw new RuntimeException('Cannot create job: ' . $jobStmt->error);
+            throw new RuntimeException('Không thể tạo bài đăng: ' . $jobStmt->error);
         }
-        $jobId = $conn->insert_id;
+        $jobId = (int) $conn->insert_id;
         $jobStmt->close();
 
-        $updateStmt = $conn->prepare("UPDATE payment_orders SET status = 'paid', job_id = ?, provider_transaction_id = ?, raw_webhook = ?, paid_at = NOW() WHERE id = ? AND job_id IS NULL");
-        $updateStmt->bind_param('issi', $jobId, $providerId, $json, $order['id']);
+        $rawResponse = json_encode($paymentInfo, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        $reference = (string) ($paymentInfo->transactions[0]->reference ?? '');
+        $paymentLinkId = (string) $paymentInfo->id;
+        $updateStmt = $conn->prepare("UPDATE job_payments SET status = 'paid', job_id = ?, payment_link_id = ?, provider_reference = ?, raw_response = ?, paid_at = NOW() WHERE id = ? AND status = 'pending' AND job_id IS NULL");
+        $updateStmt->bind_param('isssi', $jobId, $paymentLinkId, $reference, $rawResponse, $order['id']);
         if (!$updateStmt->execute() || $updateStmt->affected_rows !== 1) {
-            throw new RuntimeException('Cannot update payment order');
+            throw new RuntimeException('Không thể cập nhật trạng thái thanh toán.');
         }
         $updateStmt->close();
         $conn->commit();
         return true;
     } catch (Throwable $exception) {
         $conn->rollback();
-        error_log('SePay reconciliation error: ' . $exception->getMessage());
+        error_log('PayOS reconciliation error: ' . $exception->getMessage());
         return false;
     }
 }

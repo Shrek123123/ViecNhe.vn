@@ -183,15 +183,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'job_type' => $jobType,
         'status' => 'pending_review',
     ]);
-    echo '<div style="max-width:520px;margin:40px auto;font-family:Arial">'
-            . '<h2>Thanh toán để đăng tin</h2><p>Mã giao dịch: ' . htmlspecialchars($jobPayment['transaction_code'], ENT_QUOTES, 'UTF-8') . '</p>'
-            . $jobPayment['checkout_html'] . '</div>';
+    header('Location: ' . $jobPayment['checkout_url'], true, 303);
+    exit;
     } catch (Throwable $exception) {
         $errorId = bin2hex(random_bytes(4));
         error_log('Job payment error [' . $errorId . ']: ' . $exception->getMessage());
         echo '<div style="max-width:720px;margin:40px auto;padding:20px;border:1px solid #f0a0a0;background:#fff4f4;color:#8b0000;font-family:Arial">'
             . '<h2>Không thể tạo thanh toán</h2><p><strong>Lỗi:</strong> ' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>'
-            . '<p><strong>Mã lỗi:</strong> ' . $errorId . '</p><p>Kiểm tra lại dữ liệu bài đăng, cấu hình SePay và kết nối cơ sở dữ liệu.</p></div>';
+            . '<p><strong>Mã lỗi:</strong> ' . $errorId . '</p><p>Kiểm tra dữ liệu bài đăng, cấu hình PayOS và kết nối cơ sở dữ liệu.</p></div>';
     }
   exit;
 }

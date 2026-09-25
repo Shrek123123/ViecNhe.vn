@@ -1,6 +1,5 @@
 {
     "require": {
-        "phpmailer/phpmailer": "^7.1",
-        "payos/payos": "^2.0"
+        "phpmailer/phpmailer": "^7.1"
     }
 }

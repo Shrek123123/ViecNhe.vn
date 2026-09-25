@@ -6,11 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
-    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
-    'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
-    'PsrDiscovery\\' => array($vendorDir . '/psr-discovery/http-factory-implementations/src', $vendorDir . '/psr-discovery/http-client-implementations/src', $vendorDir . '/psr-discovery/discovery/src'),
-    'PayOS\\' => array($vendorDir . '/payos/payos/src'),
     'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
-    'Composer\\Semver\\' => array($vendorDir . '/composer/semver/src'),
 );

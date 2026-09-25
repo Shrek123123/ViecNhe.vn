@@ -15,15 +15,17 @@ $payOS = new PayOS(
     checksumKey: $payOSChecksumKey
 );
 
-$YOUR_DOMAIN = 'http://localhost:3030/';
+$YOUR_DOMAIN = 'http://localhost/JobHive-main';
 
 $data = [
     "orderCode" => intval(substr(strval(microtime(true) * 10000), -6)),
     "amount" => 2000,
     "description" => "Thanh toán đơn hàng",
-    "returnUrl" => $YOUR_DOMAIN,
-    "cancelUrl" => $YOUR_DOMAIN
+    "returnUrl" => $YOUR_DOMAIN . "/success.html",
+    "cancelUrl" => $YOUR_DOMAIN . "/cancel.html"
 ];
 
 $response = $payOS->paymentRequests->create($data);
-echo json_encode($response);
+
+header("HTTP/1.1 303 See Other");
+header("Location: " . $response['checkoutUrl']);

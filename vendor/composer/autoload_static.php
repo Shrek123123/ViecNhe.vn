@@ -9,50 +9,14 @@ class ComposerStaticInit2185d2f99bcd56787481d9357a5972d3
     public static $prefixLengthsPsr4 = array (
         'P' =>
         array (
-            'Psr\\Log\\' => 8,
-            'Psr\\Http\\Message\\' => 17,
-            'Psr\\Http\\Client\\' => 16,
-            'PsrDiscovery\\' => 13,
-            'PayOS\\' => 6,
             'PHPMailer\\PHPMailer\\' => 20,
-        ),
-        'C' =>
-        array (
-            'Composer\\Semver\\' => 16,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Psr\\Log\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/psr/log/src',
-        ),
-        'Psr\\Http\\Message\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
-        ),
-        'Psr\\Http\\Client\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-client/src',
-        ),
-        'PsrDiscovery\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/psr-discovery/http-factory-implementations/src',
-            1 => __DIR__ . '/..' . '/psr-discovery/http-client-implementations/src',
-            2 => __DIR__ . '/..' . '/psr-discovery/discovery/src',
-        ),
-        'PayOS\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/payos/payos/src',
-        ),
         'PHPMailer\\PHPMailer\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
-        ),
-        'Composer\\Semver\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/composer/semver/src',
         ),
     );
 

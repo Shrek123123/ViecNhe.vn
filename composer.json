@@ -1,6 +1,6 @@
 {
     "require": {
         "phpmailer/phpmailer": "^7.1",
-        "sepay/sepay-pg": "1.0"
+        "payos/payos": "^2.0"
     }
 }

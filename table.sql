@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 );
 
 ALTER TABLE `user`
-    ADD COLUMN IF NOT EXISTS status ENUM('unlocked', 'locked') NOT NULL DEFAULT 'unlocked' AFTER updated_at;
+    ADD COLUMN status ENUM('unlocked', 'locked') NOT NULL DEFAULT 'unlocked' AFTER updated_at;
 
 CREATE TABLE IF NOT EXISTS password_reset (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -46,10 +46,10 @@ CREATE TABLE IF NOT EXISTS payment_orders (
 );
 
 ALTER TABLE payment_orders
-    ADD COLUMN IF NOT EXISTS employer_id INT UNSIGNED NULL,
-    ADD COLUMN IF NOT EXISTS job_payload JSON NULL,
-    ADD COLUMN IF NOT EXISTS job_id INT UNSIGNED NULL,
-    ADD COLUMN IF NOT EXISTS provider_transaction_id VARCHAR(100) NULL UNIQUE;
+    ADD COLUMN employer_id INT UNSIGNED NULL,
+    ADD COLUMN job_payload JSON NULL,
+    ADD COLUMN job_id INT UNSIGNED NULL,
+    ADD COLUMN provider_transaction_id VARCHAR(100) NULL UNIQUE;
 
 ALTER TABLE payment_orders
     MODIFY COLUMN provider_transaction_id VARCHAR(100) NULL;
@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS application (
 );
 
 ALTER TABLE application
-    ADD COLUMN IF NOT EXISTS cover_letter TEXT NULL AFTER cv_file;
+    ADD COLUMN cover_letter TEXT NULL AFTER cv_file;
 
 CREATE TABLE IF NOT EXISTS feedback (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

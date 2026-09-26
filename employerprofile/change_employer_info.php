@@ -127,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_employer_profi
 <html lang="en">
 
 <head>
+    <link rel="icon" type="image/png" href="../image/favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $lang['employerprofile_postajob'] ?></title>

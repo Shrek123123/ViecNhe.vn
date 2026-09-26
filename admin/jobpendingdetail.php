@@ -54,6 +54,7 @@ $conn->close();
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <link rel="icon" type="image/png" href="../image/favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản trị - Chi tiết tin tuyển dụng chờ duyệt</title>

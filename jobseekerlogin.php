@@ -109,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="image/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $lang['jobseeker_login_title']; ?> - ViecNhe</title>
 

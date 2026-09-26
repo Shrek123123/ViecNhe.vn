@@ -14,6 +14,7 @@ include __DIR__ . '/lang/' . basename($_SESSION['lang']) . '.php';
 <html lang="<?= htmlspecialchars($_SESSION['lang'], ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="image/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($lang['jobseekerforgetpassword_title'] ?? 'Password recovery', ENT_QUOTES, 'UTF-8') ?></title>
     <style>

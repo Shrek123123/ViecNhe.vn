@@ -145,6 +145,7 @@ $lang = [
     ],
     "recruitment_consulting" => "Recruitment Consulting",
     "post_job_now" => "Post a Job Now →",
+    "free_30_day_post_already_used" => "You have already submitted 1 job post with a 30-days duration, therefore the free trial is over.",
     "job_post_is_saved_for_review" => "Your job post is now saved for review. Please wait for further notice!",
     "ung_tuyen_viec" => "Applied for",
 

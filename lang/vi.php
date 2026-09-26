@@ -152,6 +152,7 @@ $lang = [
     ],
     "recruitment_consulting" => "Tư vấn tuyển dụng",
     "post_job_now" => "Đăng tin tuyển dụng ngay →",
+    "free_30_day_post_already_used" => "Bạn đã đăng 1 bài đăng 30 ngày miễn phí nên không thể đăng tiếp.",
     "job_post_is_saved_for_review" => "Bài đăng tuyển đã được lưu để duyệt qua, kết quả sẽ được thông báo trong thời gian sớm nhất!",
     "ung_tuyen_viec" => "Ứng tuyển việc",
 

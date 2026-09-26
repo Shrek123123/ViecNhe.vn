@@ -14,6 +14,18 @@ if (!isset($_SESSION['usernameemployer'])) {
   </script>";
 }
 
+$hasFree30DayPost = false;
+if (!empty($_SESSION['employerid'])) {
+  $freePostEmployerId = (int) $_SESSION['employerid'];
+  $freePostCheckStmt = $conn->prepare("SELECT 1 FROM job WHERE posted_by_employer_id = ? AND post_duration = 30 LIMIT 1");
+  if ($freePostCheckStmt) {
+    $freePostCheckStmt->bind_param("i", $freePostEmployerId);
+    $freePostCheckStmt->execute();
+    $hasFree30DayPost = (bool) $freePostCheckStmt->get_result()->fetch_assoc();
+    $freePostCheckStmt->close();
+  }
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $companyId = (int)($_POST['company_id'] ?? 0);
   $jobRequirementText = $_POST['jobRequirementText'];
@@ -41,6 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
   }
   $employerid = (int) $_SESSION['employerid'];
+
+  if ($hasFree30DayPost) {
+    echo '<script>alert(' . json_encode($lang['free_30_day_post_already_used'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = window.location.pathname;</script>';
+    exit;
+  }
 
   if ($companyId <= 0) {
     echo "<script>alert('Please select a company before posting a job.'); window.history.back();</script>";
@@ -607,6 +624,10 @@ if (isset($_SESSION['employerid'])) {
   const closeBtn = document.querySelector(".closeBtn");
 
   openBtn.onclick = () => {
+    if (<?= $hasFree30DayPost ? 'true' : 'false' ?>) {
+      alert(<?= json_encode($lang['free_30_day_post_already_used'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>);
+      return;
+    }
     modal.style.display = "block";
   }
 

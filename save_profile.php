@@ -37,7 +37,8 @@ $validGenders = ['Male', 'Female', 'Other', 'Prefer not to say'];
 $validStatus = ['Single', 'Married', 'Other'];
 
 
-$mysqli = new mysqli("localhost", "root", "", "jobhive");
+require_once __DIR__ . '/config.php';
+$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($mysqli->connect_errno) {
     echo json_encode(['success' => false, 'message' => "Lỗi kết nối DB: " . $mysqli->connect_error]);
     exit;

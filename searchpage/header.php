@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -17,7 +18,7 @@ include __DIR__ . '/../lang/' . $_SESSION['lang'] . '.php';
 $jobseeker_id = isset($_SESSION['jobseeker_id']) ? intval($_SESSION['jobseeker_id']) : 0;
 $user_data = null;
 if ($jobseeker_id > 0) {
-    $conn = new mysqli("localhost", "root", "", "jobhive");
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
     if (!$conn->connect_error) {
         $sql = "SELECT username FROM user WHERE id = ?";
         $stmt = $conn->prepare($sql);
@@ -445,7 +446,7 @@ if ($jobseeker_id > 0) {
                     <?php
                     $profilePic = "image/defaultavatar.jpg"; // ảnh mặc định
                     if (isset($_SESSION['jobseeker_id'])) {
-                        $conn = new mysqli("localhost", "root", "", "jobhive");
+                        $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
                         if (!$conn->connect_error) {
                             $sql = "SELECT profile_pic FROM jobseeker_profile WHERE jobseeker_id = ?";

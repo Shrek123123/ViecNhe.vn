@@ -1,13 +1,5 @@
 <?php
-// Kết nối đến MySQL để tạo cơ sở dữ liệu
-
 include_once 'config.php'; // Kết nối đến cơ sở dữ liệu MySQL
-
-// Tạo cơ sở dữ liệu jobhive nếu chưa tồn tại
-$conn->query("CREATE DATABASE IF NOT EXISTS jobhive");
-
-// Chọn cơ sở dữ liệu jobhive
-$conn->select_db("jobhive");
 
 // Tạo bảng user
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS user (

@@ -20,7 +20,7 @@ $isVerified = isset($_SESSION['jobseeker_password_reset_verified_user_id']);
 <html lang="<?= htmlspecialchars($_SESSION['lang'], ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="image/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($lang['jobseekerforgetpassword_title'] ?? 'Password recovery', ENT_QUOTES, 'UTF-8') ?></title>
     <style>

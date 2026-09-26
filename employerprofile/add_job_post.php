@@ -35,7 +35,7 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
 <html lang="en">
 
 <head>
-    <link rel="icon" type="image/png" href="../image/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="../image/favicon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $lang['employerprofile_postajob'] ?></title>

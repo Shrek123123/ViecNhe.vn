@@ -26,7 +26,7 @@ $sql = "SELECT j.id, j.job_title, c.company_name, j.posted_by_employer_id
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <link rel="icon" type="image/png" href="../image/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="../image/favicon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản trị - Duyệt tin tuyển dụng chờ phê duyệt</title>

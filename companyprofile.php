@@ -329,7 +329,7 @@ $company_profile_jobs_title = str_replace(':company_name', $company_name, $compa
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($_SESSION['lang']) ?>">
 <head>
-    <link rel="icon" type="image/png" href="image/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $company_name ?> | ViecNhe</title>

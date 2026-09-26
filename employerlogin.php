@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="image/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $lang['employer_login_title'] ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">

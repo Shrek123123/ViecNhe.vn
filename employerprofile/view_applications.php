@@ -1036,7 +1036,7 @@ if (isset($_SESSION['flash_message'])) {
                                         $formatted_created_at = formatDateByLocale($row['created_at']);
                                         $final_formatted_date = trans('cv_application_date', [':date' => $formatted_created_at]);
 
-                                        // Chuẩn hóa đường dẫn CV để luôn trỏ vào root folder JobHive-main
+                                        // Chuẩn hóa đường dẫn CV để luôn trỏ vào root folder ViecNhe
                                         $cv_file = '';
                                         if (!empty($row['cv_file'])) {
                                             $cv_file_raw = trim($row['cv_file']);
@@ -1049,7 +1049,7 @@ if (isset($_SESSION['flash_message'])) {
                                             if (preg_match('#^(https?://)#i', $cv_file_raw)) {
                                                 $cv_file = $cv_file_raw;
                                             } else {
-                                                // Nếu là đường dẫn bắt đầu / thì cho vào base folder JobHive-main
+                                                // Nếu là đường dẫn bắt đầu / thì cho vào base folder ViecNhe
                                                 if (strpos($cv_file_raw, '/') === 0) {
                                                     $cv_file = $baseFolder . rtrim($cv_file_raw, '/');
                                                 } else {

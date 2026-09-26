@@ -331,7 +331,7 @@ if ($auth_header_mode === 'login') {
     </button>
     <div class="logo-wrap">
         <a href="index.php">
-            <img src="image/logo.png" alt="JobHive Logo" style="height: 50px; margin-right: 10px;">
+            <img src="image/logo.png" alt="ViecNhe Logo" style="height: 50px; margin-right: 10px;">
         </a>
     </div>
 

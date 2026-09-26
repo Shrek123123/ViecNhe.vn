@@ -78,26 +78,6 @@ $conn->query("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS employer_id IN
 $conn->query("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS job_payload JSON NULL");
 $conn->query("ALTER TABLE payment_orders ADD COLUMN IF NOT EXISTS job_id INT UNSIGNED NULL");
 
-$stmt = $conn->query("CREATE TABLE IF NOT EXISTS sepay_transactions (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    sepay_id VARCHAR(100) NOT NULL UNIQUE,
-    gateway VARCHAR(100) NOT NULL,
-    transaction_date DATETIME NOT NULL,
-    account_number VARCHAR(100) NULL,
-    sub_account VARCHAR(250) NULL,
-    code VARCHAR(250) NULL,
-    amount_in BIGINT NOT NULL DEFAULT 0,
-    amount_out BIGINT NOT NULL DEFAULT 0,
-    accumulated BIGINT NOT NULL DEFAULT 0,
-    content TEXT NULL,
-    reference_code VARCHAR(255) NULL,
-    body JSON NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_sepay_code (code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-if ($stmt !== TRUE) {
-    echo "Error creating sepay_transactions table: " . $conn->error . "<br>";
-}
 $paymentProviderColumn = $conn->query("SHOW COLUMNS FROM payment_orders LIKE 'provider_transaction_id'");
 if ($paymentProviderColumn && $paymentProviderColumn->num_rows > 0) {
     $paymentProviderDefinition = $paymentProviderColumn->fetch_assoc();

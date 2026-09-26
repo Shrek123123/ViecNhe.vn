@@ -983,7 +983,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
               ? t('dayleft', ['d' => $days_left])
               : t('expired');
             $job_id = (int) $row['id'];
-            $companyName = $row['company_name'] ?? 'JobHive';
+            $companyName = $row['company_name'] ?? 'ViecNhe';
             $companyLogo = normalizeCompanyLogoPath($row['company_logo'] ?? 'image/logo1.png');
             $companyIndustry = translateCompanyIndustry($row['industry'] ?? '', $lang) ?: ($lang['jobdetail_unknown'] ?? 'Unknown');
             $jobExperienceLabel = translateJobExperience($row['job_experience'] ?? '', $lang);
@@ -1009,7 +1009,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
                       </div>
                     <?php endif; ?>
                     <div class="job-meta-row">
-                      <div class="job-meta-item"><?php echo htmlspecialchars($row['salary']); ?></div>
+                      <div class="job-meta-item"><?php echo htmlspecialchars(translateJobSalary($row['salary'] ?? '', $lang), ENT_QUOTES, 'UTF-8'); ?></div>
                       <span class="job-meta-divider" aria-hidden="true"></span>
                       <div class="job-meta-item"><?php echo htmlspecialchars($row['job_location']); ?></div>
                     </div>

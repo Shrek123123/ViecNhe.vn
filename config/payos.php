@@ -9,13 +9,7 @@ $payosEnv = static function (string $name, string $default = ''): string {
     return trim((string) $value);
 };
 
-$publicUrl = rtrim($payosEnv('PAYOS_PUBLIC_URL'), '/');
-if ($publicUrl === '') {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $appPath = trim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'))), '/.');
-    $publicUrl = $scheme . '://' . $host . ($appPath === '' ? '' : '/' . $appPath);
-}
+$publicUrl = 'https://unmade-petite-carefully.ngrok-free.dev/ViecNhe';
 
 return [
     'client_id' => $payosEnv('PAYOS_CLIENT_ID'),

@@ -295,7 +295,7 @@
 
             <!-- <h4><?= $lang['footer_download_app']; ?></h4>
             <div class="qr-and-apps">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://jobhive.vn&size=100x100"
+                <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://unmade-petite-carefully.ngrok-free.dev&size=100x100"
                     alt="QR Code">
                 <div class="app-links">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"

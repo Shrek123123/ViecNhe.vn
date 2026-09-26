@@ -45,7 +45,7 @@ $statusContent = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f4f7f5">
-    <title><?= htmlspecialchars($statusContent['title'], ENT_QUOTES, 'UTF-8') ?> | JobHive</title>
+    <title><?= htmlspecialchars($statusContent['title'], ENT_QUOTES, 'UTF-8') ?> | ViecNhe</title>
     <style>
         :root {
             color-scheme: light;
@@ -195,7 +195,7 @@ $statusContent = [
                 <a class="result__button" href="../employerprofile/my_job_posts.php">Quay lại danh sách tin</a>
             </div>
         </section>
-        <footer class="result__brand">JobHive <span aria-hidden="true">·</span> Thanh toán bảo mật bởi PayOS</footer>
+        <footer class="result__brand">ViecNhe <span aria-hidden="true">·</span> Thanh toán bảo mật bởi PayOS</footer>
     </main>
 </body>
 </html>

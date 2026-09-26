@@ -231,10 +231,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container">
         <div class="login-card">
             <a href="../index.php">
-                <img class="logo" src="../image/logo.png" alt="JobHive Logo">
+                <img class="logo" src="../image/logo.png" alt="ViecNhe Logo">
             </a>
             <h2><?= $lang['admin_login'] ?? 'Chào mừng quản trị viên' ?></h2>
-            <p class="intro">Hãy cùng đưa hệ thống JobHive lên một tầm cao mới</p>
+            <p class="intro">Hãy cùng đưa hệ thống ViecNhe lên một tầm cao mới</p>
             <form action="adminlogin.php" method="POST">
                 <div class="form-group">
                     <label for="admin-email"><?= $lang['email'] ?? 'Email' ?></label>

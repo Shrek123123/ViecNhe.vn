@@ -1093,8 +1093,8 @@ if ($cv_file_path) {
                 $('.content-area').html('<div style="padding:30px;text-align:center;">Đang tải việc làm đã lưu...</div>');
 
                 // Sửa đường dẫn: SỬ DỤNG ĐƯỜNG DẪN TUYỆT ĐỐI TỪ GỐC WEB APP
-                // Giả định /JobHive-main/ là gốc của ứng dụng trên server
-                $.get('/JobHive-main/jobseekerprofile/savedjobs-modal.php', function (data) {
+                // Giả định /ViecNhe/ là gốc của ứng dụng trên server
+                $.get('/ViecNhe/jobseekerprofile/savedjobs-modal.php', function (data) {
                     $('.content-area').html(data);
                 })
                     .fail(function (jqXHR, textStatus, errorThrown) {
@@ -1110,7 +1110,7 @@ if ($cv_file_path) {
                 $('.content-area').html('<div style="padding:30px;text-align:center;">Đang tải đơn ứng tuyển...</div>');
 
                 // Sửa đường dẫn: SỬ DỤNG ĐƯỜNG DẪN TUYỆT ĐỐI TỪ GỐC WEB APP
-                $.get('/JobHive-main/jobseekerprofile/myapplications-modal.php', function (data) {
+                $.get('/ViecNhe/jobseekerprofile/myapplications-modal.php', function (data) {
                     $('.content-area').html(data);
                 })
                     .fail(function (jqXHR, textStatus, errorThrown) {

@@ -41,7 +41,7 @@ if (!$company) {
 
 if (!$company) {
     $company = [
-        'company_name' => 'JobHive Company',
+        'company_name' => 'ViecNhe',
         'company_address' => 'Hồ Chí Minh, Việt Nam',
         'industry' => 'Human Resources',
         'information' => 'No company information available yet.',
@@ -299,7 +299,7 @@ if ($banner_logo === '') {
 $company_address = htmlspecialchars((string) ($company['company_address'] ?? 'Chưa cập nhật'));
 $company_industry = htmlspecialchars(translateCompanyIndustry($company['industry'] ?? 'Chưa cập nhật', $lang));
 $company_info = nl2br(htmlspecialchars((string) ($company['information'] ?? 'Chưa có thông tin mô tả.')));
-$company_name = htmlspecialchars((string) ($company['company_name'] ?? 'JobHive Company'));
+$company_name = htmlspecialchars((string) ($company['company_name'] ?? 'ViecNhe'));
 $company_size_display = '';
 if (!empty($company['company_size'] ?? '')) {
     $company_size_display = htmlspecialchars((string) $company['company_size']);
@@ -331,7 +331,7 @@ $company_profile_jobs_title = str_replace(':company_name', $company_name, $compa
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $company_name ?> | JobHive</title>
+    <title><?= $company_name ?> | ViecNhe</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <style>
         * { box-sizing: border-box; }

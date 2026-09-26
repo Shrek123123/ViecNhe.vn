@@ -6,7 +6,7 @@ include_once(__DIR__ . '/../models/Job.php');
 class JobController {
     // Hiển thị form tìm kiếm bằng cách gọi đến file seach.php trong view
     public function search() {
-    include $_SERVER['DOCUMENT_ROOT'] . '/JobHive-main/app/views/job/search.php'; // Đường dẫn tuyệt đối
+    include $_SERVER['DOCUMENT_ROOT'] . '/ViecNhe/app/views/job/search.php'; // Đường dẫn tuyệt đối
     }
 
     // Xử lý tìm kiếm và hiển thị kết quả

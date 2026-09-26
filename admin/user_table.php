@@ -244,7 +244,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng - JobHive</title>
+    <title>Quản lý người dùng - ViecNhe</title>
     <style>
         :root {
             --admin-navy: #0b1e45;
@@ -865,7 +865,7 @@ $conn->close();
     <main class="admin-main">
         <div class="admin-topbar">
             <h1>Quản lý người dùng</h1>
-            <img class="admin-topbar__logo" src="../image/logo.png" alt="JobHive">
+            <img class="admin-topbar__logo" src="../image/logo.png" alt="ViecNhe">
             <form method="post" action="adminlogout.php">
                 <button type="submit" name="admin_logout" class="admin-topbar__logout">Đăng xuất</button>
             </form>

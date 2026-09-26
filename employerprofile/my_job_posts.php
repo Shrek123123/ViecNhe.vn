@@ -1007,7 +1007,7 @@ $employer_id = $_SESSION['employerid'] ?? 0;
                                         </div>
 
                                         <div style="color: #b23b3b; font-weight: bold; font-size: 16px; margin-bottom: 5px;">
-                                            <?= htmlspecialchars($row['salary']) ?>
+                                            <?= htmlspecialchars(translateJobSalary($row['salary'] ?? '', $lang), ENT_QUOTES, 'UTF-8') ?>
                                         </div>
                                         <div style="font-size: 14px;">
                                             <?= $lang['status'] ?>: <span

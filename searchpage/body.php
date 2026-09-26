@@ -868,7 +868,7 @@ foreach ($industryOptionKeys as $industryKey) {
                     $days_left = (int) $interval->format('%r%a');
                     $days_left_text = $days_left > 0 ? sprintf($lang['days_left'], $days_left) : $lang['expired'];
                     $job_id = (int) $row['id'];
-                    $companyName = $row['company_name'] ?? 'JobHive';
+                    $companyName = $row['company_name'] ?? 'ViecNhe';
                     $companyLogo = normalizeCompanyLogoPath($row['company_logo'] ?? 'image/logo1.png');
                     $companyIndustry = translateCompanyIndustry($row['industry'] ?? '', $lang) ?: ($lang['jobdetail_unknown'] ?? 'Unknown');
                     $jobExperienceLabel = translateJobExperience($row['job_experience'] ?? '', $lang);

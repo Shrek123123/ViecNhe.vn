@@ -1,4 +1,5 @@
 <?php require_once '../config.php';
+require_once '../helpers.php';
 session_start();
 if (!isset($_SESSION['username'])) {
     $redirect = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php';
@@ -827,7 +828,7 @@ if ($cv_file_path) {
                             $days_left_text = $days_left > 0
                                 ? str_replace(':d', (string) $days_left, $lang['dayleft'] ?? $days_left . ' days left')
                                 : ($lang['expired'] ?? 'Expired');
-                            $salary = htmlspecialchars($row['salary']);
+                            $salary = htmlspecialchars(translateJobSalary($row['salary'] ?? '', $lang), ENT_QUOTES, 'UTF-8');
                             $job_title = htmlspecialchars($row['job_title']);
                             $job_location = htmlspecialchars($row['job_location']);
                             $updated = $created_at->diff($now);

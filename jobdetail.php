@@ -248,7 +248,7 @@ session_start();
                                 <strong><?= $lang['jobdetail_salary'] ?></strong>
                             </div>
                             <div class="col-md-8 text-danger fw-bold job-summary-value">
-                                <?= htmlspecialchars($job['salary'] ?? $lang['jobdetail_no_data']) ?>
+                                <?= htmlspecialchars(translateJobSalary($job['salary'] ?? $lang['jobdetail_no_data'], $lang), ENT_QUOTES, 'UTF-8') ?>
                             </div>
                         </div>
                         <div class="row mb-3 job-summary-row">
@@ -360,7 +360,7 @@ session_start();
                             <?php foreach ($related_jobs as $rjob): ?>
                                 <a href="jobdetail.php?id=<?= htmlspecialchars($rjob['id']) ?>"
                                     class="list-group-item list-group-item-action">
-                                    <?= htmlspecialchars($rjob['job_title']) ?>: <?= htmlspecialchars($rjob['salary']) ?>
+                                    <?= htmlspecialchars($rjob['job_title']) ?>: <?= htmlspecialchars(translateJobSalary($rjob['salary'] ?? '', $lang), ENT_QUOTES, 'UTF-8') ?>
                                 </a>
                             <?php endforeach; ?>
                         </div>
@@ -435,7 +435,7 @@ session_start();
                             <?php foreach ($related_jobs as $rjob): ?>
                                 <a href="jobdetail.php?id=<?= htmlspecialchars($rjob['id']) ?>"
                                     class="list-group-item list-group-item-action">
-                                    <?= htmlspecialchars($rjob['job_title']) ?>: <?= htmlspecialchars($rjob['salary']) ?>
+                                    <?= htmlspecialchars($rjob['job_title']) ?>: <?= htmlspecialchars(translateJobSalary($rjob['salary'] ?? '', $lang), ENT_QUOTES, 'UTF-8') ?>
                                 </a>
                             <?php endforeach; ?>
                         </div>

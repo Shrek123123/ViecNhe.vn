@@ -14,29 +14,9 @@ $displayStatus = 'pending';
 $orderCode = (int) ($_GET['orderCode'] ?? 0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_SESSION['employerid'])) {
-        header('Location: employerlogin.php?redirect=employerpage.php', true, 303);
-        exit;
-    }
-    $sessionToken = (string) ($_SESSION['csrf_prominent_company'] ?? '');
-    $postedToken = (string) ($_POST['csrf_token'] ?? '');
-    if ($sessionToken === '' || $postedToken === '' || !hash_equals($sessionToken, $postedToken)) {
-        http_response_code(400);
-        $displayStatus = 'error';
-    } else {
-        $companyId = filter_input(INPUT_POST, 'company_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        try {
-            if ($companyId === false || $companyId === null) {
-                throw new InvalidArgumentException('Invalid company selection.');
-            }
-            $payment = createProminentCompanyPaymentCheckout($conn, (int) $_SESSION['employerid'], (int) $companyId);
-            header('Location: ' . $payment['checkout_url'], true, 303);
-            exit;
-        } catch (Throwable $exception) {
-            error_log('Prominent company checkout error: ' . $exception->getMessage());
-            $displayStatus = 'error';
-        }
-    }
+    http_response_code(405);
+    header('Allow: GET');
+    exit('Method not allowed');
 } elseif ($orderCode > 0) {
     $displayStatus = reconcileProminentCompanyPayment($conn, $orderCode);
 }

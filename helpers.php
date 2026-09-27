@@ -254,17 +254,22 @@ function createProminentCompanyPaymentCheckout($conn, int $employerId, int $comp
             'returnUrl' => $baseUrl . '/dang_ky_cong_ty_nb_thanh_cong.php',
             'cancelUrl' => $baseUrl . '/huy_dang_ky_cong_ty_nb.php',
         ]);
+        $checkoutUrl = trim((string) ($response->checkoutUrl ?? ''));
+        if (!filter_var($checkoutUrl, FILTER_VALIDATE_URL)
+            || strtolower((string) parse_url($checkoutUrl, PHP_URL_SCHEME)) !== 'https') {
+            throw new RuntimeException('PayOS không trả về liên kết thanh toán hợp lệ.');
+        }
         $updateStmt = $conn->prepare('UPDATE prominent_company SET payment_link_id = ?, checkout_url = ? WHERE id = ? AND status = \'pending\'');
         if (!$updateStmt) {
             throw new RuntimeException('Không thể lưu liên kết PayOS: ' . $conn->error);
         }
-        $updateStmt->bind_param('ssi', $response->paymentLinkId, $response->checkoutUrl, $paymentId);
+        $updateStmt->bind_param('ssi', $response->paymentLinkId, $checkoutUrl, $paymentId);
         if (!$updateStmt->execute()) {
             throw new RuntimeException('Không thể lưu liên kết PayOS: ' . $updateStmt->error);
         }
         $updateStmt->close();
 
-        return ['checkout_url' => $response->checkoutUrl];
+        return ['checkout_url' => $checkoutUrl];
     } catch (Throwable $exception) {
         $failedStmt = $conn->prepare("UPDATE prominent_company SET status = 'failed' WHERE id = ? AND status = 'pending'");
         if ($failedStmt) {

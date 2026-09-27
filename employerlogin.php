@@ -1,6 +1,10 @@
 <?php
 session_start();
 require_once 'config.php';
+$redirectAfterLogin = (string) ($_GET['redirect'] ?? $_POST['redirect'] ?? 'employerpage.php');
+if ($redirectAfterLogin !== 'employerpage.php') {
+    $redirectAfterLogin = 'employerpage.php';
+}
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
@@ -36,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['usernameemployer'] = $row['username'];
                 $_SESSION['role'] = 'employer';
                 $_SESSION['employerid'] = $row['id'];
-                header("Location: employerpage.php");
+                header("Location: " . $redirectAfterLogin);
                 exit();
             }
         } else {
@@ -237,6 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <p><?= $lang['employer_login_subtitle_p']; ?></p>
 
             <form action="employerlogin.php" method="POST">
+                <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirectAfterLogin, ENT_QUOTES, 'UTF-8'); ?>">
                 <div class="form-group">
                     <label for="emailInput"><?= $lang['email']; ?></label>
                     <input type="email" id="emailInput" name="email"

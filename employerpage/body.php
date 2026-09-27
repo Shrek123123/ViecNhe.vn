@@ -363,7 +363,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       <li><?php echo $lang['hero_section_desc']['toppy_ai']; ?></li>
     </ul>
     <div class="hero-buttons">
-      <button class="consult-btn"><?php echo $lang['recruitment_consulting']; ?></button>
+      <button class="consult-btn" id="add_prominent_company_btn" type="button"><?php echo $lang['add_prominent_company_btn']; ?></button>
       <button class="post-now-btn" id="openModalBtn"><?php echo $lang['post_job_now']; ?></button>
     </div>
   </div>
@@ -385,6 +385,29 @@ if (isset($_SESSION['employerid'])) {
   }
 }
 ?>
+
+<?php $_SESSION['csrf_prominent_company'] = bin2hex(random_bytes(32)); ?>
+<div id="prominentCompanyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="prominentCompanyTitle">
+  <div class="modal-content">
+    <span class="prominent-close-btn" data-close-prominent-modal role="button" tabindex="0" aria-label="Close">&times;</span>
+    <h2 id="prominentCompanyTitle"><?= htmlspecialchars($lang['prominent_company_payment_title'], ENT_QUOTES, 'UTF-8'); ?></h2>
+    <p><?= htmlspecialchars($lang['prominent_company_confirmation'], ENT_QUOTES, 'UTF-8'); ?></p>
+    <form method="POST" action="dang_ky_cong_ty_nb_thanh_cong.php">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_prominent_company'], ENT_QUOTES, 'UTF-8'); ?>">
+      <label for="prominent_company_id"><?= htmlspecialchars($lang['prominent_company_choose'], ENT_QUOTES, 'UTF-8'); ?></label>
+      <select id="prominent_company_id" name="company_id" required>
+        <option value=""><?= htmlspecialchars($lang['prominent_company_choose'], ENT_QUOTES, 'UTF-8'); ?></option>
+        <?php foreach ($companyOptions as $company): ?>
+          <option value="<?= (int) $company['id']; ?>"><?= htmlspecialchars((string) $company['company_name'], ENT_QUOTES, 'UTF-8'); ?></option>
+        <?php endforeach; ?>
+      </select>
+      <div class="prominent-company-actions">
+        <button type="button" data-close-prominent-modal><?= htmlspecialchars($lang['prominent_company_cancel'], ENT_QUOTES, 'UTF-8'); ?></button>
+        <button type="submit"><?= htmlspecialchars($lang['prominent_company_confirm'], ENT_QUOTES, 'UTF-8'); ?></button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <div id="myModal" class="modal">
   <div class="modal-content">
@@ -596,6 +619,39 @@ if (isset($_SESSION['employerid'])) {
     min-width: 0;
   }
 
+  #prominentCompanyModal .modal-content {
+    text-align: left;
+  }
+
+  #prominentCompanyModal p {
+    line-height: 1.6;
+  }
+
+  #prominentCompanyModal select {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+  }
+
+  .prominent-company-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .prominent-company-actions button {
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .prominent-company-actions button[type="submit"] {
+    background: #d40000;
+    color: #fff;
+  }
+
   @media (max-width: 600px) {
     .salary-controls { gap: 5px; }
   }
@@ -622,6 +678,23 @@ if (isset($_SESSION['employerid'])) {
   const modal = document.getElementById("myModal");
   const openBtn = document.getElementById("openModalBtn");
   const closeBtn = document.querySelector(".closeBtn");
+  const prominentCompanyModal = document.getElementById("prominentCompanyModal");
+  const prominentCompanyButton = document.getElementById("add_prominent_company_btn");
+
+  prominentCompanyButton.onclick = () => {
+    if (!<?= isset($_SESSION['employerid']) ? 'true' : 'false' ?>) {
+      window.location.href = 'employerlogin.php?redirect=employerpage.php';
+      return;
+    }
+    prominentCompanyModal.style.display = "block";
+  };
+
+  document.querySelectorAll('[data-close-prominent-modal]').forEach(button => {
+    button.addEventListener('click', () => prominentCompanyModal.style.display = "none");
+    button.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') prominentCompanyModal.style.display = "none";
+    });
+  });
 
   openBtn.onclick = () => {
     if (<?= $hasFree30DayPost ? 'true' : 'false' ?>) {
@@ -638,6 +711,9 @@ if (isset($_SESSION['employerid'])) {
   window.onclick = (event) => {
     if (event.target == modal) {
       modal.style.display = "none";
+    }
+    if (event.target == prominentCompanyModal) {
+      prominentCompanyModal.style.display = "none";
     }
   }
 

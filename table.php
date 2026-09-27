@@ -143,6 +143,29 @@ if ($stmt === TRUE) {
     echo "Error creating table: " . $conn->error;
 }
 
+$stmt = $conn->query("CREATE TABLE IF NOT EXISTS prominent_company (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT(6) UNSIGNED NOT NULL,
+    employer_id INT(6) UNSIGNED NOT NULL,
+    transaction_code VARCHAR(100) NOT NULL UNIQUE,
+    payment_link_id VARCHAR(100) NULL,
+    checkout_url TEXT NULL,
+    amount BIGINT UNSIGNED NOT NULL DEFAULT 69000,
+    status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+    provider_reference VARCHAR(255) NULL,
+    raw_response JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    paid_at DATETIME NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_prominent_company_company_status (company_id, status),
+    INDEX idx_prominent_company_employer (employer_id),
+    CONSTRAINT fk_prominent_company_company FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE,
+    CONSTRAINT fk_prominent_company_employer FOREIGN KEY (employer_id) REFERENCES user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+if ($stmt !== TRUE) {
+    echo "Error creating prominent_company table: " . $conn->error . "<br>";
+}
+
 // Tạo bảng job
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS job (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

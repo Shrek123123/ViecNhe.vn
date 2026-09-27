@@ -1,0 +1,70 @@
+<?php
+declare(strict_types=1);
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/helpers.php';
+
+$langCode = in_array($_SESSION['lang'] ?? 'vi', ['vi', 'en'], true) ? $_SESSION['lang'] : 'vi';
+$lang = [];
+require __DIR__ . '/lang/' . $langCode . '.php';
+$displayStatus = 'pending';
+$orderCode = (int) ($_GET['orderCode'] ?? 0);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_SESSION['employerid'])) {
+        header('Location: employerlogin.php?redirect=employerpage.php', true, 303);
+        exit;
+    }
+    $sessionToken = (string) ($_SESSION['csrf_prominent_company'] ?? '');
+    $postedToken = (string) ($_POST['csrf_token'] ?? '');
+    if ($sessionToken === '' || $postedToken === '' || !hash_equals($sessionToken, $postedToken)) {
+        http_response_code(400);
+        $displayStatus = 'error';
+    } else {
+        $companyId = filter_input(INPUT_POST, 'company_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        try {
+            if ($companyId === false || $companyId === null) {
+                throw new InvalidArgumentException('Invalid company selection.');
+            }
+            $payment = createProminentCompanyPaymentCheckout($conn, (int) $_SESSION['employerid'], (int) $companyId);
+            header('Location: ' . $payment['checkout_url'], true, 303);
+            exit;
+        } catch (Throwable $exception) {
+            error_log('Prominent company checkout error: ' . $exception->getMessage());
+            $displayStatus = 'error';
+        }
+    }
+} elseif ($orderCode > 0) {
+    $displayStatus = reconcileProminentCompanyPayment($conn, $orderCode);
+}
+
+$messageKey = [
+    'paid' => 'prominent_company_payment_paid',
+    'failed' => 'prominent_company_payment_failed',
+    'pending' => 'prominent_company_payment_pending',
+    'error' => 'prominent_company_payment_error',
+][$displayStatus] ?? 'prominent_company_payment_pending';
+?><!doctype html>
+<html lang="<?= htmlspecialchars($langCode, ENT_QUOTES, 'UTF-8') ?>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= htmlspecialchars($lang['prominent_company_payment_title'], ENT_QUOTES, 'UTF-8') ?> | ViecNhe</title>
+    <style>
+        body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:#f3f7f5;color:#20332e;font-family:Arial,sans-serif}
+        main{width:min(100%,560px);padding:36px;background:#fff;border:1px solid #dce8e2;border-radius:8px;text-align:center;box-shadow:0 18px 48px #18342c18}
+        h1{font-size:24px;line-height:1.35}p{line-height:1.65;color:#52645f}a{display:inline-block;margin-top:16px;padding:11px 16px;background:#19765b;color:#fff;text-decoration:none;border-radius:4px}
+    </style>
+</head>
+<body>
+<main>
+    <h1><?= htmlspecialchars($lang['prominent_company_payment_title'], ENT_QUOTES, 'UTF-8') ?></h1>
+    <p><?= htmlspecialchars($lang[$messageKey], ENT_QUOTES, 'UTF-8') ?></p>
+    <?php if ($orderCode > 0): ?><p><?= htmlspecialchars((string) $orderCode, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+    <a href="employerpage.php"><?= htmlspecialchars($lang['prominent_company_back'], ENT_QUOTES, 'UTF-8') ?></a>
+</main>
+</body>
+</html>

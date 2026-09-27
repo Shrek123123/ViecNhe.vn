@@ -720,7 +720,8 @@ foreach ($industryOptionKeys as $industryKey) {
                 j.salary, j.job_location, j.job_type, j.job_experience, j.job_position,
                 j.created_at, j.post_duration
                 FROM job j
-                LEFT JOIN company c ON c.id = j.company_id";
+                LEFT JOIN company c ON c.id = j.company_id
+                LEFT JOIN (SELECT company_id, MIN(paid_at) AS featured_at FROM prominent_company WHERE status = 'paid' GROUP BY company_id) pc_featured ON pc_featured.company_id = j.company_id";
             $sql_count_base = "SELECT COUNT(*) as total FROM job j LEFT JOIN company c ON c.id = j.company_id";
 
             $conditions[] = "j.status = 'approved'";
@@ -792,19 +793,19 @@ foreach ($industryOptionKeys as $industryKey) {
 
             switch ($sort_order) {
                 case 'newest_first':
-                    $order_by_clause = " ORDER BY j.created_at DESC";
+                    $order_by_clause = " ORDER BY pc_featured.featured_at IS NULL ASC, pc_featured.featured_at ASC, j.created_at DESC";
                     break;
                 case 'oldest_first':
-                    $order_by_clause = " ORDER BY j.created_at ASC";
+                    $order_by_clause = " ORDER BY pc_featured.featured_at IS NULL ASC, pc_featured.featured_at ASC, j.created_at ASC";
                     break;
                 case 'salary_highest':
-                    $order_by_clause = " ORDER BY " . $salary_numeric_first . " DESC, j.created_at DESC";
+                    $order_by_clause = " ORDER BY pc_featured.featured_at IS NULL ASC, pc_featured.featured_at ASC, " . $salary_numeric_first . " DESC, j.created_at DESC";
                     break;
                 case 'salary_lowest':
-                    $order_by_clause = " ORDER BY " . $salary_numeric_first . " ASC, j.created_at DESC";
+                    $order_by_clause = " ORDER BY pc_featured.featured_at IS NULL ASC, pc_featured.featured_at ASC, " . $salary_numeric_first . " ASC, j.created_at DESC";
                     break;
                 default:
-                    $order_by_clause = " ORDER BY j.created_at DESC";
+                    $order_by_clause = " ORDER BY pc_featured.featured_at IS NULL ASC, pc_featured.featured_at ASC, j.created_at DESC";
                     break;
             }
 

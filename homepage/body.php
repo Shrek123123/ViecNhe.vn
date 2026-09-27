@@ -386,6 +386,17 @@ $savedJobIdsJson = json_encode($savedJobIds);
     object-fit: contain;
   }
 
+  .logos .featured-company {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #333;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+  }
+
   .section-4 {
     background-color: #f9f5f5;
 
@@ -944,6 +955,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
                         c.company_name, c.company_logo, c.industry AS industry
                         FROM job j
                         LEFT JOIN company c ON c.id = j.company_id
+                        LEFT JOIN (SELECT company_id, MIN(paid_at) AS featured_at FROM prominent_company WHERE status = 'paid' GROUP BY company_id) pc_featured ON pc_featured.company_id = j.company_id
                         WHERE j.status = 'approved'
                         AND (c.status IS NULL OR c.status NOT IN ('pending_review', 'rejected'))";
         $bind_types = '';
@@ -958,7 +970,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
           $bind_types .= 's';
           $params[] = $job_type;
         }
-        $sql .= " ORDER BY j.created_at DESC LIMIT ? OFFSET ?";
+        $sql .= " ORDER BY pc_featured.featured_at IS NULL ASC, pc_featured.featured_at ASC, j.created_at DESC LIMIT ? OFFSET ?";
         $bind_types .= 'ii';
         $params[] = $jobs_per_page;
         $params[] = $offset;
@@ -1258,6 +1270,28 @@ $savedJobIdsJson = json_encode($savedJobIds);
       </div>
 
       <div class="logos">
+        <?php
+        $featuredCompaniesResult = $conn->query("SELECT c.id, c.company_name, c.company_logo
+          FROM prominent_company pc
+          JOIN company c ON c.id = pc.company_id
+          WHERE pc.status = 'paid' AND c.status = 'approved'
+          GROUP BY c.id, c.company_name, c.company_logo
+          ORDER BY MIN(pc.paid_at) ASC, MIN(pc.id) ASC
+          LIMIT 8");
+        if ($featuredCompaniesResult):
+          while ($featuredCompany = $featuredCompaniesResult->fetch_assoc()):
+            $featuredCompanyLogo = normalizeCompanyLogoPath($featuredCompany['company_logo'] ?? '');
+            if ($featuredCompanyLogo !== ''):
+        ?>
+          <a class="featured-company" href="companyprofile.php?company_id=<?= (int) $featuredCompany['id']; ?>">
+            <img src="<?= htmlspecialchars($featuredCompanyLogo, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($featuredCompany['company_name'], ENT_QUOTES, 'UTF-8'); ?>" />
+            <span><?= htmlspecialchars($featuredCompany['company_name'], ENT_QUOTES, 'UTF-8'); ?></span>
+          </a>
+        <?php
+            endif;
+          endwhile;
+        endif;
+        ?>
         <img src="image/logo1.png" alt="Tabtab.me" />
         <img src="image/logo2.png" alt="DIC" />
         <img src="image/logo3.png" alt="NhanHoa" />

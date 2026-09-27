@@ -203,6 +203,144 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
     }
 }
 
+function createProminentCompanyPaymentCheckout($conn, int $employerId, int $companyId): array {
+    $amount = 69000;
+    $companyStmt = $conn->prepare('SELECT id FROM company WHERE id = ? AND employer_id = ? LIMIT 1');
+    if (!$companyStmt) {
+        throw new RuntimeException('Không thể xác minh công ty: ' . $conn->error);
+    }
+    $companyStmt->bind_param('ii', $companyId, $employerId);
+    $companyStmt->execute();
+    $company = $companyStmt->get_result()->fetch_assoc();
+    $companyStmt->close();
+    if (!$company) {
+        throw new InvalidArgumentException('Công ty đã chọn không hợp lệ.');
+    }
+
+    $paidStmt = $conn->prepare("SELECT id FROM prominent_company WHERE company_id = ? AND status = 'paid' LIMIT 1");
+    if (!$paidStmt) {
+        throw new RuntimeException('Không thể kiểm tra trạng thái công ty: ' . $conn->error);
+    }
+    $paidStmt->bind_param('i', $companyId);
+    $paidStmt->execute();
+    $alreadyPaid = (bool) $paidStmt->get_result()->fetch_assoc();
+    $paidStmt->close();
+    if ($alreadyPaid) {
+        throw new InvalidArgumentException('Công ty này đã được đăng ký nổi bật.');
+    }
+
+    $transactionCode = (string) random_int(100000, 999999999);
+    $stmt = $conn->prepare("INSERT INTO prominent_company (company_id, employer_id, transaction_code, amount, status) VALUES (?, ?, ?, ?, 'pending')");
+    if (!$stmt) {
+        throw new RuntimeException('Không thể lưu giao dịch: ' . $conn->error);
+    }
+    $stmt->bind_param('iisi', $companyId, $employerId, $transactionCode, $amount);
+    if (!$stmt->execute()) {
+        throw new RuntimeException('Không thể lưu giao dịch: ' . $stmt->error);
+    }
+    $paymentId = (int) $conn->insert_id;
+    $stmt->close();
+
+    try {
+        $config = require __DIR__ . '/config/payos.php';
+        $baseUrl = rtrim((string) ($config['public_url'] ?? ''), '/');
+        if ($baseUrl === '') {
+            throw new RuntimeException('Thiếu cấu hình APP_URL.');
+        }
+        $response = getJobPayOSClient()->paymentRequests->create([
+            'orderCode' => (int) $transactionCode,
+            'amount' => $amount,
+            'description' => 'Cong ty noi bat',
+            'returnUrl' => $baseUrl . '/dang_ky_cong_ty_nb_thanh_cong.php',
+            'cancelUrl' => $baseUrl . '/huy_dang_ky_cong_ty_nb.php',
+        ]);
+        $updateStmt = $conn->prepare('UPDATE prominent_company SET payment_link_id = ?, checkout_url = ? WHERE id = ? AND status = \'pending\'');
+        if (!$updateStmt) {
+            throw new RuntimeException('Không thể lưu liên kết PayOS: ' . $conn->error);
+        }
+        $updateStmt->bind_param('ssi', $response->paymentLinkId, $response->checkoutUrl, $paymentId);
+        if (!$updateStmt->execute()) {
+            throw new RuntimeException('Không thể lưu liên kết PayOS: ' . $updateStmt->error);
+        }
+        $updateStmt->close();
+
+        return ['checkout_url' => $response->checkoutUrl];
+    } catch (Throwable $exception) {
+        $failedStmt = $conn->prepare("UPDATE prominent_company SET status = 'failed' WHERE id = ? AND status = 'pending'");
+        if ($failedStmt) {
+            $failedStmt->bind_param('i', $paymentId);
+            $failedStmt->execute();
+            $failedStmt->close();
+        }
+        throw $exception;
+    }
+}
+
+function reconcileProminentCompanyPayment($conn, int $transactionCode): string {
+    if ($transactionCode <= 0) {
+        return 'pending';
+    }
+    $code = (string) $transactionCode;
+    $stmt = $conn->prepare('SELECT id, amount, status FROM prominent_company WHERE transaction_code = ? LIMIT 1');
+    if (!$stmt) {
+        return 'pending';
+    }
+    $stmt->bind_param('s', $code);
+    $stmt->execute();
+    $registration = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$registration) {
+        return 'pending';
+    }
+    if ($registration['status'] !== 'pending') {
+        return (string) $registration['status'];
+    }
+
+    try {
+        $paymentInfo = getJobPayOSClient()->paymentRequests->get($transactionCode);
+    } catch (Throwable $exception) {
+        error_log('PayOS prominent-company lookup failed: ' . $exception->getMessage());
+        return 'pending';
+    }
+    if ((int) $paymentInfo->orderCode !== $transactionCode || (int) $paymentInfo->amount !== (int) $registration['amount']) {
+        error_log('PayOS prominent-company order mismatch for ' . $transactionCode);
+        return 'pending';
+    }
+
+    $providerStatus = $paymentInfo->status->value ?? '';
+    if ($providerStatus === 'PAID'
+        && (int) $paymentInfo->amountPaid === (int) $registration['amount']
+        && (int) $paymentInfo->amountRemaining === 0) {
+        $rawResponse = json_encode($paymentInfo, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        $paymentLinkId = (string) $paymentInfo->id;
+        $providerReference = (string) ($paymentInfo->transactions[0]->reference ?? '');
+        $updateStmt = $conn->prepare("UPDATE prominent_company SET status = 'paid', payment_link_id = ?, provider_reference = ?, raw_response = ?, paid_at = NOW() WHERE id = ? AND status = 'pending'");
+        if ($updateStmt) {
+            $updateStmt->bind_param('sssi', $paymentLinkId, $providerReference, $rawResponse, $registration['id']);
+            $updateStmt->execute();
+            $updateStmt->close();
+        }
+    } elseif (in_array($providerStatus, ['CANCELLED', 'EXPIRED', 'FAILED'], true)) {
+        $updateStmt = $conn->prepare("UPDATE prominent_company SET status = 'failed', raw_response = ? WHERE id = ? AND status = 'pending'");
+        if ($updateStmt) {
+            $rawResponse = json_encode($paymentInfo, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            $updateStmt->bind_param('si', $rawResponse, $registration['id']);
+            $updateStmt->execute();
+            $updateStmt->close();
+        }
+    }
+
+    $statusStmt = $conn->prepare('SELECT status FROM prominent_company WHERE id = ? LIMIT 1');
+    if (!$statusStmt) {
+        return 'pending';
+    }
+    $statusStmt->bind_param('i', $registration['id']);
+    $statusStmt->execute();
+    $status = (string) ($statusStmt->get_result()->fetch_assoc()['status'] ?? 'pending');
+    $statusStmt->close();
+    return $status;
+}
+
 function sendEmployerJobPaymentConfirmation($conn, int $paymentId): bool {
     $tierDetails = [
         30 => ['label' => '30 ngày', 'amount' => 50000, 'subject' => 'Thanh toán gói đăng tin 30 ngày thành công'],

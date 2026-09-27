@@ -77,12 +77,19 @@ function truncateCompanyName(string $companyName, int $maxCharacters = 35): stri
 }
 
 function getAppBaseUrl(): string {
-    $baseUrl = getenv('APP_URL');
-    if ($baseUrl === false || trim($baseUrl) === '') {
+    $baseUrl = $_ENV['APP_URL'] ?? $_SERVER['APP_URL'] ?? getenv('APP_URL');
+    if ($baseUrl === false || trim((string) $baseUrl) === '') {
+        require_once __DIR__ . '/vendor/autoload.php';
+        if (is_file(__DIR__ . '/.env')) {
+            Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
+        }
+        $baseUrl = $_ENV['APP_URL'] ?? $_SERVER['APP_URL'] ?? getenv('APP_URL');
+    }
+    if ($baseUrl === false || trim((string) $baseUrl) === '') {
         $baseUrl = 'https://unmade-petite-carefully.ngrok-free.dev/ViecNhe';
     }
 
-    return rtrim(trim($baseUrl), '/');
+    return rtrim(trim((string) $baseUrl), '/');
 }
 
 function sendRegistrationSuccessEmail($recipientEmail, $accountType, $loginPath) {
@@ -155,6 +162,83 @@ function sendEmailChangeNotification($newEmail, $userType) {
         . '<p>Trân trọng,<br>ViecNhe.vn</p>';
 
     return sendEmail($newEmail, '', $subject, $message);
+}
+
+function sendProminentCompanyPaymentConfirmation($conn, int $registrationId): bool {
+    $resetStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = ? AND status = 'paid' AND confirmation_email_status = 'sending' AND updated_at < NOW() - INTERVAL 10 MINUTE");
+    if ($resetStmt) {
+        $resetStmt->bind_param('i', $registrationId);
+        $resetStmt->execute();
+        $resetStmt->close();
+    }
+
+    $claimStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'sending' WHERE id = ? AND status = 'paid' AND confirmation_email_status = 'pending'");
+    if (!$claimStmt) {
+        return false;
+    }
+    $claimStmt->bind_param('i', $registrationId);
+    $claimed = $claimStmt->execute() && $claimStmt->affected_rows === 1;
+    $claimStmt->close();
+    if (!$claimed) {
+        return false;
+    }
+
+    $stmt = $conn->prepare('SELECT u.email, c.company_name, c.id AS company_id, pc.transaction_code, pc.amount, pc.paid_at FROM prominent_company pc JOIN company c ON c.id = pc.company_id JOIN user u ON u.id = pc.employer_id WHERE pc.id = ? AND pc.status = \'paid\' LIMIT 1');
+    if (!$stmt) {
+        $conn->query("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = " . $registrationId . " AND confirmation_email_status = 'sending'");
+        return false;
+    }
+    $stmt->bind_param('i', $registrationId);
+    $stmt->execute();
+    $registration = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    $recipientEmail = trim((string) ($registration['email'] ?? ''));
+    if (!$registration || !filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        $resetStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = ? AND confirmation_email_status = 'sending'");
+        if ($resetStmt) {
+            $resetStmt->bind_param('i', $registrationId);
+            $resetStmt->execute();
+            $resetStmt->close();
+        }
+        return false;
+    }
+
+    $companyName = (string) $registration['company_name'];
+    $companyProfileUrl = getAppBaseUrl() . '/companyprofile.php?company_id=' . (int) $registration['company_id'];
+    $safeCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
+    $safeProfileUrl = htmlspecialchars($companyProfileUrl, ENT_QUOTES, 'UTF-8');
+    $paidAt = htmlspecialchars((string) $registration['paid_at'], ENT_QUOTES, 'UTF-8');
+    $transactionCode = htmlspecialchars((string) $registration['transaction_code'], ENT_QUOTES, 'UTF-8');
+    $amount = number_format((int) $registration['amount'], 0, ',', ',');
+    $subject = 'ViecNhe | Đăng ký công ty nổi bật thành công';
+    $message = '<div style="max-width:600px;margin:0 auto;padding:28px 24px;color:#20332e;font-family:Arial,sans-serif;line-height:1.65">'
+        . '<h1 style="margin:0 0 16px;font-size:24px">Đăng ký công ty nổi bật thành công</h1>'
+        . '<p>ViecNhe đã xác nhận thanh toán cho công ty <strong>' . $safeCompanyName . '</strong>.</p>'
+        . '<p><strong>Số tiền:</strong> ' . $amount . ' VND<br><strong>Mã giao dịch:</strong> ' . $transactionCode . '<br><strong>Thời gian thanh toán:</strong> ' . $paidAt . '</p>'
+        . '<p>Công ty đã được đưa vào danh sách công ty nổi bật và các bài đăng sẽ được ưu tiên theo thời điểm thanh toán.</p>'
+        . '<p><a href="' . $safeProfileUrl . '">Xem hồ sơ công ty</a></p>'
+        . '<p>Trân trọng,<br><strong>Đội ngũ ViecNhe</strong></p></div>';
+
+    $sent = false;
+    try {
+        require_once __DIR__ . '/config/mail.php';
+        $sent = sendEmail($recipientEmail, $companyName, $subject, $message);
+    } catch (Throwable $exception) {
+        error_log('Prominent company confirmation email error for registration ' . $registrationId . ': ' . $exception->getMessage());
+    }
+
+    if ($sent) {
+        $updateStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'sent', confirmation_email_sent_at = NOW() WHERE id = ? AND confirmation_email_status = 'sending'");
+    } else {
+        $updateStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = ? AND confirmation_email_status = 'sending'");
+    }
+    if ($updateStmt) {
+        $updateStmt->bind_param('i', $registrationId);
+        $updateStmt->execute();
+        $updateStmt->close();
+    }
+    return $sent;
 }
 
 function sendPasswordResetOtp($recipientEmail, $otp) {
@@ -374,6 +458,9 @@ function reconcileProminentCompanyPayment($conn, int $transactionCode): string {
         return 'pending';
     }
     if ($registration['status'] !== 'pending') {
+        if ($registration['status'] === 'paid') {
+            sendProminentCompanyPaymentConfirmation($conn, (int) $registration['id']);
+        }
         return (string) $registration['status'];
     }
 
@@ -419,6 +506,9 @@ function reconcileProminentCompanyPayment($conn, int $transactionCode): string {
     $statusStmt->execute();
     $status = (string) ($statusStmt->get_result()->fetch_assoc()['status'] ?? 'pending');
     $statusStmt->close();
+    if ($status === 'paid') {
+        sendProminentCompanyPaymentConfirmation($conn, (int) $registration['id']);
+    }
     return $status;
 }
 

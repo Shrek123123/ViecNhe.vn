@@ -163,10 +163,10 @@ $lang = [
     "prominent_company_already_registered" => "Bạn đã đăng ký nổi bật cho công ty này rồi, hãy thử với công ty khác.",
     "prominent_company_back" => "Quay lại trang nhà tuyển dụng",
     "featured_companies_empty" => "Hiện chưa có công ty nổi bật.",
-    "featured_companies_description" => "Các công ty đã đăng ký nổi bật, sắp xếp theo thời điểm thanh toán.",
+    "featured_companies_description" => "Danh sách công ty nổi bật.",
     "featured_companies_count" => "công ty nổi bật",
-    "post_job_now" => "Đăng tin 1 tin tuyển dụng ngay (miễn phí) →",
-    "free_30_day_post_already_used" => "Bạn đã đăng 1 bài đăng 30 ngày miễn phí nên không thể đăng tiếp. Vui lòng vào mục tài khoản (nhấp chuột vào ảnh đại diện) để đăng bài tiếp.",
+    "post_job_now" => "Đăng 1 tin tuyển dụng ngay (miễn phí) →",
+    "free_30_day_post_already_used" => "Bạn đã đăng 1 bài đăng 30 ngày miễn phí nên không thể đăng tiếp. Vui lòng vào mục \"Tài khoản\" (nhấp chuột vào ảnh đại diện) để đăng bài tiếp.",
     "job_post_is_saved_for_review" => "Bài đăng tuyển đã được lưu để duyệt qua, kết quả sẽ được thông báo trong thời gian sớm nhất!",
     "ung_tuyen_viec" => "Ứng tuyển việc",
 

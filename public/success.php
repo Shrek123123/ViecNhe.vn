@@ -159,6 +159,7 @@ $statusContent = [
 
         .result__button:hover { background: var(--green); transform: translateY(-1px); }
         .result__brand { padding: 15px; border-top: 1px solid var(--line); color: #71817d; font-size: 12px; text-align: center; }
+        .result__brand img { display: block; width: min(190px, 70%); height: auto; margin: 0 auto 8px; }
 
         @keyframes arrive {
             from { opacity: 0; transform: translateY(10px); }
@@ -195,7 +196,7 @@ $statusContent = [
                 <a class="result__button" href="../employerprofile/my_job_posts.php">Quay lại danh sách tin</a>
             </div>
         </section>
-        <footer class="result__brand">ViecNhe <span aria-hidden="true">·</span> Thanh toán bảo mật bởi PayOS</footer>
+        <footer class="result__brand"><img src="../image/logo.png" alt="ViecNhe" onerror="this.src='../image/favicon.svg'"><span>Thanh toán bảo mật bởi PayOS</span></footer>
     </main>
 </body>
 </html>

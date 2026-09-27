@@ -152,6 +152,8 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS prominent_company (
     checkout_url TEXT NULL,
     amount BIGINT UNSIGNED NOT NULL DEFAULT 69000,
     status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+    confirmation_email_status ENUM('pending', 'sending', 'sent') NOT NULL DEFAULT 'pending',
+    confirmation_email_sent_at DATETIME NULL,
     provider_reference VARCHAR(255) NULL,
     raw_response JSON NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -164,6 +166,14 @@ $stmt = $conn->query("CREATE TABLE IF NOT EXISTS prominent_company (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 if ($stmt !== TRUE) {
     echo "Error creating prominent_company table: " . $conn->error . "<br>";
+}
+$prominentEmailStatusColumn = $conn->query("SHOW COLUMNS FROM prominent_company LIKE 'confirmation_email_status'");
+if ($prominentEmailStatusColumn && $prominentEmailStatusColumn->num_rows === 0) {
+    $conn->query("ALTER TABLE prominent_company ADD COLUMN confirmation_email_status ENUM('pending', 'sending', 'sent') NOT NULL DEFAULT 'pending'");
+}
+$prominentEmailSentAtColumn = $conn->query("SHOW COLUMNS FROM prominent_company LIKE 'confirmation_email_sent_at'");
+if ($prominentEmailSentAtColumn && $prominentEmailSentAtColumn->num_rows === 0) {
+    $conn->query('ALTER TABLE prominent_company ADD COLUMN confirmation_email_sent_at DATETIME NULL');
 }
 
 // Tạo bảng job

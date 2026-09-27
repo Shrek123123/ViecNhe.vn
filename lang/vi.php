@@ -51,7 +51,7 @@ $lang = [
     "job_search_subtitle" => "Truy cập hơn hàng nghìn tin tuyển dụng mới mỗi ngày từ hàng ngàn công ty uy tín tại Việt Nam.",
     "job_category" => "Danh mục công việc",
     "job_title" => "Chức danh công việc, tên công ty",
-    "location" => "Vị trí",
+    "location" => "Địa điểm làm việc",
     "search" => "Tìm kiếm",
     "urgent_job_openings" => "🔥 Việc làm gấp",
     "all_jobs" => "Tất cả công việc",
@@ -654,7 +654,7 @@ $lang = [
     'filter_value' => 'Chọn tùy chọn',
     'filter_salary' => 'Mức lương',
     'filter_experience' => 'Kinh nghiệm',
-    'filter_position' => 'Địa điểm làm việc',
+    'filter_position' => 'Vị trí',
     'filter_job_type' => 'Loại hình công việc',
     'days_left' => 'Còn %d ngày',
     //application form

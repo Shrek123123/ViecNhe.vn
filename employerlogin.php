@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     errorDiv.style.textAlign = 'center';
                     errorDiv.style.marginTop = '10px';
                     errorDiv.innerText = " . json_encode($lang['account_locked'] ?? 'Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.', JSON_UNESCAPED_UNICODE) . ";
-                    document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                    document.querySelector('input[name=\"password\"]').closest('.form-group').appendChild(errorDiv);
                 });
                 </script>";
             } else {
@@ -52,22 +52,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 errorDiv.style.textAlign = 'center';
                 errorDiv.style.marginTop = '10px';
                 errorDiv.innerText = " . json_encode($invalidPasswordMessage) . ";
-                document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                document.querySelector('input[name=\"password\"]').closest('.form-group').appendChild(errorDiv);
             });
             </script>";
         }
     } else {
         // Email not found
-     echo "<script>
+        echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
                 var errorDiv = document.createElement('div');
                 errorDiv.style.color = 'red';
                 errorDiv.style.textAlign = 'center';
                 errorDiv.style.marginTop = '10px';
                 errorDiv.innerText = " . json_encode($invalidEmailMessage) . ";
-                document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                document.querySelector('input[name=\"password\"]').closest('.form-group').appendChild(errorDiv);
             });
-            </script>";    }
+            </script>";
+    }
 
     // Close the statement and connection
     $stmt->close();

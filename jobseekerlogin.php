@@ -6,7 +6,6 @@ require_once 'config.php';
 if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
-
 // Nếu chưa có ngôn ngữ thì mặc định là tiếng Việt
 if (!isset($_SESSION['lang'])) {
     $_SESSION['lang'] = 'vi';
@@ -37,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     errorDiv.style.textAlign = 'center';
                     errorDiv.style.marginTop = '10px';
                     errorDiv.innerText = " . json_encode($lang['account_locked'] ?? 'Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.', JSON_UNESCAPED_UNICODE) . ";
-                    document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                    document.querySelector('input[name=\"password\"]').closest('.form-group').appendChild(errorDiv);
                 });
                 </script>";
             } else {
@@ -47,25 +46,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['jobseeker_id'] = $row['id'];
                 // Clear any previous output before redirecting
                 if (ob_get_level()) {
-                ob_end_clean();
-            }
-            // Respect optional redirect parameter (only allow internal redirects)
-            $redirect = null;
-            if (!empty($_GET['redirect'])) {
-                $redirect = $_GET['redirect'];
-            } elseif (!empty($_POST['redirect'])) {
-                $redirect = $_POST['redirect'];
-            }
-
-            // Simple open-redirect protection: only allow relative/internal paths (no host)
-            if (!empty($redirect)) {
-                $parsed = parse_url($redirect);
-                if (empty($parsed['host']) && empty($parsed['scheme'])) {
-                    // safe to redirect
-                    header('Location: ' . $redirect);
-                    exit();
+                    ob_end_clean();
                 }
-            }
+                // Respect optional redirect parameter (only allow internal redirects)
+                $redirect = null;
+                if (!empty($_GET['redirect'])) {
+                    $redirect = $_GET['redirect'];
+                } elseif (!empty($_POST['redirect'])) {
+                    $redirect = $_POST['redirect'];
+                }
+
+                // Simple open-redirect protection: only allow relative/internal paths (no host)
+                if (!empty($redirect)) {
+                    $parsed = parse_url($redirect);
+                    if (empty($parsed['host']) && empty($parsed['scheme'])) {
+                        // safe to redirect
+                        header('Location: ' . $redirect);
+                        exit();
+                    }
+                }
 
                 // Fallback destination
                 header("Location: jobseekerdashboard.php");
@@ -81,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 errorDiv.style.textAlign = 'center';
                 errorDiv.style.marginTop = '10px';
                 errorDiv.innerText = " . json_encode($invalidPasswordMessage) . ";
-                document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                document.querySelector('input[name=\"password\"]').closest('.form-group').appendChild(errorDiv);
             });
             </script>";
         }
@@ -94,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 errorDiv.style.textAlign = 'center';
                 errorDiv.style.marginTop = '10px';
                 errorDiv.innerText = " . json_encode($invalidEmailMessage) . ";
-                document.querySelector('input[name=\"password\"]').parentNode.appendChild(errorDiv);
+                document.querySelector('input[name=\"password\"]').closest('.form-group').appendChild(errorDiv);
             });
             </script>";
     }

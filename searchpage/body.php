@@ -32,37 +32,6 @@ function refValues($arr){
     return $arr; // Đối với PHP < 5.3, không cần thiết phải làm gì đặc biệt
 }
 
-function normalizeCompanyLogoPath($path)
-{
-    $value = trim((string) $path);
-    if ($value === '') {
-        return 'image/logo1.png';
-    }
-
-    $value = preg_replace('#^(?:\./)+#', '', $value);
-    $value = preg_replace('#^(?:\.\./)+#', '', $value);
-    $value = preg_replace('#^/+#', '', $value);
-
-    if (stripos($value, 'uploads/companylogo/') === 0) {
-        return $value;
-    }
-
-    if (stripos($value, 'companylogo/') === 0) {
-        return 'uploads/' . $value;
-    }
-
-    if (stripos($value, 'uploads/') === 0) {
-        return $value;
-    }
-
-    if (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0) {
-        return $value;
-    }
-
-    return 'uploads/companylogo/' . basename($value);
-}
-
-
 // Lấy danh sách job_id mà người dùng hiện tại đã lưu từ database
 $savedJobIds = [];
 if ($isLoggedIn) {

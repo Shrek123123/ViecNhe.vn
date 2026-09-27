@@ -151,7 +151,7 @@ $lang = [
     ],
     "add_prominent_company_btn" => "Đăng ký công ty nổi bật",
     "prominent_company_confirmation" => "Khi đăng ký công ty nổi bật thì logo và tên công ty bạn sẽ được xuất hiện trên mục \"Công ty nổi bật\" ở trang nhất kèm theo trong danh sách Công ty đối tác của ViecNhe. Những bài đăng của bạn cũng sẽ được ưu tiên xuất hiện lên trên đầu theo nguyên tắc công ty đăng ký nổi bật trước xuất hiện trước. Bạn có muốn tiếp tục không? (phí: 69.000 VND)",
-    "prominent_compan   y_confirm" => "Tiếp tục thanh toán",
+    "prominent_company_confirm" => "Tiếp tục thanh toán",
     "prominent_company_cancel" => "Để sau",
     "prominent_company_choose" => "Chọn công ty",
     "prominent_company_payment_title" => "Đăng ký công ty nổi bật",
@@ -654,7 +654,7 @@ $lang = [
     'filter_value' => 'Chọn tùy chọn',
     'filter_salary' => 'Mức lương',
     'filter_experience' => 'Kinh nghiệm',
-    'filter_position' => 'Vị trí',
+    'filter_position' => 'Địa điểm làm việc',
     'filter_job_type' => 'Loại hình công việc',
     'days_left' => 'Còn %d ngày',
     //application form

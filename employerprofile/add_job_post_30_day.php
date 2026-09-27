@@ -106,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $contactEmail = $_POST['contactEmail'];
   $contactPhone = $_POST['contactPhone'];
   $jobType = $_POST['jobType'];
-  $jobCategory = $_POST['jobCategory'];
   $requiredcertification = $_POST['requiredcertification'];
   $jobExperience = $_POST['jobExperience'];
   $jobPosition = $_POST['jobPosition'] ?? '';
@@ -139,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   //   'contactEmail' => $contactEmail,
   //   'contactPhone' => $contactPhone,
   //   'jobType' => $jobType,
-  //   'jobCategory' => $jobCategory,
   //   'requiredcertification' => $requiredcertification,
   //   'jobExperience' => $jobExperience,
   //   'post_duration' => $post_duration,
@@ -1184,59 +1182,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         </select>
                                     </div>
 
-                                    <!-- Job Category -->
-                                    <div class="form-group">
-                                        <label><?= $lang['post_job_form_job_category']; ?></label>
-
-                                        <select id="jobCategory" name="jobCategory" onchange="toggleCustomInput2()"
-                                            required>
-                                            <option value=""><?= $lang['chon_nganh_nghe'] ?></option>
-                                            <option value="kinh_doanh_ban_hang"><?= $lang['kinh_doanh_ban_hang'] ?>
-                                            </option>
-                                            <option value="marketing_truyen_thong">
-                                                <?= $lang['marketing_truyen_thong'] ?>
-                                            </option>
-                                            <option value="tai_chinh_ke_toan_ngan_hang">
-                                                <?= $lang['tai_chinh_ke_toan_ngan_hang'] ?>
-                                            </option>
-                                            <option value="cong_nghe_thong_tin"><?= $lang['cong_nghe_thong_tin'] ?>
-                                            </option>
-                                            <option value="nhan_su"><?= $lang['nhan_su'] ?></option>
-                                            <option value="hanh_chinh_van_phong"><?= $lang['hanh_chinh_van_phong'] ?>
-                                            </option>
-                                            <option value="ky_thuat"><?= $lang['ky_thuat'] ?></option>
-                                            <option value="san_xuat_van_hanh_day_chuyen">
-                                                <?= $lang['san_xuat_van_hanh_day_chuyen'] ?>
-                                            </option>
-                                            <option value="van_tai_logistics"><?= $lang['van_tai_logistics'] ?></option>
-                                            <option value="bat_dong_san"><?= $lang['bat_dong_san'] ?></option>
-                                            <option value="bao_hiem"><?= $lang['bao_hiem'] ?></option>
-                                            <option value="xay_dung_kien_truc"><?= $lang['xay_dung_kien_truc'] ?>
-                                            </option>
-                                            <option value="y_te_duoc_pham"><?= $lang['y_te_duoc_pham'] ?></option>
-                                            <option value="giao_duc_dao_tao"><?= $lang['giao_duc_dao_tao'] ?></option>
-                                            <option value="du_lich_khach_san_nha_hang">
-                                                <?= $lang['du_lich_khach_san_nha_hang'] ?>
-                                            </option>
-                                            <option value="luat"><?= $lang['luat'] ?></option>
-                                            <option value="thiet_ke_nghe_thuat"><?= $lang['thiet_ke_nghe_thuat'] ?>
-                                            </option>
-                                            <option value="lao_dong_pho_thong"><?= $lang['lao_dong_pho_thong'] ?>
-                                            </option>
-                                            <option value="nong_nghiep"><?= $lang['nong_nghiep'] ?></option>
-                                            <option value="food_beverage"><?= $lang['food_beverage'] ?></option>
-                                            <option value="nha_nuoc_cong_vu"><?= $lang['nha_nuoc_cong_vu'] ?></option>
-                                            <option value="khac"><?= $lang['khac'] ?></option>
-                                        </select>
-
-                                        <input type="hidden" name="jobCategoryHidden" id="jobCategoryHidden">
-
-                                        <div id="custom_input_wrapper2" style="display:none; margin-top:6px;">
-                                            <input type="text" id="custom_job_category" name="custom_job_category"
-                                                placeholder="<?= $lang['custom_jobcategory_placeholder']; ?>">
-                                        </div>
-                                    </div>
-
                                     <!-- Required Certification -->
                                     <div class="form-group">
                                         <label><?= $lang['post_job_form_required_certification']; ?></label>
@@ -1372,20 +1317,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             const hiddenInput = document.getElementById('company_size');
 
             if (select && select.value === 'other') {
-                if (customWrapper) customWrapper.style.display = 'block';
-                if (hiddenInput) hiddenInput.value = '';
-            } else {
-                if (customWrapper) customWrapper.style.display = 'none';
-                if (hiddenInput && select) hiddenInput.value = select.value;
-            }
-        }
-
-        function toggleCustomInput2() {
-            const select = document.getElementById('jobCategory');
-            const customWrapper = document.getElementById('custom_input_wrapper2');
-            const hiddenInput = document.getElementById('jobCategoryHidden');
-
-            if (select && select.value === 'khac') {
                 if (customWrapper) customWrapper.style.display = 'block';
                 if (hiddenInput) hiddenInput.value = '';
             } else {

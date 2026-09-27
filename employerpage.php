@@ -1,6 +1,8 @@
 <?php
-
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['employerpage_action'] ?? '') === 'prominent_company_payment') {
+  require __DIR__ . '/dang_ky_cong_ty_nb_thanh_toan.php';
+  exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

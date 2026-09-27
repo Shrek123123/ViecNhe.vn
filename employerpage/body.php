@@ -392,7 +392,7 @@ if (isset($_SESSION['employerid'])) {
     <span class="prominent-close-btn" data-close-prominent-modal role="button" tabindex="0" aria-label="Close">&times;</span>
     <h2 id="prominentCompanyTitle"><?= htmlspecialchars($lang['prominent_company_payment_title'], ENT_QUOTES, 'UTF-8'); ?></h2>
     <p><?= htmlspecialchars($lang['prominent_company_confirmation'], ENT_QUOTES, 'UTF-8'); ?></p>
-    <form method="POST" action="employerpage.php">
+    <form method="POST" action="/employerpage.php">
       <input type="hidden" name="employerpage_action" value="prominent_company_payment">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_prominent_company'], ENT_QUOTES, 'UTF-8'); ?>">
       <label for="prominent_company_id"><?= htmlspecialchars($lang['prominent_company_choose'], ENT_QUOTES, 'UTF-8'); ?></label>

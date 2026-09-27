@@ -14,36 +14,6 @@ function t($key, $replace = [])
   return $text;
 }
 
-function normalizeCompanyLogoPath($path)
-{
-  $value = trim((string) $path);
-  if ($value === '') {
-    return 'image/logo1.png';
-  }
-
-  $value = preg_replace('#^(?:\./)+#', '', $value);
-  $value = preg_replace('#^(?:\.\./)+#', '', $value);
-  $value = preg_replace('#^/+#', '', $value);
-
-  if (stripos($value, 'uploads/companylogo/') === 0) {
-    return $value;
-  }
-
-  if (stripos($value, 'companylogo/') === 0) {
-    return 'uploads/' . $value;
-  }
-
-  if (stripos($value, 'uploads/') === 0) {
-    return $value;
-  }
-
-  if (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0) {
-    return $value;
-  }
-
-  return 'uploads/companylogo/' . basename($value);
-}
-
 function normalizeIndustryMatchText($value)
 {
   $raw = trim((string) $value);
@@ -1266,37 +1236,29 @@ $savedJobIdsJson = json_encode($savedJobIds);
     <div class="container">
       <div class="header">
         <h2><?= $lang['featured_companies']; ?></h2>
-        <a href="#" class="view-all"><?= $lang['view_all']; ?></a>
+        <a href="/ds_cong_ty_noi_bat.php" class="view-all"><?= $lang['view_all']; ?></a>
       </div>
 
       <div class="logos">
         <?php
-        $featuredCompaniesResult = $conn->query("SELECT c.id, c.company_name, c.company_logo
-          FROM prominent_company pc
-          JOIN company c ON c.id = pc.company_id
-          WHERE pc.status = 'paid' AND c.status = 'approved'
-          GROUP BY c.id, c.company_name, c.company_logo
-          ORDER BY MIN(pc.paid_at) ASC, MIN(pc.id) ASC
-          LIMIT 8");
-        if ($featuredCompaniesResult):
-          while ($featuredCompany = $featuredCompaniesResult->fetch_assoc()):
+        $featuredCompanies = getProminentCompanies($conn, 6);
+        if ($featuredCompanies):
+          foreach ($featuredCompanies as $featuredCompany):
             $featuredCompanyLogo = normalizeCompanyLogoPath($featuredCompany['company_logo'] ?? '');
-            if ($featuredCompanyLogo !== ''):
+            $featuredCompanyName = (string) $featuredCompany['company_name'];
         ?>
-          <a class="featured-company" href="companyprofile.php?company_id=<?= (int) $featuredCompany['id']; ?>">
+          <a class="featured-company" href="/companyprofile.php?company_id=<?= (int) $featuredCompany['id']; ?>" title="<?= htmlspecialchars($featuredCompanyName, ENT_QUOTES, 'UTF-8'); ?>">
             <img src="<?= htmlspecialchars($featuredCompanyLogo, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($featuredCompany['company_name'], ENT_QUOTES, 'UTF-8'); ?>" />
-            <span><?= htmlspecialchars($featuredCompany['company_name'], ENT_QUOTES, 'UTF-8'); ?></span>
+            <span><?= htmlspecialchars(truncateCompanyName($featuredCompanyName), ENT_QUOTES, 'UTF-8'); ?></span>
           </a>
         <?php
-            endif;
-          endwhile;
+          endforeach;
+        else:
+        ?>
+          <p class="featured-companies-empty"><?= htmlspecialchars($lang['featured_companies_empty'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php
         endif;
         ?>
-        <img src="image/logo1.png" alt="Tabtab.me" />
-        <img src="image/logo2.png" alt="DIC" />
-        <img src="image/logo3.png" alt="NhanHoa" />
-        <img src="image/logo4.png" alt="EY" />
-        <img src="image/logo5.png" alt="Karofi" />
       </div>
     </div>
   </section>

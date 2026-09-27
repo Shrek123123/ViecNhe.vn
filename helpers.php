@@ -1,5 +1,81 @@
 <?php
 
+function getProminentCompanies($conn, int $limit = 0): array {
+    $sql = "SELECT c.id, c.company_name, c.company_logo, MIN(pc.paid_at) AS paid_at
+        FROM prominent_company pc
+        JOIN company c ON c.id = pc.company_id
+        WHERE pc.status = 'paid' AND c.status = 'approved'
+        GROUP BY c.id, c.company_name, c.company_logo
+        ORDER BY MIN(pc.paid_at) ASC, MIN(pc.id) ASC";
+    if ($limit > 0) {
+        $sql .= ' LIMIT ?';
+    }
+
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        return [];
+    }
+    if ($limit > 0) {
+        $stmt->bind_param('i', $limit);
+    }
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return [];
+    }
+
+    $result = $stmt->get_result();
+    $companies = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    $stmt->close();
+    return $companies;
+}
+
+function normalizeCompanyLogoPath($path): string {
+    $value = trim((string) $path);
+    if ($value === '') {
+        return 'image/logo1.png';
+    }
+
+    $value = preg_replace('#^(?:\./)+#', '', $value);
+    $value = preg_replace('#^(?:\.\./)+#', '', $value);
+    $value = preg_replace('#^/+#', '', $value);
+
+    if (stripos($value, 'uploads/companylogo/') === 0) {
+        return $value;
+    }
+    if (stripos($value, 'companylogo/') === 0) {
+        return 'uploads/' . $value;
+    }
+    if (stripos($value, 'uploads/') === 0) {
+        return $value;
+    }
+    if (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0) {
+        return $value;
+    }
+
+    return 'uploads/companylogo/' . basename($value);
+}
+
+function truncateCompanyName(string $companyName, int $maxCharacters = 35): string {
+    if ($maxCharacters < 1) {
+        return '';
+    }
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        return mb_strlen($companyName, 'UTF-8') > $maxCharacters
+            ? mb_substr($companyName, 0, $maxCharacters, 'UTF-8') . '...'
+            : $companyName;
+    }
+
+    $characters = preg_split('//u', $companyName, -1, PREG_SPLIT_NO_EMPTY);
+    if ($characters === false) {
+        return strlen($companyName) > $maxCharacters
+            ? substr($companyName, 0, $maxCharacters) . '...'
+            : $companyName;
+    }
+    return count($characters) > $maxCharacters
+        ? implode('', array_slice($characters, 0, $maxCharacters)) . '...'
+        : $companyName;
+}
+
 function getAppBaseUrl(): string {
     $baseUrl = getenv('APP_URL');
     if ($baseUrl === false || trim($baseUrl) === '') {

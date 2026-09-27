@@ -153,6 +153,7 @@ $lang = [
     "prominent_company_payment_failed" => "Payment was canceled or failed. Your company was not registered as featured.",
     "prominent_company_payment_pending" => "Payment is awaiting PayOS confirmation. The company status has not been updated.",
     "prominent_company_payment_error" => "Could not create the payment. Please try again later.",
+    "prominent_company_already_registered" => "This company is already registered as featured. Please try another company.",
     "prominent_company_back" => "Back to employer homepage",
     "post_job_now" => "Post a Job Now →",
     "free_30_day_post_already_used" => "You have already submitted 1 job post with a 30-days duration, therefore the free trial is over.",

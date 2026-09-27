@@ -44,6 +44,15 @@ try {
     header('Cache-Control: no-store');
     header('Location: ' . $checkoutUrl, true, 303);
     exit;
+} catch (InvalidArgumentException $exception) {
+    if ($exception->getCode() === 409) {
+        http_response_code(200);
+        $duplicateMessage = json_encode($lang['prominent_company_already_registered'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        echo '<script>alert(' . $duplicateMessage . '); window.location.replace("/employerpage.php");</script>';
+        exit;
+    }
+    error_log('Prominent company checkout error [' . $errorId . ']: ' . $exception->getMessage());
+    http_response_code(502);
 } catch (Throwable $exception) {
     error_log('Prominent company checkout error [' . $errorId . ']: ' . $exception->getMessage());
     http_response_code(502);

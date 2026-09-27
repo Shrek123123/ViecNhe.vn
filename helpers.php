@@ -226,7 +226,7 @@ function createProminentCompanyPaymentCheckout($conn, int $employerId, int $comp
     $alreadyPaid = (bool) $paidStmt->get_result()->fetch_assoc();
     $paidStmt->close();
     if ($alreadyPaid) {
-        throw new InvalidArgumentException('Công ty này đã được đăng ký nổi bật.');
+        throw new InvalidArgumentException('Prominent company is already registered.', 409);
     }
 
     $transactionCode = (string) random_int(100000, 999999999);

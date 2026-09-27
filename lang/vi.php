@@ -160,6 +160,7 @@ $lang = [
     "prominent_company_payment_failed" => "Thanh toán đã bị hủy hoặc thất bại. Công ty chưa được đăng ký nổi bật.",
     "prominent_company_payment_pending" => "Giao dịch đang chờ PayOS xác nhận. Trạng thái công ty chưa được cập nhật.",
     "prominent_company_payment_error" => "Không thể tạo giao dịch thanh toán. Vui lòng thử lại sau.",
+    "prominent_company_already_registered" => "Bạn đã đăng ký nổi bật cho công ty này rồi, hãy thử với công ty khác.",
     "prominent_company_back" => "Quay lại trang nhà tuyển dụng",
     "post_job_now" => "Đăng tin tuyển dụng ngay →",
     "free_30_day_post_already_used" => "Bạn đã đăng 1 bài đăng 30 ngày miễn phí nên không thể đăng tiếp.",

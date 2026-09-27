@@ -1,6 +1,6 @@
 <?php
 
-function getProminentCompanies($conn, int $limit = 0): array {
+function getProminentCompanies($conn, int $limit = 0, int $offset = 0): array {
     $sql = "SELECT c.id, c.company_name, c.company_logo, MIN(pc.paid_at) AS paid_at
         FROM prominent_company pc
         JOIN company c ON c.id = pc.company_id
@@ -8,7 +8,7 @@ function getProminentCompanies($conn, int $limit = 0): array {
         GROUP BY c.id, c.company_name, c.company_logo
         ORDER BY MIN(pc.paid_at) ASC, MIN(pc.id) ASC";
     if ($limit > 0) {
-        $sql .= ' LIMIT ?';
+        $sql .= ' LIMIT ? OFFSET ?';
     }
 
     $stmt = $conn->prepare($sql);
@@ -16,7 +16,8 @@ function getProminentCompanies($conn, int $limit = 0): array {
         return [];
     }
     if ($limit > 0) {
-        $stmt->bind_param('i', $limit);
+        $offset = max(0, $offset);
+        $stmt->bind_param('ii', $limit, $offset);
     }
     if (!$stmt->execute()) {
         $stmt->close();

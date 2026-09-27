@@ -368,35 +368,53 @@ $savedJobIdsJson = json_encode($savedJobIds);
   }
 
   .featured-carousel {
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) 42px;
-    align-items: stretch;
-    gap: 12px;
+    position: relative;
+    display: block;
     padding: 14px;
     border: 1px solid #d7dedb;
     background: #f7f9f8;
   }
 
+  .section-3 .container > .logos {
+    display: block;
+  }
+
   .featured-carousel__arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
     display: grid;
-    min-width: 0;
+    width: 38px;
+    height: 52px;
+    padding: 0;
     place-items: center;
-    border: 1px solid #d4ddda;
-    background: #fff;
-    color: #263c37;
-    font-size: 27px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #111;
+    font-size: 38px;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
   }
 
+  #featured-company-prev {
+    left: calc((100vw - 100%) / -2 + 8px);
+  }
+
+  #featured-company-next {
+    right: calc((100vw - 100%) / -2 + 8px);
+  }
+
   .featured-carousel__arrow:disabled {
-    color: #aeb9b5;
+    color: #111;
+    opacity: .35;
     cursor: default;
   }
 
   .featured-carousel__arrow:not(:disabled):hover {
-    border-color: #bb3337;
-    color: #bb3337;
+    color: #111;
+    opacity: .7;
   }
 
   .featured-carousel .logos {
@@ -710,9 +728,25 @@ $savedJobIdsJson = json_encode($savedJobIds);
     }
 
     .featured-carousel {
+      display: grid;
       grid-template-columns: 34px minmax(0, 1fr) 34px;
+      align-items: stretch;
       gap: 8px;
       padding: 8px;
+    }
+
+    .featured-carousel__arrow {
+      position: static;
+      width: 34px;
+      height: auto;
+      transform: none;
+      font-size: 27px;
+    }
+
+    #featured-company-prev,
+    #featured-company-next {
+      left: auto;
+      right: auto;
     }
 
     .featured-carousel .logos {

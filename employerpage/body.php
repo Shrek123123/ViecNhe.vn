@@ -360,7 +360,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <ul>
       <li><?php echo $lang['hero_section_desc']['post_jobs_free']; ?></li>
       <li><?php echo $lang['hero_section_desc']['candidate_pool']; ?></li>
-      <li><?php echo $lang['hero_section_desc']['toppy_ai']; ?></li>
     </ul>
     <div class="hero-buttons">
       <button class="consult-btn" id="add_prominent_company_btn" type="button"><?php echo $lang['add_prominent_company_btn']; ?></button>

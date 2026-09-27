@@ -148,11 +148,10 @@ $lang = [
     "hero_section_desc" => [
         "post_jobs_free" => "Đăng tin tuyển dụng miễn phí, nhanh chóng và dễ dàng",
         "candidate_pool" => "Nguồn ứng viên phong phú từ nhiều ngành nghề và lĩnh vực",
-        "toppy_ai" => "Toppy AI gợi ý ứng viên tiềm năng, lọc hồ sơ hàng đầu và xếp hạng theo mức độ phù hợp"
     ],
     "add_prominent_company_btn" => "Đăng ký công ty nổi bật",
     "prominent_company_confirmation" => "Khi đăng ký công ty nổi bật thì logo và tên công ty bạn sẽ được xuất hiện trên mục \"Công ty nổi bật\" ở trang nhất kèm theo trong danh sách Công ty đối tác của ViecNhe. Những bài đăng của bạn cũng sẽ được ưu tiên xuất hiện lên trên đầu theo nguyên tắc công ty đăng ký nổi bật trước xuất hiện trước. Bạn có muốn tiếp tục không? (phí: 69.000 VND)",
-    "prominent_company_confirm" => "Tiếp tục thanh toán",
+    "prominent_compan   y_confirm" => "Tiếp tục thanh toán",
     "prominent_company_cancel" => "Để sau",
     "prominent_company_choose" => "Chọn công ty",
     "prominent_company_payment_title" => "Đăng ký công ty nổi bật",

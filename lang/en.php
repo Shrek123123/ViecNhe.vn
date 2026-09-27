@@ -141,7 +141,6 @@ $lang = [
     "hero_section_desc" => [
         "post_jobs_free" => "Post jobs for free, easily and quickly",
         "candidate_pool" => "Huge candidate pool from various industries and fields",
-        "toppy_ai" => "Toppy AI recommends potential candidates, filters top profiles, and ranks them by relevance"
     ],
     "add_prominent_company_btn" => "Register as a Featured Company",
     "prominent_company_confirmation" => "When you register as a featured company, your company logo and name will appear in the Featured Companies section on the homepage and in ViecNhe's partner company list. Your job posts will also be prioritized at the top, with companies registered earlier appearing first. Would you like to continue? (fee: 69,000 VND)",

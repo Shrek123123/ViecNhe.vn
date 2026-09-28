@@ -1,5 +1,3 @@
-    $free_job_status = 'approved';
-    echo '<script>alert(' . json_encode($lang['job_post_published_successfully'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = "my_job_posts.php";</script>';
 <?php
 session_start();
 if (!isset($_SESSION['usernameemployer'])) {
@@ -8,7 +6,7 @@ if (!isset($_SESSION['usernameemployer'])) {
     exit();
 }
 
-// Kiểm tra quyền truy cập employerprofile.php
+// Kiểm tra quyền trugit by cập employerprofile.php
 if (!isset($_SESSION['employerid'])) {
     header("Location: employerpage.php");
     exit();

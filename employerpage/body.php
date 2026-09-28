@@ -622,6 +622,10 @@ if (isset($_SESSION['employerid'])) {
     min-width: 0;
   }
 
+  .prominent-close-btn {
+    cursor: pointer;
+  }
+
   #prominentCompanyModal .modal-content {
     text-align: left;
   }

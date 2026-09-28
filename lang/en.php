@@ -503,6 +503,8 @@ $lang = [
     'save_changes' => 'Save changes',
     'back_to_profile' => 'Back to profile',
     'jobseekerprofile_appliedjobs' => 'Applied jobs',
+    'image_validation_note' => 'Allowed: JPG, JPEG, PNG, SVG. Maximum size: 2MB.
+',
 
     'my_applications' => 'My Applications',
     'saved_jobs_title' => 'Saved Jobs',

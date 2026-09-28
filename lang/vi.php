@@ -593,6 +593,7 @@ $lang = [
     'otp_verified' => 'Xác nhận thành công. Hãy nhập mật khẩu mới.',
     'password_reset_success' => 'Mật khẩu đã được đặt lại thành công.',
     'resend_wait' => 'Vui lòng chờ trước khi yêu cầu mã mới.',
+    'image_validation_note' => 'Cho phép tải lên các định dạng ảnh: JPG, PNG, SVG. Kích thước tối đa 2MB.',
     //employerforgetpassword
     'employerforgetpassword_title' => 'Quên mật khẩu nhà tuyển dụng',
     'employerforgetpassword_intro' => 'Nhập email của bạn và chúng tôi sẽ kiểm tra xem có tài khoản khớp nào không.',

@@ -259,7 +259,7 @@
         <div class="footer-column">
             <h4><?= $lang['footer_about_us']; ?></h4>
             <p>
-                <!-- <strong><?= $lang['footer_company_full']; ?></strong><br>
+                <strong><?= $lang['footer_company_full']; ?></strong><br>
                 <?= $lang['footer_address_hcm']; ?><br>
                 <?= $lang['footer_address_hn']; ?><br>
                 <?= $lang['footer_license']; ?><br> -->

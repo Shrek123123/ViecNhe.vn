@@ -25,6 +25,34 @@ if (!isset($_SESSION['lang'])) {
 include '../lang/' . $_SESSION['lang'] . '.php';
 
 $jobseeker_id = (int) $_SESSION['jobseeker_id'];
+$interest_csrf_token = $_SESSION['interest_csrf_token'] ??= bin2hex(random_bytes(32));
+$interest_action_message = $_SESSION['interest_action_message'] ?? '';
+unset($_SESSION['interest_action_message']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_interested_job'])) {
+    $submittedToken = (string) ($_POST['csrf_token'] ?? '');
+    $jobIdToRemove = filter_input(INPUT_POST, 'job_id', FILTER_VALIDATE_INT);
+
+    if (!hash_equals($interest_csrf_token, $submittedToken) || !$jobIdToRemove || $jobIdToRemove < 1) {
+        $_SESSION['interest_action_message'] = $lang['interest_remove_failed'];
+    } else {
+        $deleteStmt = $conn->prepare('DELETE FROM job_interest_count WHERE job_id = ? AND jobseeker_id = ?');
+        if ($deleteStmt) {
+            $deleteStmt->bind_param('ii', $jobIdToRemove, $jobseeker_id);
+            $deleted = $deleteStmt->execute() && $deleteStmt->affected_rows > 0;
+            $deleteStmt->close();
+            $_SESSION['interest_action_message'] = $deleted
+                ? $lang['interest_removed']
+                : $lang['interest_remove_failed'];
+        } else {
+            $_SESSION['interest_action_message'] = $lang['interest_remove_failed'];
+        }
+    }
+
+    header('Location: followed_company.php');
+    exit();
+}
+
 $interested_jobs = [];
 
 $sql = 'SELECT j.id, j.job_title, j.job_location, j.salary, j.job_type,
@@ -179,14 +207,22 @@ function interestedJobLogoPath($logo) {
 
         .interested-job-card {
             display: flex;
+            flex-direction: column;
             align-items: flex-start;
-            gap: 14px;
+            gap: 12px;
             min-width: 0;
             padding: 18px;
             background: #fff;
             border: 1px solid #ddd;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .interested-job-link {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            min-width: 0;
             color: inherit;
             text-decoration: none;
         }
@@ -195,7 +231,7 @@ function interestedJobLogoPath($logo) {
             border-color: #b23b3b;
         }
 
-        .interested-job-card img {
+        .interested-job-link img {
             width: 70px;
             height: 70px;
             flex: 0 0 70px;
@@ -225,6 +261,32 @@ function interestedJobLogoPath($logo) {
 
         .interested-job-details {
             margin: 0;
+        }
+
+        .interest-action-message {
+            margin: 0 0 16px;
+            padding: 12px 14px;
+            background: #edf9f0;
+            border: 1px solid #bfe7c9;
+            color: #1e7d45;
+        }
+
+        .interest-remove-form {
+            align-self: flex-end;
+            margin: 0;
+        }
+
+        .interest-remove-button {
+            border: 1px solid #b23b3b;
+            padding: 7px 12px;
+            background: #fff;
+            color: #a02b2b;
+            cursor: pointer;
+        }
+
+        .interest-remove-button:hover {
+            background: #b23b3b;
+            color: #fff;
         }
 
         .empty-interested-jobs {
@@ -295,6 +357,9 @@ function interestedJobLogoPath($logo) {
         <div class="content-area">
             <div class="interested-jobs-content">
                 <h2><?= htmlspecialchars($lang['interested_jobs_title']) ?></h2>
+                <?php if ($interest_action_message !== ''): ?>
+                    <div class="interest-action-message" role="status"><?= htmlspecialchars($interest_action_message, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
                 <?php if (empty($interested_jobs)): ?>
                     <div class="empty-interested-jobs"><?= htmlspecialchars($lang['no_interested_jobs']) ?></div>
                 <?php else: ?>
@@ -306,14 +371,21 @@ function interestedJobLogoPath($logo) {
                             $job_location = (string) ($job['job_location'] ?? '');
                             $salary = translateJobSalary($job['salary'] ?? '', $lang);
                             ?>
-                            <a class="interested-job-card" href="../jobdetail.php?id=<?= (int) $job['id'] ?>">
-                                <img src="<?= htmlspecialchars(interestedJobLogoPath($job['company_logo'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') ?>">
-                                <div class="interested-job-info">
-                                    <h3 class="interested-job-title"><?= htmlspecialchars($job_title, ENT_QUOTES, 'UTF-8') ?></h3>
-                                    <p class="interested-job-company"><?= htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') ?></p>
-                                    <p class="interested-job-details"><?= htmlspecialchars($job_location, ENT_QUOTES, 'UTF-8') ?> · <?= htmlspecialchars($salary, ENT_QUOTES, 'UTF-8') ?></p>
-                                </div>
-                            </a>
+                            <article class="interested-job-card">
+                                <a class="interested-job-link" href="../jobdetail.php?id=<?= (int) $job['id'] ?>">
+                                    <img src="<?= htmlspecialchars(interestedJobLogoPath($job['company_logo'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') ?>">
+                                    <div class="interested-job-info">
+                                        <h3 class="interested-job-title"><?= htmlspecialchars($job_title, ENT_QUOTES, 'UTF-8') ?></h3>
+                                        <p class="interested-job-company"><?= htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') ?></p>
+                                        <p class="interested-job-details"><?= htmlspecialchars($job_location, ENT_QUOTES, 'UTF-8') ?> · <?= htmlspecialchars($salary, ENT_QUOTES, 'UTF-8') ?></p>
+                                    </div>
+                                </a>
+                                <form class="interest-remove-form" method="POST">
+                                    <input type="hidden" name="job_id" value="<?= (int) $job['id'] ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($interest_csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+                                    <button class="interest-remove-button" type="submit" name="remove_interested_job" value="1"><?= htmlspecialchars($lang['remove_interest'], ENT_QUOTES, 'UTF-8') ?></button>
+                                </form>
+                            </article>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>

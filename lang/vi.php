@@ -511,6 +511,9 @@ $lang = [
     'interested_jobs_title' => 'Công việc đã quan tâm',
     'no_interested_jobs' => 'Bạn chưa quan tâm công việc nào.',
     'btn_interested_jobs' => 'Việc quan tâm',
+    'remove_interest' => 'Xóa quan tâm',
+    'interest_removed' => 'Đã xóa công việc khỏi danh sách quan tâm.',
+    'interest_remove_failed' => 'Không thể xóa công việc khỏi danh sách quan tâm. Vui lòng thử lại.',
 
     'addmobilephone' => 'Thêm số điện thoại di động',
     'adddateofbirth' => 'Thêm ngày sinh',

@@ -512,6 +512,9 @@ $lang = [
     'interested_jobs_title' => 'Jobs You Are Interested In',
     'no_interested_jobs' => 'You have not marked any jobs as interesting yet.',
     'btn_interested_jobs' => 'Interested Jobs',
+    'remove_interest' => 'Remove interest',
+    'interest_removed' => 'Job removed from your interested jobs.',
+    'interest_remove_failed' => 'Could not remove this job. Please try again.',
 
     'addmobilephone' => 'Add mobile phone',
     'adddateofbirth' => 'Add date of birth',

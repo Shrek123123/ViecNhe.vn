@@ -192,7 +192,7 @@ function sendJobUpdateNotificationEmails(mysqli $conn, int $jobId, string $jobTi
     $message = '<p>Bài đăng vị trí <strong>' . $safeJobTitle . '</strong> của công ty <strong>' . $safeCompanyName . '</strong> vừa được cập nhật ở các mục sau:</p>'
         . $changedList
         . '<p>Để biết thêm thông tin, hãy truy cập trang bài đăng: <a href="' . $safeJobUrl . '">' . $safeJobUrl . '</a></p>'
-        . '<p>Trân trọng,<br>ViecNhe.vn</p>';
+        . '<p>Trân trọng,<br>Đội ngũ ViecNhe</p>';
 
     $sentCount = 0;
     foreach ($recipients as $recipient) {

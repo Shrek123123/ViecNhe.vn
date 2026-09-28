@@ -1,4 +1,3 @@
-    "job_post_published_successfully" => "Bài đăng tuyển đã được đăng thành công!",
 <?php
 $lang = [
     "login" => "Đăng nhập",

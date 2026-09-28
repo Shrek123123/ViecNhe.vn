@@ -260,9 +260,6 @@
             <h4><?= $lang['footer_about_us']; ?></h4>
             <p>
                 <strong><?= $lang['footer_company_full']; ?></strong><br>
-                <?= $lang['footer_address_hcm']; ?><br>
-                <?= $lang['footer_address_hn']; ?><br>
-                <?= $lang['footer_license']; ?><br> -->
                 <?= $lang['footer_phone']; ?><br>
                 <?= $lang['footer_email_job_seeker']; ?><br>
                 <?= $lang['footer_email_employer']; ?>

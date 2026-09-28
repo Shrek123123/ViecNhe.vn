@@ -250,11 +250,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
                     }
 
                     // Lấy số người quan tâm
-                    $interest_count = 0;
-                    $stmt2 = $conn->prepare('SELECT COUNT(*) AS interest_count FROM job_interest_count WHERE job_id = ?');
+                    $interestedTotal = 0;
+                    $stmt2 = $conn->prepare('SELECT COUNT(*) AS total FROM job_interest_count WHERE job_id = ?');
                     $stmt2->bind_param('i', $job_id);
                     $stmt2->execute();
-                    $interest_count = (int) ($stmt2->get_result()->fetch_assoc()['interest_count'] ?? 0);
+                    $interestedTotal = (int) ($stmt2->get_result()->fetch_assoc()['total'] ?? 0);
                     $stmt2->close();
 
                     // Tính ngày hết hạn
@@ -272,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
                                  style="width: 80px; height: 80px; object-fit: cover; border-radius: 14px; border: 1px solid #ececec; background: #fff;">
                             <div>
                                 <h5 class="fw-bold mb-1"><?= htmlspecialchars($job['job_title'] ?? 'Không có mô tả') ?></h5>
-                                <small class="text-muted"><?= sprintf($lang['jobdetail_interested'], $interest_count) ?></small>
+                                <small class="text-muted"><?= sprintf($lang['jobdetail_interested'], $interestedTotal) ?></small>
                             </div>
                         </div>
                         <hr>

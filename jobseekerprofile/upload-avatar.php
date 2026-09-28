@@ -1,8 +1,13 @@
 <?php
 require_once '../config.php';
 session_start();
-include '../lang/' . $_SESSION['lang'] . '.php';
 header('Content-Type: application/json');
+
+$language = $_SESSION['lang'] ?? 'vi';
+if (!in_array($language, ['vi', 'en'], true)) {
+    $language = 'vi';
+}
+include '../lang/' . $language . '.php';
 
 if (!isset($_SESSION['jobseeker_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Bạn chưa đăng nhập.']);
@@ -11,68 +16,93 @@ if (!isset($_SESSION['jobseeker_id'])) {
 
 $jobseeker_id = $_SESSION['jobseeker_id'];
 
-if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-    echo json_encode(['status' => 'error', 'message' => 'Không có file hoặc file lỗi.']);
+if (!isset($_FILES['avatar'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Không có file được tải lên.']);
     exit;
 }
 
 $file = $_FILES['avatar'];
-$allowed_types = ['image/jpeg', 'image/png', 'image/svg+xml'];
+$uploadErrors = [
+    UPLOAD_ERR_INI_SIZE => 'File vượt quá giới hạn upload của máy chủ.',
+    UPLOAD_ERR_FORM_SIZE => 'File vượt quá giới hạn cho phép.',
+    UPLOAD_ERR_PARTIAL => 'File chỉ được tải lên một phần. Vui lòng thử lại.',
+    UPLOAD_ERR_NO_FILE => 'Vui lòng chọn ảnh đại diện.',
+    UPLOAD_ERR_NO_TMP_DIR => 'Máy chủ thiếu thư mục tạm để nhận file.',
+    UPLOAD_ERR_CANT_WRITE => 'Máy chủ không thể ghi file tải lên.',
+    UPLOAD_ERR_EXTENSION => 'Một tiện ích PHP đã dừng việc tải file.',
+];
+if ($file['error'] !== UPLOAD_ERR_OK) {
+    echo json_encode(['status' => 'error', 'message' => $uploadErrors[$file['error']] ?? 'File tải lên không hợp lệ.']);
+    exit;
+}
+
+$allowed_types = [
+    'jpg' => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'png' => 'image/png',
+];
 $max_size = 5 * 1024 * 1024;
 
-$file_type = mime_content_type($file['tmp_name']);
-$file_size = $file['size'];
+$extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+$fileInfo = new finfo(FILEINFO_MIME_TYPE);
+$file_type = $fileInfo->file($file['tmp_name']);
 
-if (!in_array($file_type, $allowed_types)) {
-    echo json_encode(['status' => 'error', 'message' => $lang['upload_invalid_type']]);
+if (!isset($allowed_types[$extension]) || $file_type !== $allowed_types[$extension]) {
+    echo json_encode(['status' => 'error', 'message' => 'Ảnh đại diện chỉ hỗ trợ định dạng JPG, JPEG hoặc PNG.']);
     exit;
 }
 
-if ($file_size > $max_size) {
-    echo json_encode(['status' => 'error', 'message' => $lang['upload_file_too_large']]);
+if ($file['size'] > $max_size) {
+    echo json_encode(['status' => 'error', 'message' => $lang['upload_file_too_large'] ?? 'Ảnh không được vượt quá 5MB.']);
     exit;
 }
 
-$upload_dir = '../uploads/';
-if (!file_exists($upload_dir)) {
-    mkdir($upload_dir, 0777, true);
+$upload_dir = __DIR__ . '/../uploads';
+if (!is_dir($upload_dir) && !mkdir($upload_dir, 0775, true) && !is_dir($upload_dir)) {
+    echo json_encode(['status' => 'error', 'message' => 'Không thể tạo thư mục lưu ảnh.']);
+    exit;
 }
 
-$extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-$new_filename = 'avatar_' . $jobseeker_id . '_' . time() . '.' . $extension;
-$destination = $upload_dir . $new_filename;
+$new_filename = 'avatar_' . (int) $jobseeker_id . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+$destination = $upload_dir . DIRECTORY_SEPARATOR . $new_filename;
 
 if (!move_uploaded_file($file['tmp_name'], $destination)) {
-    echo json_encode(['status' => 'error', 'message' => $lang['upload_error']]);
+    echo json_encode(['status' => 'error', 'message' => $lang['upload_error'] ?? 'Không thể lưu ảnh tải lên.']);
     exit;
 }
 
-// Xử lý INSERT hoặc UPDATE
-$stmt = $conn->prepare("SELECT COUNT(*) as total FROM jobseeker_profile WHERE jobseeker_id = ?");
-$stmt->bind_param("i", $jobseeker_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$total = $row['total'];
+$relativePath = 'uploads/' . $new_filename;
+$stmt = $conn->prepare('UPDATE jobseeker_profile SET profile_pic = ? WHERE jobseeker_id = ?');
+if (!$stmt) {
+    unlink($destination);
+    echo json_encode(['status' => 'error', 'message' => 'Không thể chuẩn bị lưu ảnh vào hồ sơ.']);
+    exit;
+}
+$stmt->bind_param('si', $relativePath, $jobseeker_id);
+$saved = $stmt->execute();
+$hasProfile = $stmt->affected_rows > 0;
 $stmt->close();
 
-if ($total > 0) {
-    $stmt = $conn->prepare("UPDATE jobseeker_profile SET profile_pic = ? WHERE jobseeker_id = ?");
-    $stmt->bind_param("si", $destination, $jobseeker_id);
-    $stmt->execute();
-    $stmt->close();
-} else {
-    $stmt = $conn->prepare("INSERT INTO jobseeker_profile (jobseeker_id, profile_pic) VALUES (?, ?)");
-    $stmt->bind_param("is", $jobseeker_id, $destination);
-    $stmt->execute();
-    $stmt->close();
+if ($saved && !$hasProfile) {
+    $stmt = $conn->prepare('INSERT INTO jobseeker_profile (jobseeker_id, profile_pic) VALUES (?, ?)');
+    if ($stmt) {
+        $stmt->bind_param('is', $jobseeker_id, $relativePath);
+        $saved = $stmt->execute();
+        $stmt->close();
+    } else {
+        $saved = false;
+    }
 }
 
-$conn->close();
+if (!$saved) {
+    unlink($destination);
+    echo json_encode(['status' => 'error', 'message' => 'Không thể cập nhật ảnh đại diện vào hồ sơ.']);
+    exit;
+}
 
 echo json_encode([
     'status' => 'success',
-    'message' => $lang['upload_success'],
-    'path' => $destination
+    'message' => $lang['upload_success'] ?? 'Ảnh đại diện đã được tải lên thành công!',
+    'path' => $relativePath
 ]);
 exit;

@@ -673,7 +673,7 @@ if ($cv_file_path) {
                     <div style="flex-shrink: 0; text-align: center;">
                         <form id="uploadAvatarForm" action="upload-avatar.php" method="POST"
                             enctype="multipart/form-data">
-                            <input type="file" name="avatar" id="avatarInput" accept=".jpg,.jpeg,.png,.svg,.pdf"
+                            <input type="file" name="avatar" id="avatarInput" accept=".jpg,.jpeg,.png"
                                 style="display: none;" onchange="handleAvatarChange(event)">
                             <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click();">
                                 <?php
@@ -1133,18 +1133,20 @@ if ($cv_file_path) {
     <script>
         function handleAvatarChange(event) {
             const file = event.target.files[0];
-            const validTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+            const validTypes = ['image/jpeg', 'image/png'];
             const maxSize = 5 * 1024 * 1024;
 
             if (!file) return;
 
             if (!validTypes.includes(file.type)) {
-                alert("Chỉ cho phép JPG, PNG, SVG.");
+                alert("Chỉ cho phép JPG, JPEG hoặc PNG.");
+                event.target.value = '';
                 return;
             }
 
             if (file.size > maxSize) {
                 alert("File phải nhỏ hơn 5MB.");
+                event.target.value = '';
                 return;
             }
 
@@ -1174,11 +1176,13 @@ if ($cv_file_path) {
                         // document.querySelector('.top-bar .company img').src = data.path;
                     } else {
                         alert("Lỗi khi tải ảnh: " + (data.message || "Không rõ lỗi."));
+                        location.reload();
                     }
                 })
                 .catch(err => {
                     console.error("Lỗi kết nối:", err);
                     alert("Lỗi kết nối khi tải ảnh.");
+                    location.reload();
                 });
         }
     </script>

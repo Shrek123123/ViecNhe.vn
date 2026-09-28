@@ -1,7 +1,27 @@
 <?php
-require_once '../config.php';
+ob_start(static function ($output) {
+    json_decode($output);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        return $output;
+    }
+
+    error_log('Invalid avatar upload response: ' . trim(strip_tags($output)));
+    http_response_code(500);
+    return json_encode(['status' => 'error', 'message' => 'Máy chủ gặp lỗi khi xử lý ảnh đại diện.']);
+});
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+set_error_handler(static function ($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+header('Content-Type: application/json; charset=utf-8');
+
+try {
+require_once __DIR__ . '/../config.php';
 session_start();
-header('Content-Type: application/json');
 
 $language = $_SESSION['lang'] ?? 'vi';
 if (!in_array($language, ['vi', 'en'], true)) {
@@ -106,3 +126,8 @@ echo json_encode([
     'path' => $relativePath
 ]);
 exit;
+} catch (Throwable $error) {
+    error_log('Avatar upload failed: ' . $error->getMessage());
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Máy chủ gặp lỗi khi xử lý ảnh đại diện.']);
+}

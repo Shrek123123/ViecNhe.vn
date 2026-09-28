@@ -116,6 +116,7 @@ if ($cv_file_path) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../image/favicon.svg">
     <title><?= $lang['jobseekerpersonalinfo_title'] ?></title>
     <style>
         body {
@@ -1167,7 +1168,15 @@ if ($cv_file_path) {
                 method: 'POST',
                 body: formData
             })
-                .then(res => res.json())
+                .then(async res => {
+                    const responseText = await res.text();
+                    try {
+                        return JSON.parse(responseText);
+                    } catch (error) {
+                        console.error('Phản hồi upload ảnh không phải JSON:', responseText);
+                        throw new Error('Máy chủ trả về phản hồi không hợp lệ khi tải ảnh.');
+                    }
+                })
                 .then(data => {
                     if (data.status === 'success') {
                         alert(data.message || lang.upload_success);
@@ -1181,7 +1190,7 @@ if ($cv_file_path) {
                 })
                 .catch(err => {
                     console.error("Lỗi kết nối:", err);
-                    alert("Lỗi kết nối khi tải ảnh.");
+                    alert(err.message || "Lỗi kết nối khi tải ảnh.");
                     location.reload();
                 });
         }

@@ -11,6 +11,7 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
 <html lang="en">
 
 <head>
+    <link rel="icon" type="image/svg+xml" href="../image/favicon.svg">
     <style>
         body {
             margin: 0;

@@ -1,3 +1,4 @@
+    "job_post_published_successfully" => "Bài đăng tuyển đã được đăng thành công!",
 <?php
 $lang = [
     "login" => "Đăng nhập",
@@ -167,6 +168,7 @@ $lang = [
     "post_job_now" => "Đăng 1 tin tuyển dụng ngay (miễn phí) →",
     "free_30_day_post_already_used" => "Bạn đã đăng 1 bài đăng 30 ngày miễn phí nên không thể đăng tiếp. Vui lòng vào mục \"Tài khoản\" (nhấp chuột vào ảnh đại diện) để đăng bài tiếp.",
     "job_post_is_saved_for_review" => "Bài đăng tuyển đã được lưu để duyệt qua, kết quả sẽ được thông báo trong thời gian sớm nhất!",
+        "job_post_published_successfully" => "Bài đăng tuyển đã được đăng thành công!",
     "ung_tuyen_viec" => "Ứng tuyển việc",
 
     //post-job form
@@ -328,6 +330,7 @@ $lang = [
     'jobdetail_deadline' => 'Hạn nộp hồ sơ:',
     'jobdetail_apply_now' => 'Ứng tuyển ngay',
     'jobdetail_like_job' => 'Quan tâm',
+        'jobdetail_interested_button' => 'Đã quan tâm',
     'jobdetail_job_description' => 'Mô tả công việc',
     'jobdetail_employee_requirement' => 'Yêu cầu ứng viên',
     'jobdetail_job_benefit' => 'Quyền lợi',

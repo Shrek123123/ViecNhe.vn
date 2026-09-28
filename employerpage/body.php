@@ -110,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   //   }
   // }
   $jobStatus = 'pending_review'; // Mặc định là chờ duyệt
+  $jobStatus = $hasFree30DayPost ? 'pending_review' : 'approved';
 
   // Database connection and insertion logic here
   // Lấy số thứ tự bài đăng mới nhất của employer này
@@ -171,8 +172,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 //   $stmt->close();
 // }
   if ($stmt->execute()) {
-    // Thay đổi thông báo và cách thoát ra
-    echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
+    $jobPostMessage = $jobStatus === 'approved'
+      ? $lang['job_post_published_successfully']
+      : $lang['job_post_is_saved_for_review'];
+    echo '<script>alert(' . json_encode($jobPostMessage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = window.location.href;</script>';
     // window.location.href = window.location.href; sẽ tải lại trang hiện tại (body.php)
     // và đóng modal, làm mới trạng thái
   } else {

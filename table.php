@@ -307,15 +307,41 @@ if ($stmt === TRUE) {
 //Tạo bảng job_interest_count
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS job_interest_count (
     id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    job_id INT(6) UNSIGNED NOT NULL,
-    interest_count INT(6) DEFAULT 0,
+    job_id INT UNSIGNED NOT NULL,
+    jobseeker_id INT(6) UNSIGNED NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE
+    UNIQUE KEY unique_job_interest (job_id, jobseeker_id),
+    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
+    FOREIGN KEY (jobseeker_id) REFERENCES user(id) ON DELETE CASCADE
 )");
 if ($stmt === TRUE) {
     echo "Table job_interest_count created successfully <br>";
 } else {
     echo "Error creating table: " . $conn->error;
+}
+
+$interest_jobseeker_column = $conn->query("SHOW COLUMNS FROM job_interest_count LIKE 'jobseeker_id'");
+if ($interest_jobseeker_column && $interest_jobseeker_column->num_rows === 0) {
+    $conn->query("ALTER TABLE job_interest_count ADD COLUMN jobseeker_id INT(6) UNSIGNED NULL AFTER job_id");
+}
+
+$interest_count_column = $conn->query("SHOW COLUMNS FROM job_interest_count LIKE 'interest_count'");
+if ($interest_count_column && $interest_count_column->num_rows > 0) {
+    $conn->query("DELETE FROM job_interest_count WHERE jobseeker_id IS NULL");
+    $conn->query("ALTER TABLE job_interest_count DROP COLUMN interest_count");
+}
+
+$conn->query("DELETE FROM job_interest_count WHERE jobseeker_id IS NULL");
+$conn->query("ALTER TABLE job_interest_count MODIFY jobseeker_id INT(6) UNSIGNED NOT NULL");
+
+$interest_unique_index = $conn->query("SHOW INDEX FROM job_interest_count WHERE Key_name = 'unique_job_interest'");
+if ($interest_unique_index && $interest_unique_index->num_rows === 0) {
+    $conn->query("ALTER TABLE job_interest_count ADD UNIQUE KEY unique_job_interest (job_id, jobseeker_id)");
+}
+
+$interest_user_fk = $conn->query("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'job_interest_count' AND COLUMN_NAME = 'jobseeker_id' AND REFERENCED_TABLE_NAME = 'user'");
+if ($interest_user_fk && $interest_user_fk->num_rows === 0) {
+    $conn->query("ALTER TABLE job_interest_count ADD CONSTRAINT fk_job_interest_jobseeker FOREIGN KEY (jobseeker_id) REFERENCES user(id) ON DELETE CASCADE");
 }
 // Tạo bảng saved_jobs
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS saved_jobs (

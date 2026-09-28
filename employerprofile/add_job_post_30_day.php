@@ -1,3 +1,5 @@
+    $free_job_status = 'approved';
+    echo '<script>alert(' . json_encode($lang['job_post_published_successfully'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = "my_job_posts.php";</script>';
 <?php
 session_start();
 if (!isset($_SESSION['usernameemployer'])) {
@@ -181,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $next_job_number = (int) ($number_stmt->get_result()->fetch_assoc()['next_number'] ?? 1);
       $number_stmt->close();
 
-      $free_job_status = 'pending_review';
+    $free_job_status = 'approved';
       $free_job_stmt = $conn->prepare('INSERT INTO job (posted_by_employer_id, company_id, job_post_number_by_employer, job_title, job_description, job_location, salary, post_duration, contact_email, contact_phone, required_certification, job_experience, job_requirement, job_benefit, no_employee_needed, job_position, job_detailed_location, job_location_district, job_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
       if (!$free_job_stmt) {
           throw new RuntimeException('Không thể tạo bài đăng miễn phí: ' . $conn->error);
@@ -192,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       }
       $free_job_stmt->close();
 
-      echo '<script>alert(' . json_encode($lang['job_post_is_saved_for_review'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = "my_job_posts.php";</script>';
+        echo '<script>alert(' . json_encode($lang['job_post_published_successfully'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = "my_job_posts.php";</script>';
       exit;
   }
 

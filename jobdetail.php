@@ -2,6 +2,42 @@
 require_once 'config.php';
 require_once 'helpers.php';
 session_start();
+if (!isset($_SESSION['job_interest_csrf'])) {
+    $_SESSION['job_interest_csrf'] = bin2hex(random_bytes(32));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_interest') {
+    if (($_SESSION['role'] ?? '') !== 'jobseeker' || empty($_SESSION['jobseeker_id'])) {
+        http_response_code(403);
+        exit('Unauthorized');
+    }
+
+    $postedJobId = (int) ($_POST['job_id'] ?? 0);
+    $postedToken = (string) ($_POST['csrf_token'] ?? '');
+    if ($postedJobId <= 0 || !hash_equals($_SESSION['job_interest_csrf'], $postedToken)) {
+        http_response_code(400);
+        exit('Invalid request');
+    }
+
+    $currentJobseekerId = (int) $_SESSION['jobseeker_id'];
+    $interestCheck = $conn->prepare('SELECT id FROM job_interest_count WHERE job_id = ? AND jobseeker_id = ? LIMIT 1');
+    $interestCheck->bind_param('ii', $postedJobId, $currentJobseekerId);
+    $interestCheck->execute();
+    $existingInterest = $interestCheck->get_result()->fetch_assoc();
+    $interestCheck->close();
+
+    if ($existingInterest) {
+        $interestChange = $conn->prepare('DELETE FROM job_interest_count WHERE job_id = ? AND jobseeker_id = ?');
+    } else {
+        $interestChange = $conn->prepare('INSERT IGNORE INTO job_interest_count (job_id, jobseeker_id) VALUES (?, ?)');
+    }
+    $interestChange->bind_param('ii', $postedJobId, $currentJobseekerId);
+    $interestChange->execute();
+    $interestChange->close();
+
+    header('Location: jobdetail.php?id=' . $postedJobId, true, 303);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +46,7 @@ session_start();
     <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job detail</title>
+    <title>Chi tiết công việc</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
@@ -215,13 +251,10 @@ session_start();
 
                     // Lấy số người quan tâm
                     $interest_count = 0;
-                    $stmt2 = $conn->prepare("SELECT interest_count FROM job_interest_count WHERE job_id = ?");
-                    $stmt2->bind_param("i", $job_id);
+                    $stmt2 = $conn->prepare('SELECT COUNT(*) AS interest_count FROM job_interest_count WHERE job_id = ?');
+                    $stmt2->bind_param('i', $job_id);
                     $stmt2->execute();
-                    $result2 = $stmt2->get_result();
-                    if ($row = $result2->fetch_assoc()) {
-                        $interest_count = $row['interest_count'];
-                    }
+                    $interest_count = (int) ($stmt2->get_result()->fetch_assoc()['interest_count'] ?? 0);
                     $stmt2->close();
 
                     // Tính ngày hết hạn
@@ -276,13 +309,20 @@ session_start();
                         $current_url = "jobdetail.php?id=" . urlencode($job_detail_id);
                         $login_url = "jobseekerlogin.php?redirect=" . urlencode($current_url);
                         $has_applied = false;
+                        $is_interested = false;
 
                         if ($is_logged_in && !empty($_SESSION['jobseeker_id']) && $job_detail_id > 0) {
+                            $current_jobseeker_id = (int) $_SESSION['jobseeker_id'];
+                            $interest_check = $conn->prepare('SELECT id FROM job_interest_count WHERE job_id = ? AND jobseeker_id = ? LIMIT 1');
+                            $interest_check->bind_param('ii', $job_detail_id, $current_jobseeker_id);
+                            $interest_check->execute();
+                            $is_interested = (bool) $interest_check->get_result()->fetch_assoc();
+                            $interest_check->close();
+
                             $application_check = $conn->prepare(
                                 'SELECT id FROM application WHERE job_id = ? AND jobseeker_id = ? LIMIT 1'
                             );
                             if ($application_check) {
-                                $current_jobseeker_id = (int) $_SESSION['jobseeker_id'];
                                 $application_check->bind_param('ii', $job_detail_id, $current_jobseeker_id);
                                 $application_check->execute();
                                 $application_check->store_result();
@@ -301,11 +341,21 @@ session_start();
                                 data-duplicate-message="<?= htmlspecialchars($lang['you_have_apply_before_warning'] ?? 'You have applied to this job before and therefore cannot apply again.', ENT_QUOTES, 'UTF-8') ?>">
                                 <?= $lang['jobdetail_apply_now'] ?>
                             </button>
-                            <button class="btn btn-secondary" type="button" id="save-job-btn"
-                                data-job-id="<?= $job_detail_id ?>" <?php if (!$is_logged_in): ?>
-                                    onclick="window.location.href='<?= $login_url ?>'; return false;" <?php endif; ?>>
-                                <span id="save-job-icon">&#9734;</span> <?= $lang['jobdetail_like_job'] ?>
-                            </button>
+                            <?php if ($is_logged_in): ?>
+                                <form method="POST" class="m-0">
+                                    <input type="hidden" name="action" value="toggle_interest">
+                                    <input type="hidden" name="job_id" value="<?= $job_detail_id ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['job_interest_csrf'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <button class="btn <?= $is_interested ? 'btn-danger' : 'btn-secondary' ?>" type="submit" id="save-job-btn">
+                                        <span aria-hidden="true"><?= $is_interested ? '&#9733;' : '&#9734;' ?></span>
+                                        <?= $is_interested ? $lang['jobdetail_interested_button'] : $lang['jobdetail_like_job'] ?>
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <button class="btn btn-secondary" type="button" id="save-job-btn" onclick="window.location.href='<?= htmlspecialchars($login_url, ENT_QUOTES, 'UTF-8') ?>'">
+                                    <span aria-hidden="true">&#9734;</span> <?= $lang['jobdetail_like_job'] ?>
+                                </button>
+                            <?php endif; ?>
                         </div>
 
                     </div>
@@ -446,141 +496,6 @@ session_start();
         </div>
     </div>
 
-    <script>
-        //Đổi màu nút Save job
-        // Lấy jobId từ thuộc tính data-job-id của nút Save job
-        document.addEventListener('DOMContentLoaded', function () {
-            const saveBtn = document.getElementById('save-job-btn');
-            if (!saveBtn) return;
-            const jobId = saveBtn.getAttribute('data-job-id');
-            const savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-            if (savedJobs.includes(jobId)) {
-                document.getElementById('save-job-icon').innerHTML = '★';
-                saveBtn.classList.add('btn-danger');
-                saveBtn.classList.remove('btn-secondary');
-            }
-
-            // Hiển thị thông báo
-            function showToast(message) {
-                let toast = document.createElement('div');
-                toast.innerText = message;
-                toast.style.position = 'fixed';
-                toast.style.bottom = '30px';
-                toast.style.right = '30px';
-                toast.style.background = '#333';
-                toast.style.color = '#fff';
-                toast.style.padding = '12px 24px';
-                toast.style.borderRadius = '6px';
-                toast.style.zIndex = 9999;
-                toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-                document.body.appendChild(toast);
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    setTimeout(() => document.body.removeChild(toast), 400);
-                }, 1500);
-            }
-
-            saveBtn.addEventListener('click', function (e) {
-                // Nếu nút có thuộc tính onclick (tức là chưa đăng nhập), không xử lý lưu job
-                if (saveBtn.hasAttribute('onclick')) {
-                    return;
-                }
-                e.preventDefault();
-                let savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-                const icon = document.getElementById('save-job-icon');
-                if (savedJobs.includes(jobId)) {
-                    savedJobs = savedJobs.filter(id => id !== jobId);
-                    icon.innerHTML = '☆';
-                    this.classList.remove('btn-danger');
-                    this.classList.add('btn-secondary');
-                    showToast('<?= $lang['job_unliked'] ?>');
-                } else {
-                    savedJobs.push(jobId);
-                    icon.innerHTML = '★';
-                    this.classList.add('btn-danger');
-                    this.classList.remove('btn-secondary');
-                    showToast('<?= $lang['job_liked'] ?>');
-                }
-                localStorage.setItem('savedJobs', JSON.stringify(savedJobs));
-            });
-        });
-    </script>
-    <?php
-    // Xử lý AJAX tăng/giảm interest_count khi lưu/huỷ lưu job
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['job_id'])) {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-        if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'jobseeker') {
-            http_response_code(403);
-            exit('Unauthorized');
-        }
-        require_once 'config.php';
-        $job_id = intval($_POST['job_id']);
-        $action = $_POST['action'];
-
-        if ($job_id > 0 && in_array($action, ['save', 'unsave'])) {
-            // Kiểm tra xem đã có dòng cho job_id này chưa
-            $stmt = $conn->prepare("SELECT interest_count FROM job_interest_count WHERE job_id = ?");
-            $stmt->bind_param("i", $job_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($row = $result->fetch_assoc()) {
-                // Đã có, cập nhật
-                if ($action === 'save') {
-                    $stmt2 = $conn->prepare("UPDATE job_interest_count SET interest_count = GREATEST(interest_count - 1, 0) WHERE job_id = ?");
-                    $stmt2->bind_param("i", $job_id);
-                    $stmt2->execute();
-                    $stmt2->close();
-                } elseif ($action === 'unsave') {
-                    $stmt2 = $conn->prepare("UPDATE job_interest_count SET interest_count = interest_count + 1 WHERE job_id = ?");
-                    $stmt2->bind_param("i", $job_id);
-                    $stmt2->execute();
-                    $stmt2->close();
-                }
-            } else {
-                // Chưa có, thêm mới nếu là unsave
-                if ($action === 'unsave') {
-                    $stmt2 = $conn->prepare("INSERT INTO job_interest_count (job_id, interest_count) VALUES (?, 1)");
-                    $stmt2->bind_param("i", $job_id);
-                    $stmt2->execute();
-                    $stmt2->close();
-                }
-            }
-            $stmt->close();
-            echo 'success';
-            exit;
-        }
-        http_response_code(400);
-        exit('Invalid request');
-    }
-    ?>
-
-    <script>
-        //Ngăn ko đổi màu nút Save job khi chưa đăng nhập
-        document.addEventListener('DOMContentLoaded', function () {
-            const saveBtn = document.getElementById('save-job-btn');
-            if (!saveBtn) return;
-            const jobId = saveBtn.getAttribute('data-job-id');
-            // Đã có xử lý localStorage ở trên, chỉ cần thêm AJAX gọi PHP khi đã đăng nhập
-            saveBtn.addEventListener('click', function (e) {
-                if (saveBtn.hasAttribute('onclick')) return; // chưa đăng nhập
-                // Xác định action
-                let savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-                let action = savedJobs.includes(jobId) ? 'unsave' : 'save';
-                // Gửi AJAX tới PHP
-                fetch(window.location.pathname, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'action=' + encodeURIComponent(action) + '&job_id=' + encodeURIComponent(jobId)
-                })
-                    .then(res => res.text())
-                    .then(data => {
-                        // Không cần xử lý gì thêm, localStorage và giao diện đã xử lý ở trên
-                    });
-            });
-        });
-    </script>
 </body>
 
 

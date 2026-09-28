@@ -220,10 +220,12 @@ CREATE TABLE IF NOT EXISTS company_followers (
 
 CREATE TABLE IF NOT EXISTS job_interest_count (
     id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    job_id INT(6) UNSIGNED NOT NULL,
-    interest_count INT(6) DEFAULT 0,
+    job_id INT UNSIGNED NOT NULL,
+    jobseeker_id INT(6) UNSIGNED NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE
+    UNIQUE KEY unique_job_interest (job_id, jobseeker_id),
+    FOREIGN KEY (job_id) REFERENCES job(id) ON DELETE CASCADE,
+    FOREIGN KEY (jobseeker_id) REFERENCES `user`(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS saved_jobs (

@@ -508,6 +508,9 @@ $lang = [
     'followed_companies_title' => 'Công ty đã theo dõi',
     'no_followed_companies' => 'Bạn chưa theo dõi công ty nào.',
     'number_of_job_company_has' => ':count công việc đang tuyển',
+    'interested_jobs_title' => 'Công việc đã quan tâm',
+    'no_interested_jobs' => 'Bạn chưa quan tâm công việc nào.',
+    'btn_interested_jobs' => 'Việc quan tâm',
 
     'addmobilephone' => 'Thêm số điện thoại di động',
     'adddateofbirth' => 'Thêm ngày sinh',

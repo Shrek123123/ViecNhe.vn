@@ -510,6 +510,9 @@ $lang = [
     'followed_companies_title' => 'Followed Companies',
     'no_followed_companies' => 'You are not following any companies yet.',
     'number_of_job_company_has' => ':count open jobs',
+    'interested_jobs_title' => 'Jobs You Are Interested In',
+    'no_interested_jobs' => 'You have not marked any jobs as interesting yet.',
+    'btn_interested_jobs' => 'Interested Jobs',
 
     'addmobilephone' => 'Add mobile phone',
     'adddateofbirth' => 'Add date of birth',

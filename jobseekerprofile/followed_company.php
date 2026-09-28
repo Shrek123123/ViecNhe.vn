@@ -25,28 +25,28 @@ if (!isset($_SESSION['lang'])) {
 include '../lang/' . $_SESSION['lang'] . '.php';
 
 $jobseeker_id = (int) $_SESSION['jobseeker_id'];
-$followed_companies = [];
+$interested_jobs = [];
 
-$sql = 'SELECT c.id, c.company_logo, c.company_name, c.industry, COUNT(j.id) AS job_count
-        FROM company_followers cf
-        INNER JOIN company c ON c.id = cf.company_id
-        LEFT JOIN job j ON j.company_id = c.id
-        WHERE cf.jobseeker_id = ?
-        GROUP BY c.id, c.company_logo, c.company_name, c.industry
-        ORDER BY c.company_name ASC';
+$sql = 'SELECT j.id, j.job_title, j.job_location, j.salary, j.job_type,
+            c.company_name, c.company_logo, jic.created_at AS interested_at
+        FROM job_interest_count jic
+        INNER JOIN job j ON j.id = jic.job_id
+        LEFT JOIN company c ON c.id = j.company_id
+        WHERE jic.jobseeker_id = ?
+        ORDER BY jic.created_at DESC';
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    throw new RuntimeException('Unable to prepare followed companies query.');
+    throw new RuntimeException('Unable to prepare interested jobs query.');
 }
 $stmt->bind_param('i', $jobseeker_id);
 $stmt->execute();
 $result = $stmt->get_result();
-while ($company = $result->fetch_assoc()) {
-    $followed_companies[] = $company;
+while ($job = $result->fetch_assoc()) {
+    $interested_jobs[] = $job;
 }
 $stmt->close();
 
-function followedCompanyLogoPath($logo) {
+function interestedJobLogoPath($logo) {
     $logo = trim((string) $logo);
     if ($logo === '') {
         return '../image/logo.png';
@@ -66,7 +66,7 @@ function followedCompanyLogoPath($logo) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../image/favicon.svg">
-    <title><?= htmlspecialchars($lang['followed_companies_title']) ?></title>
+    <title><?= htmlspecialchars($lang['interested_jobs_title']) ?></title>
     <style>
         body {
             margin: 0;
@@ -162,22 +162,22 @@ function followedCompanyLogoPath($logo) {
             background-color: #f3f3f3;
         }
 
-        .companies-content {
+        .interested-jobs-content {
             padding: 30px;
         }
 
-        .companies-content h2 {
+        .interested-jobs-content h2 {
             color: #b23b3b;
             margin: 0 0 20px;
         }
 
-        .companies-list {
+        .interested-jobs-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
             gap: 18px;
         }
 
-        .company-card {
+        .interested-job-card {
             display: flex;
             align-items: flex-start;
             gap: 14px;
@@ -191,11 +191,11 @@ function followedCompanyLogoPath($logo) {
             text-decoration: none;
         }
 
-        .company-card:hover {
+        .interested-job-card:hover {
             border-color: #b23b3b;
         }
 
-        .company-card img {
+        .interested-job-card img {
             width: 70px;
             height: 70px;
             flex: 0 0 70px;
@@ -204,32 +204,30 @@ function followedCompanyLogoPath($logo) {
             border-radius: 8px;
         }
 
-        .company-card-info {
+        .interested-job-info {
             min-width: 0;
         }
 
-        .company-card-name {
+        .interested-job-title {
             margin: 0 0 8px;
             color: #333;
             font-size: 18px;
             overflow-wrap: anywhere;
         }
 
-        .company-card-industry {
+        .interested-job-company,
+        .interested-job-details {
             margin: 0 0 8px;
             color: #666;
             font-size: 13px;
             overflow-wrap: anywhere;
         }
 
-        .company-card-jobs {
+        .interested-job-details {
             margin: 0;
-            color: #b23b3b;
-            font-size: 13px;
-            font-weight: bold;
         }
 
-        .empty-companies {
+        .empty-interested-jobs {
             padding: 24px;
             color: #888;
             text-align: center;
@@ -262,7 +260,7 @@ function followedCompanyLogoPath($logo) {
                 box-shadow: none;
             }
 
-            .companies-content {
+            .interested-jobs-content {
                 padding: 22px 16px;
             }
         }
@@ -284,7 +282,7 @@ function followedCompanyLogoPath($logo) {
             <button id="btn-myprofile" onclick="window.location.href='ho_so_ung_vien.php'"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications" onclick="window.location.href='don_ung_tuyen.php'"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs" onclick="window.location.href='cong_viec_da_luu.php'"><?= $lang['btn_savedjobs'] ?></button>
-            <button id="btn-followed-companies" class="active" onclick="window.location.href='followed_company.php'"><?= $lang['btn_followed_companies'] ?></button>
+            <button id="btn-followed-companies" class="active" onclick="window.location.href='followed_company.php'"><?= $lang['btn_interested_jobs'] ?></button>
             <div class="change-info-wrap">
                 <button id="btn-changeinfo" type="button"><?= $lang['btn_changeinfo'] ?></button>
                 <div id="changeInfoMenu" class="change-info-menu" aria-label="Change info actions">
@@ -295,24 +293,25 @@ function followedCompanyLogoPath($logo) {
         </div>
 
         <div class="content-area">
-            <div class="companies-content">
-                <h2><?= htmlspecialchars($lang['followed_companies_title']) ?></h2>
-                <?php if (empty($followed_companies)): ?>
-                    <div class="empty-companies"><?= htmlspecialchars($lang['no_followed_companies']) ?></div>
+            <div class="interested-jobs-content">
+                <h2><?= htmlspecialchars($lang['interested_jobs_title']) ?></h2>
+                <?php if (empty($interested_jobs)): ?>
+                    <div class="empty-interested-jobs"><?= htmlspecialchars($lang['no_interested_jobs']) ?></div>
                 <?php else: ?>
-                    <div class="companies-list">
-                        <?php foreach ($followed_companies as $company): ?>
+                    <div class="interested-jobs-list">
+                        <?php foreach ($interested_jobs as $job): ?>
                             <?php
-                            $company_name = (string) ($company['company_name'] ?? '');
-                            $industry = translateIndustryDisplay($company['industry'] ?? '', $lang);
-                            $job_count_text = str_replace(':count', number_format((int) $company['job_count']), $lang['number_of_job_company_has']);
+                            $company_name = (string) ($job['company_name'] ?? '');
+                            $job_title = (string) ($job['job_title'] ?? '');
+                            $job_location = (string) ($job['job_location'] ?? '');
+                            $salary = translateJobSalary($job['salary'] ?? '', $lang);
                             ?>
-                            <a class="company-card" href="../companyprofile.php?id=<?= (int) $company['id'] ?>">
-                                <img src="<?= htmlspecialchars(followedCompanyLogoPath($company['company_logo'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') ?>">
-                                <div class="company-card-info">
-                                    <h3 class="company-card-name"><?= htmlspecialchars($company_name) ?></h3>
-                                    <p class="company-card-industry"><?= htmlspecialchars($industry) ?></p>
-                                    <p class="company-card-jobs"><?= htmlspecialchars($job_count_text) ?></p>
+                            <a class="interested-job-card" href="../jobdetail.php?id=<?= (int) $job['id'] ?>">
+                                <img src="<?= htmlspecialchars(interestedJobLogoPath($job['company_logo'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') ?>">
+                                <div class="interested-job-info">
+                                    <h3 class="interested-job-title"><?= htmlspecialchars($job_title, ENT_QUOTES, 'UTF-8') ?></h3>
+                                    <p class="interested-job-company"><?= htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') ?></p>
+                                    <p class="interested-job-details"><?= htmlspecialchars($job_location, ENT_QUOTES, 'UTF-8') ?> · <?= htmlspecialchars($salary, ENT_QUOTES, 'UTF-8') ?></p>
                                 </div>
                             </a>
                         <?php endforeach; ?>

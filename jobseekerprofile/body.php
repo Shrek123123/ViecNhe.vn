@@ -187,7 +187,7 @@ include_once '../lang/' . $_SESSION['lang'] . '.php'; // Nạp ngôn ngữ từ 
             <button id="btn-myprofile" class="active"><?= $lang['btn_myprofile'] ?></button>
             <button id="btn-myapplications"><?= $lang['btn_myapplications'] ?></button>
             <button id="btn-savedjobs"><?= $lang['btn_savedjobs'] ?></button>
-            <button id="btn-followed-companies" onclick="window.location.href='followed_company.php'"><?= $lang['btn_followed_companies'] ?></button>
+            <button id="btn-followed-companies" onclick="window.location.href='followed_company.php'"><?= $lang['btn_interested_jobs'] ?></button>
             <button id="btn-changeinfo"><?= $lang['btn_changeinfo'] ?></button>
 
 

@@ -147,6 +147,63 @@ function sendApplicationStatusEmail($recipientEmail, $jobTitle, $companyName, $s
     return sendEmail($recipientEmail, '', $subject, $message);
 }
 
+function getChangedJobFieldLabels(array $before, array $after, array $fieldLabels): array {
+    $changedLabels = [];
+    foreach ($fieldLabels as $field => $label) {
+        if ((string) ($before[$field] ?? '') !== (string) ($after[$field] ?? '')) {
+            $changedLabels[] = $label;
+        }
+    }
+    return $changedLabels;
+}
+
+function sendJobUpdateNotificationEmails(mysqli $conn, int $jobId, string $jobTitle, string $companyName, array $changedFieldLabels): int {
+    if ($changedFieldLabels === []) {
+        return 0;
+    }
+
+    $stmt = $conn->prepare('SELECT DISTINCT u.email, u.username FROM job_interest_count jic JOIN `user` u ON u.id = jic.jobseeker_id WHERE jic.job_id = ? AND u.user_type = \'jobseeker\'');
+    if (!$stmt) {
+        return 0;
+    }
+    $stmt->bind_param('i', $jobId);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return 0;
+    }
+    $recipients = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    if ($recipients === []) {
+        return 0;
+    }
+
+    require_once __DIR__ . '/config/mail.php';
+    $subject = 'ViecNhe.vn thông báo bài đăng bạn quan tâm vừa được cập nhật';
+    $safeJobTitle = htmlspecialchars($jobTitle, ENT_QUOTES, 'UTF-8');
+    $safeCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
+    $jobUrl = 'https://viecnhe.io.vn/jobdetail.php?id=' . $jobId;
+    $safeJobUrl = htmlspecialchars($jobUrl, ENT_QUOTES, 'UTF-8');
+    $changedList = '<ul>';
+    foreach (array_unique($changedFieldLabels) as $label) {
+        $changedList .= '<li>' . htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8') . '</li>';
+    }
+    $changedList .= '</ul>';
+    $message = '<p>Bài đăng vị trí <strong>' . $safeJobTitle . '</strong> của công ty <strong>' . $safeCompanyName . '</strong> vừa được cập nhật ở các mục sau:</p>'
+        . $changedList
+        . '<p>Để biết thêm thông tin, hãy truy cập trang bài đăng: <a href="' . $safeJobUrl . '">' . $safeJobUrl . '</a></p>'
+        . '<p>Trân trọng,<br>ViecNhe.vn</p>';
+
+    $sentCount = 0;
+    foreach ($recipients as $recipient) {
+        $email = trim((string) ($recipient['email'] ?? ''));
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) && sendEmail($email, (string) ($recipient['username'] ?? ''), $subject, $message)) {
+            $sentCount++;
+        }
+    }
+    return $sentCount;
+}
+
 function sendEmailChangeNotification($newEmail, $userType) {
     $newEmail = trim((string) $newEmail);
     if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {

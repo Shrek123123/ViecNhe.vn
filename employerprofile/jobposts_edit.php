@@ -785,6 +785,49 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                         $message_type = "error";
                     } else {
                         if (isset($conn) && $conn->ping()) {
+                            $beforeJob = null;
+                            $beforeStmt = $conn->prepare('SELECT j.*, c.company_name FROM job j LEFT JOIN company c ON c.id = j.company_id WHERE j.id = ? AND j.posted_by_employer_id = ? LIMIT 1');
+                            if ($beforeStmt) {
+                                $beforeStmt->bind_param('ii', $job_id, $posted_by_employer_id);
+                                if ($beforeStmt->execute()) {
+                                    $beforeJob = $beforeStmt->get_result()->fetch_assoc();
+                                }
+                                $beforeStmt->close();
+                            }
+
+                            $newJobFields = [
+                                'job_title' => $job_title,
+                                'job_description' => $job_description,
+                                'job_benefit' => $job_benefit,
+                                'job_requirement' => $job_requirement,
+                                'job_location' => $job_location,
+                                'job_location_district' => $job_location_district,
+                                'no_employee_needed' => $no_employee_needed,
+                                'salary' => $salary,
+                                'contact_email' => $contact_email,
+                                'contact_phone' => $contact_phone,
+                                'job_type' => $job_type,
+                                'job_position' => $job_position,
+                                'required_certification' => $required_certification,
+                                'job_experience' => $job_experience,
+                            ];
+                            $jobFieldLabels = [
+                                'job_title' => 'Vị trí tuyển dụng',
+                                'job_description' => 'Mô tả công việc',
+                                'job_benefit' => 'Quyền lợi',
+                                'job_requirement' => 'Yêu cầu công việc',
+                                'job_location' => 'Địa điểm làm việc',
+                                'job_location_district' => 'Quận/huyện',
+                                'no_employee_needed' => 'Số lượng tuyển dụng',
+                                'salary' => 'Mức lương',
+                                'contact_email' => 'Email liên hệ',
+                                'contact_phone' => 'Số điện thoại liên hệ',
+                                'job_type' => 'Hình thức làm việc',
+                                'job_position' => 'Cấp bậc',
+                                'required_certification' => 'Chứng chỉ yêu cầu',
+                                'job_experience' => 'Kinh nghiệm yêu cầu',
+                            ];
+
                             $sql_update = "UPDATE job SET
                                 job_title = ?, job_description = ?,
                                 job_benefit = ?, job_requirement = ?, job_location = ?, job_location_district = ?, no_employee_needed = ?,
@@ -815,6 +858,11 @@ $employername = $_SESSION['usernameemployer'] ?? 'Employer';
                             );
 
                             if ($stmt->execute()) {
+                                if ($stmt->affected_rows > 0 && $beforeJob) {
+                                    $changedFieldLabels = getChangedJobFieldLabels($beforeJob, $newJobFields, $jobFieldLabels);
+                                    $companyName = (string) ($beforeJob['company_name'] ?? '');
+                                    sendJobUpdateNotificationEmails($conn, $job_id, $job_title, $companyName, $changedFieldLabels);
+                                }
                                 echo "<script>alert('" . addslashes($lang['job_post_is_saved_for_review']) . "'); window.location.href = window.location.href;</script>";
                                 exit;
                             } else {

@@ -1,4 +1,3 @@
-    "job_post_published_successfully" => "Your job post has been published successfully!",
 <?php
 $lang = [
     "login" => "Login",
@@ -161,7 +160,7 @@ $lang = [
     "post_job_now" => "Post a Job Now (1 free post) →",
     "free_30_day_post_already_used" => "You have already submitted 1 job post with a 30-days duration, therefore the free trial is over. Please go to the \"Profile\" section (click on your avatar) to post more jobs.",
     "job_post_is_saved_for_review" => "Your job post is now saved for review. Please wait for further notice!",
-        "job_post_published_successfully" => "Your job post has been published successfully!",
+    "job_post_published_successfully" => "Your job post has been published successfully!",
     "ung_tuyen_viec" => "Applied for",
 
     //post-job form

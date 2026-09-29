@@ -14,6 +14,36 @@ function t($key, $replace = [])
   return $text;
 }
 
+function normalizeCompanyLogoPath($path)
+{
+  $value = trim((string) $path);
+  if ($value === '') {
+    return 'image/logo1.png';
+  }
+
+  $value = preg_replace('#^(?:\./)+#', '', $value);
+  $value = preg_replace('#^(?:\.\./)+#', '', $value);
+  $value = preg_replace('#^/+#', '', $value);
+
+  if (stripos($value, 'uploads/companylogo/') === 0) {
+    return $value;
+  }
+
+  if (stripos($value, 'companylogo/') === 0) {
+    return 'uploads/' . $value;
+  }
+
+  if (stripos($value, 'uploads/') === 0) {
+    return $value;
+  }
+
+  if (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0) {
+    return $value;
+  }
+
+  return 'uploads/companylogo/' . basename($value);
+}
+
 function normalizeIndustryMatchText($value)
 {
   $raw = trim((string) $value);
@@ -356,97 +386,6 @@ $savedJobIdsJson = json_encode($savedJobIds);
     object-fit: contain;
   }
 
-  .logos .featured-company {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    color: #333;
-    font-size: 13px;
-    text-align: center;
-    text-decoration: none;
-  }
-
-  .featured-carousel {
-    position: relative;
-    display: block;
-    padding: 14px;
-    border: 1px solid #d7dedb;
-    background: #f7f9f8;
-  }
-
-  .section-3 .container > .logos {
-    display: block;
-  }
-
-  .featured-carousel__arrow {
-    position: absolute;
-    top: 50%;
-    z-index: 2;
-    display: grid;
-    width: 38px;
-    height: 52px;
-    padding: 0;
-    place-items: center;
-    transform: translateY(-50%);
-    border: 0;
-    background: transparent;
-    color: #111;
-    font-size: 38px;
-    font-weight: 700;
-    line-height: 1;
-    cursor: pointer;
-  }
-
-  #featured-company-prev {
-    left: calc((100vw - 100%) / -2 + 8px);
-  }
-
-  #featured-company-next {
-    right: calc((100vw - 100%) / -2 + 8px);
-  }
-
-  .featured-carousel__arrow:disabled {
-    color: #111;
-    opacity: .35;
-    cursor: default;
-  }
-
-  .featured-carousel__arrow:not(:disabled):hover {
-    color: #111;
-    opacity: .7;
-  }
-
-  .featured-carousel .logos {
-    min-width: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .featured-carousel .featured-company {
-    min-width: 0;
-    justify-content: center;
-    padding: 10px 8px;
-    background: #fff;
-    border: 1px solid #e0e7e4;
-  }
-
-  .featured-carousel .featured-company img {
-    width: 100%;
-    height: 58px;
-  }
-
-  .featured-companies-empty {
-    grid-column: 1 / -1;
-    margin: 0;
-    padding: 20px;
-    color: #687a75;
-    text-align: center;
-  }
-
   .section-4 {
     background-color: #f9f5f5;
 
@@ -725,55 +664,6 @@ $savedJobIdsJson = json_encode($savedJobIds);
     .section-3 .header {
       flex-wrap: wrap;
       gap: 10px;
-    }
-
-    .featured-carousel {
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr) 34px;
-      align-items: stretch;
-      gap: 8px;
-      padding: 8px;
-    }
-
-    .featured-carousel__arrow {
-      position: static;
-      width: 34px;
-      height: auto;
-      transform: none;
-      font-size: 27px;
-    }
-
-    #featured-company-prev,
-    #featured-company-next {
-      left: auto;
-      right: auto;
-    }
-
-    .featured-carousel .logos {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-    }
-
-    .featured-carousel .logos::-webkit-scrollbar {
-      display: none;
-    }
-
-    .featured-carousel .featured-company {
-      flex: 0 0 calc((100% - 20px) / 3);
-      scroll-snap-align: start;
-      padding: 8px 5px;
-    }
-
-    .featured-carousel .featured-company img {
-      height: 48px;
-    }
-
-    .featured-carousel__arrow {
-      font-size: 23px;
     }
   }
 </style>
@@ -1054,7 +944,6 @@ $savedJobIdsJson = json_encode($savedJobIds);
                         c.company_name, c.company_logo, c.industry AS industry
                         FROM job j
                         LEFT JOIN company c ON c.id = j.company_id
-                        LEFT JOIN (SELECT company_id, MIN(paid_at) AS featured_at FROM prominent_company WHERE status = 'paid' GROUP BY company_id) pc_featured ON pc_featured.company_id = j.company_id
                         WHERE j.status = 'approved'
                         AND (c.status IS NULL OR c.status NOT IN ('pending_review', 'rejected'))";
         $bind_types = '';
@@ -1069,7 +958,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
           $bind_types .= 's';
           $params[] = $job_type;
         }
-        $sql .= " ORDER BY pc_featured.featured_at IS NULL ASC, pc_featured.featured_at ASC, j.created_at DESC LIMIT ? OFFSET ?";
+        $sql .= " ORDER BY j.created_at DESC LIMIT ? OFFSET ?";
         $bind_types .= 'ii';
         $params[] = $jobs_per_page;
         $params[] = $offset;
@@ -1365,111 +1254,18 @@ $savedJobIdsJson = json_encode($savedJobIds);
     <div class="container">
       <div class="header">
         <h2><?= $lang['featured_companies']; ?></h2>
-        <a href="/ds_cong_ty_noi_bat.php" class="view-all"><?= $lang['view_all']; ?></a>
+        <a href="#" class="view-all"><?= $lang['view_all']; ?></a>
       </div>
 
       <div class="logos">
-        <?php
-        $featuredCompaniesWithMore = getProminentCompanies($conn, 7);
-        $featuredHasNext = count($featuredCompaniesWithMore) > 6;
-        $featuredCompanies = array_slice($featuredCompaniesWithMore, 0, 6);
-        if ($featuredCompanies):
-        ?>
-          <div class="featured-carousel" id="featured-company-carousel" data-has-next="<?= $featuredHasNext ? '1' : '0'; ?>">
-            <button class="featured-carousel__arrow" id="featured-company-prev" type="button" aria-label="Previous featured companies" disabled>&lsaquo;</button>
-            <div class="logos" id="featured-company-list" aria-live="polite">
-              <?php foreach ($featuredCompanies as $featuredCompany): ?>
-                <?php
-                $featuredCompanyLogo = normalizeCompanyLogoPath($featuredCompany['company_logo'] ?? '');
-                $featuredCompanyName = (string) $featuredCompany['company_name'];
-                ?>
-                <a class="featured-company" href="/companyprofile.php?company_id=<?= (int) $featuredCompany['id']; ?>" title="<?= htmlspecialchars($featuredCompanyName, ENT_QUOTES, 'UTF-8'); ?>">
-                  <img src="<?= htmlspecialchars($featuredCompanyLogo, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($featuredCompanyName, ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" />
-                  <span><?= htmlspecialchars(truncateCompanyName($featuredCompanyName), ENT_QUOTES, 'UTF-8'); ?></span>
-                </a>
-              <?php endforeach; ?>
-            </div>
-            <button class="featured-carousel__arrow" id="featured-company-next" type="button" aria-label="Next featured companies" <?= $featuredHasNext ? '' : 'disabled'; ?>>&rsaquo;</button>
-          </div>
-        <?php else: ?>
-          <div class="featured-carousel">
-            <button class="featured-carousel__arrow" type="button" aria-label="Previous featured companies" disabled>&lsaquo;</button>
-            <div class="logos"><p class="featured-companies-empty"><?= htmlspecialchars($lang['featured_companies_empty'], ENT_QUOTES, 'UTF-8'); ?></p></div>
-            <button class="featured-carousel__arrow" type="button" aria-label="Next featured companies" disabled>&rsaquo;</button>
-          </div>
-        <?php endif; ?>
+        <img src="image/logo1.png" alt="Tabtab.me" />
+        <img src="image/logo2.png" alt="DIC" />
+        <img src="image/logo3.png" alt="NhanHoa" />
+        <img src="image/logo4.png" alt="EY" />
+        <img src="image/logo5.png" alt="Karofi" />
       </div>
     </div>
   </section>
-
-  <script>
-    (() => {
-      const carousel = document.getElementById('featured-company-carousel');
-      if (!carousel) return;
-
-      const list = document.getElementById('featured-company-list');
-      const previousButton = document.getElementById('featured-company-prev');
-      const nextButton = document.getElementById('featured-company-next');
-      let offset = 0;
-      let hasNext = carousel.dataset.hasNext === '1';
-      let isLoading = false;
-
-      function updateButtons() {
-        previousButton.disabled = isLoading || offset === 0;
-        nextButton.disabled = isLoading || !hasNext;
-      }
-
-      function renderCompanies(companies) {
-        list.replaceChildren();
-        companies.forEach(company => {
-          const link = document.createElement('a');
-          link.className = 'featured-company';
-          link.href = '/companyprofile.php?company_id=' + encodeURIComponent(company.id);
-          link.title = company.company_name;
-
-          const logo = document.createElement('img');
-          logo.src = company.logo;
-          logo.alt = company.company_name;
-          logo.loading = 'lazy';
-
-          const name = document.createElement('span');
-          name.textContent = company.display_name;
-
-          link.append(logo, name);
-          list.appendChild(link);
-        });
-        list.scrollLeft = 0;
-      }
-
-      async function moveCompanies(direction) {
-        if (isLoading) return;
-        const nextOffset = direction === 'next' ? offset + 6 : Math.max(0, offset - 6);
-        if (nextOffset === offset || (direction === 'next' && !hasNext)) return;
-
-        isLoading = true;
-        updateButtons();
-        try {
-          const response = await fetch('/featured_companies.php?offset=' + nextOffset, {
-            headers: { Accept: 'application/json' }
-          });
-          if (!response.ok) throw new Error('Featured companies request failed.');
-          const data = await response.json();
-          renderCompanies(data.companies);
-          offset = nextOffset;
-          hasNext = data.has_more;
-        } catch (error) {
-          console.error(error);
-        } finally {
-          isLoading = false;
-          updateButtons();
-        }
-      }
-
-      previousButton.addEventListener('click', () => moveCompanies('previous'));
-      nextButton.addEventListener('click', () => moveCompanies('next'));
-      updateButtons();
-    })();
-  </script>
 
   <section class="section-4">
     <div class="container">

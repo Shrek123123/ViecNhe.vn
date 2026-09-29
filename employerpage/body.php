@@ -14,18 +14,6 @@ if (!isset($_SESSION['usernameemployer'])) {
   </script>";
 }
 
-$hasFree30DayPost = false;
-if (!empty($_SESSION['employerid'])) {
-  $freePostEmployerId = (int) $_SESSION['employerid'];
-  $freePostCheckStmt = $conn->prepare("SELECT 1 FROM job WHERE posted_by_employer_id = ? AND post_duration = 30 LIMIT 1");
-  if ($freePostCheckStmt) {
-    $freePostCheckStmt->bind_param("i", $freePostEmployerId);
-    $freePostCheckStmt->execute();
-    $hasFree30DayPost = (bool) $freePostCheckStmt->get_result()->fetch_assoc();
-    $freePostCheckStmt->close();
-  }
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $companyId = (int)($_POST['company_id'] ?? 0);
   $jobRequirementText = $_POST['jobRequirementText'];
@@ -53,11 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
   }
   $employerid = (int) $_SESSION['employerid'];
-
-  if ($hasFree30DayPost) {
-    echo '<script>alert(' . json_encode($lang['free_30_day_post_already_used'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = window.location.pathname;</script>';
-    exit;
-  }
 
   if ($companyId <= 0) {
     echo "<script>alert('Please select a company before posting a job.'); window.history.back();</script>";
@@ -110,7 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   //   }
   // }
   $jobStatus = 'pending_review'; // Mặc định là chờ duyệt
-  $jobStatus = $hasFree30DayPost ? 'pending_review' : 'approved';
 
   // Database connection and insertion logic here
   // Lấy số thứ tự bài đăng mới nhất của employer này
@@ -172,10 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 //   $stmt->close();
 // }
   if ($stmt->execute()) {
-    $jobPostMessage = $jobStatus === 'approved'
-      ? $lang['job_post_published_successfully']
-      : $lang['job_post_is_saved_for_review'];
-    echo '<script>alert(' . json_encode($jobPostMessage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = window.location.href;</script>';
+    // Thay đổi thông báo và cách thoát ra
+    echo "<script>alert('{$lang['job_post_is_saved_for_review']}'); window.location.href = window.location.href;</script>";
     // window.location.href = window.location.href; sẽ tải lại trang hiện tại (body.php)
     // và đóng modal, làm mới trạng thái
   } else {
@@ -363,9 +343,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <ul>
       <li><?php echo $lang['hero_section_desc']['post_jobs_free']; ?></li>
       <li><?php echo $lang['hero_section_desc']['candidate_pool']; ?></li>
+      <li><?php echo $lang['hero_section_desc']['toppy_ai']; ?></li>
     </ul>
     <div class="hero-buttons">
-      <button class="consult-btn" id="add_prominent_company_btn" type="button"><?php echo $lang['add_prominent_company_btn']; ?></button>
+      <button class="consult-btn"><?php echo $lang['recruitment_consulting']; ?></button>
       <button class="post-now-btn" id="openModalBtn"><?php echo $lang['post_job_now']; ?></button>
     </div>
   </div>
@@ -387,30 +368,6 @@ if (isset($_SESSION['employerid'])) {
   }
 }
 ?>
-
-<?php $_SESSION['csrf_prominent_company'] = bin2hex(random_bytes(32)); ?>
-<div id="prominentCompanyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="prominentCompanyTitle">
-  <div class="modal-content">
-    <span class="prominent-close-btn" data-close-prominent-modal role="button" tabindex="0" aria-label="Close">&times;</span>
-    <h2 id="prominentCompanyTitle"><?= htmlspecialchars($lang['prominent_company_payment_title'], ENT_QUOTES, 'UTF-8'); ?></h2>
-    <p><?= htmlspecialchars($lang['prominent_company_confirmation'], ENT_QUOTES, 'UTF-8'); ?></p>
-    <form method="POST" action="/employerpage.php">
-      <input type="hidden" name="employerpage_action" value="prominent_company_payment">
-      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_prominent_company'], ENT_QUOTES, 'UTF-8'); ?>">
-      <label for="prominent_company_id"><?= htmlspecialchars($lang['prominent_company_choose'], ENT_QUOTES, 'UTF-8'); ?></label>
-      <select id="prominent_company_id" name="company_id" required>
-        <option value=""><?= htmlspecialchars($lang['prominent_company_choose'], ENT_QUOTES, 'UTF-8'); ?></option>
-        <?php foreach ($companyOptions as $company): ?>
-          <option value="<?= (int) $company['id']; ?>"><?= htmlspecialchars((string) $company['company_name'], ENT_QUOTES, 'UTF-8'); ?></option>
-        <?php endforeach; ?>
-      </select>
-      <div class="prominent-company-actions">
-        <button type="button" data-close-prominent-modal><?= htmlspecialchars($lang['prominent_company_cancel'], ENT_QUOTES, 'UTF-8'); ?></button>
-        <button type="submit"><?= htmlspecialchars($lang['prominent_company_confirm'], ENT_QUOTES, 'UTF-8'); ?></button>
-      </div>
-    </form>
-  </div>
-</div>
 
 <div id="myModal" class="modal">
   <div class="modal-content">
@@ -622,43 +579,6 @@ if (isset($_SESSION['employerid'])) {
     min-width: 0;
   }
 
-  .prominent-close-btn {
-    cursor: pointer;
-  }
-
-  #prominentCompanyModal .modal-content {
-    text-align: left;
-  }
-
-  #prominentCompanyModal p {
-    line-height: 1.6;
-  }
-
-  #prominentCompanyModal select {
-    width: 100%;
-    margin-top: 8px;
-    padding: 10px;
-  }
-
-  .prominent-company-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  .prominent-company-actions button {
-    padding: 10px 16px;
-    border: 0;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .prominent-company-actions button[type="submit"] {
-    background: #d40000;
-    color: #fff;
-  }
-
   @media (max-width: 600px) {
     .salary-controls { gap: 5px; }
   }
@@ -685,29 +605,8 @@ if (isset($_SESSION['employerid'])) {
   const modal = document.getElementById("myModal");
   const openBtn = document.getElementById("openModalBtn");
   const closeBtn = document.querySelector(".closeBtn");
-  const prominentCompanyModal = document.getElementById("prominentCompanyModal");
-  const prominentCompanyButton = document.getElementById("add_prominent_company_btn");
-
-  prominentCompanyButton.onclick = () => {
-    if (!<?= isset($_SESSION['employerid']) ? 'true' : 'false' ?>) {
-      window.location.href = 'employerlogin.php?redirect=employerpage.php';
-      return;
-    }
-    prominentCompanyModal.style.display = "block";
-  };
-
-  document.querySelectorAll('[data-close-prominent-modal]').forEach(button => {
-    button.addEventListener('click', () => prominentCompanyModal.style.display = "none");
-    button.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') prominentCompanyModal.style.display = "none";
-    });
-  });
 
   openBtn.onclick = () => {
-    if (<?= $hasFree30DayPost ? 'true' : 'false' ?>) {
-      alert(<?= json_encode($lang['free_30_day_post_already_used'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>);
-      return;
-    }
     modal.style.display = "block";
   }
 
@@ -718,9 +617,6 @@ if (isset($_SESSION['employerid'])) {
   window.onclick = (event) => {
     if (event.target == modal) {
       modal.style.display = "none";
-    }
-    if (event.target == prominentCompanyModal) {
-      prominentCompanyModal.style.display = "none";
     }
   }
 

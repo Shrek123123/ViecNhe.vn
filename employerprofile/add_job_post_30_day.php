@@ -6,7 +6,7 @@ if (!isset($_SESSION['usernameemployer'])) {
     exit();
 }
 
-// Kiểm tra quyền trugit by cập employerprofile.php
+// Kiểm tra quyền truy cập employerprofile.php
 if (!isset($_SESSION['employerid'])) {
     header("Location: employerpage.php");
     exit();
@@ -106,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $contactEmail = $_POST['contactEmail'];
   $contactPhone = $_POST['contactPhone'];
   $jobType = $_POST['jobType'];
+  $jobCategory = $_POST['jobCategory'];
   $requiredcertification = $_POST['requiredcertification'];
   $jobExperience = $_POST['jobExperience'];
   $jobPosition = $_POST['jobPosition'] ?? '';
@@ -138,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   //   'contactEmail' => $contactEmail,
   //   'contactPhone' => $contactPhone,
   //   'jobType' => $jobType,
+  //   'jobCategory' => $jobCategory,
   //   'requiredcertification' => $requiredcertification,
   //   'jobExperience' => $jobExperience,
   //   'post_duration' => $post_duration,
@@ -162,40 +164,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   }
 
     try {
-  $free_post_check_stmt = $conn->prepare("SELECT 1 FROM job WHERE posted_by_employer_id = ? AND post_duration = 30 LIMIT 1");
-  if (!$free_post_check_stmt) {
-      throw new RuntimeException('Không thể kiểm tra lượt đăng miễn phí: ' . $conn->error);
-  }
-  $free_post_check_stmt->bind_param('i', $employerid);
-  $free_post_check_stmt->execute();
-  $has_free_30_day_post = (bool) $free_post_check_stmt->get_result()->fetch_assoc();
-  $free_post_check_stmt->close();
-
-  if (!$has_free_30_day_post) {
-      $number_stmt = $conn->prepare('SELECT COALESCE(MAX(job_post_number_by_employer), 0) + 1 AS next_number FROM job WHERE posted_by_employer_id = ?');
-      if (!$number_stmt) {
-          throw new RuntimeException('Không thể tạo số thứ tự bài đăng: ' . $conn->error);
-      }
-      $number_stmt->bind_param('i', $employerid);
-      $number_stmt->execute();
-      $next_job_number = (int) ($number_stmt->get_result()->fetch_assoc()['next_number'] ?? 1);
-      $number_stmt->close();
-
-    $free_job_status = 'approved';
-      $free_job_stmt = $conn->prepare('INSERT INTO job (posted_by_employer_id, company_id, job_post_number_by_employer, job_title, job_description, job_location, salary, post_duration, contact_email, contact_phone, required_certification, job_experience, job_requirement, job_benefit, no_employee_needed, job_position, job_detailed_location, job_location_district, job_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-      if (!$free_job_stmt) {
-          throw new RuntimeException('Không thể tạo bài đăng miễn phí: ' . $conn->error);
-      }
-      $free_job_stmt->bind_param('iiissssissssssisssss', $employerid, $company_id, $next_job_number, $jobTitle, $jobDescription, $jobLocation, $salary, $post_duration, $contactEmail, $contactPhone, $requiredcertification, $jobExperience, $jobRequirementText, $jobBenefit, $noEmplpoyeeNeeeded, $jobPosition, $jobDetailedLocation, $jobLocationDistrict, $jobType, $free_job_status);
-      if (!$free_job_stmt->execute()) {
-          throw new RuntimeException('Không thể lưu bài đăng miễn phí: ' . $free_job_stmt->error);
-      }
-      $free_job_stmt->close();
-
-        echo '<script>alert(' . json_encode($lang['job_post_published_successfully'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . '); window.location.href = "my_job_posts.php";</script>';
-      exit;
-  }
-
     $jobPayment = createJobPaymentCheckout($conn, $employerid, $company_id, $post_duration, 50000, [
         'company_id' => $company_id,
         'job_title' => $jobTitle,
@@ -221,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errorId = bin2hex(random_bytes(4));
         error_log('Job payment error [' . $errorId . ']: ' . $exception->getMessage());
         echo '<div style="max-width:720px;margin:40px auto;padding:20px;border:1px solid #f0a0a0;background:#fff4f4;color:#8b0000;font-family:Arial">'
-            . '<h2>Không thể xử lý bài đăng</h2><p><strong>Lỗi:</strong> ' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>'
+            . '<h2>Không thể tạo thanh toán</h2><p><strong>Lỗi:</strong> ' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>'
             . '<p><strong>Mã lỗi:</strong> ' . $errorId . '</p><p>Kiểm tra dữ liệu bài đăng, cấu hình PayOS và kết nối cơ sở dữ liệu.</p></div>';
     }
   exit;
@@ -1182,6 +1150,59 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         </select>
                                     </div>
 
+                                    <!-- Job Category -->
+                                    <div class="form-group">
+                                        <label><?= $lang['post_job_form_job_category']; ?></label>
+
+                                        <select id="jobCategory" name="jobCategory" onchange="toggleCustomInput2()"
+                                            required>
+                                            <option value=""><?= $lang['chon_nganh_nghe'] ?></option>
+                                            <option value="kinh_doanh_ban_hang"><?= $lang['kinh_doanh_ban_hang'] ?>
+                                            </option>
+                                            <option value="marketing_truyen_thong">
+                                                <?= $lang['marketing_truyen_thong'] ?>
+                                            </option>
+                                            <option value="tai_chinh_ke_toan_ngan_hang">
+                                                <?= $lang['tai_chinh_ke_toan_ngan_hang'] ?>
+                                            </option>
+                                            <option value="cong_nghe_thong_tin"><?= $lang['cong_nghe_thong_tin'] ?>
+                                            </option>
+                                            <option value="nhan_su"><?= $lang['nhan_su'] ?></option>
+                                            <option value="hanh_chinh_van_phong"><?= $lang['hanh_chinh_van_phong'] ?>
+                                            </option>
+                                            <option value="ky_thuat"><?= $lang['ky_thuat'] ?></option>
+                                            <option value="san_xuat_van_hanh_day_chuyen">
+                                                <?= $lang['san_xuat_van_hanh_day_chuyen'] ?>
+                                            </option>
+                                            <option value="van_tai_logistics"><?= $lang['van_tai_logistics'] ?></option>
+                                            <option value="bat_dong_san"><?= $lang['bat_dong_san'] ?></option>
+                                            <option value="bao_hiem"><?= $lang['bao_hiem'] ?></option>
+                                            <option value="xay_dung_kien_truc"><?= $lang['xay_dung_kien_truc'] ?>
+                                            </option>
+                                            <option value="y_te_duoc_pham"><?= $lang['y_te_duoc_pham'] ?></option>
+                                            <option value="giao_duc_dao_tao"><?= $lang['giao_duc_dao_tao'] ?></option>
+                                            <option value="du_lich_khach_san_nha_hang">
+                                                <?= $lang['du_lich_khach_san_nha_hang'] ?>
+                                            </option>
+                                            <option value="luat"><?= $lang['luat'] ?></option>
+                                            <option value="thiet_ke_nghe_thuat"><?= $lang['thiet_ke_nghe_thuat'] ?>
+                                            </option>
+                                            <option value="lao_dong_pho_thong"><?= $lang['lao_dong_pho_thong'] ?>
+                                            </option>
+                                            <option value="nong_nghiep"><?= $lang['nong_nghiep'] ?></option>
+                                            <option value="food_beverage"><?= $lang['food_beverage'] ?></option>
+                                            <option value="nha_nuoc_cong_vu"><?= $lang['nha_nuoc_cong_vu'] ?></option>
+                                            <option value="khac"><?= $lang['khac'] ?></option>
+                                        </select>
+
+                                        <input type="hidden" name="jobCategoryHidden" id="jobCategoryHidden">
+
+                                        <div id="custom_input_wrapper2" style="display:none; margin-top:6px;">
+                                            <input type="text" id="custom_job_category" name="custom_job_category"
+                                                placeholder="<?= $lang['custom_jobcategory_placeholder']; ?>">
+                                        </div>
+                                    </div>
+
                                     <!-- Required Certification -->
                                     <div class="form-group">
                                         <label><?= $lang['post_job_form_required_certification']; ?></label>
@@ -1317,6 +1338,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             const hiddenInput = document.getElementById('company_size');
 
             if (select && select.value === 'other') {
+                if (customWrapper) customWrapper.style.display = 'block';
+                if (hiddenInput) hiddenInput.value = '';
+            } else {
+                if (customWrapper) customWrapper.style.display = 'none';
+                if (hiddenInput && select) hiddenInput.value = select.value;
+            }
+        }
+
+        function toggleCustomInput2() {
+            const select = document.getElementById('jobCategory');
+            const customWrapper = document.getElementById('custom_input_wrapper2');
+            const hiddenInput = document.getElementById('jobCategoryHidden');
+
+            if (select && select.value === 'khac') {
                 if (customWrapper) customWrapper.style.display = 'block';
                 if (hiddenInput) hiddenInput.value = '';
             } else {

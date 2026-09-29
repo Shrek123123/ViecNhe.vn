@@ -1,96 +1,12 @@
 <?php
 
-function getProminentCompanies($conn, int $limit = 0, int $offset = 0): array {
-    $sql = "SELECT c.id, c.company_name, c.company_logo, MIN(pc.paid_at) AS paid_at
-        FROM prominent_company pc
-        JOIN company c ON c.id = pc.company_id
-        WHERE pc.status = 'paid' AND c.status = 'approved'
-        GROUP BY c.id, c.company_name, c.company_logo
-        ORDER BY MIN(pc.paid_at) ASC, MIN(pc.id) ASC";
-    if ($limit > 0) {
-        $sql .= ' LIMIT ? OFFSET ?';
-    }
-
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        return [];
-    }
-    if ($limit > 0) {
-        $offset = max(0, $offset);
-        $stmt->bind_param('ii', $limit, $offset);
-    }
-    if (!$stmt->execute()) {
-        $stmt->close();
-        return [];
-    }
-
-    $result = $stmt->get_result();
-    $companies = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
-    $stmt->close();
-    return $companies;
-}
-
-function normalizeCompanyLogoPath($path): string {
-    $value = trim((string) $path);
-    if ($value === '') {
-        return 'image/logo1.png';
-    }
-
-    $value = preg_replace('#^(?:\./)+#', '', $value);
-    $value = preg_replace('#^(?:\.\./)+#', '', $value);
-    $value = preg_replace('#^/+#', '', $value);
-
-    if (stripos($value, 'uploads/companylogo/') === 0) {
-        return $value;
-    }
-    if (stripos($value, 'companylogo/') === 0) {
-        return 'uploads/' . $value;
-    }
-    if (stripos($value, 'uploads/') === 0) {
-        return $value;
-    }
-    if (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0) {
-        return $value;
-    }
-
-    return 'uploads/companylogo/' . basename($value);
-}
-
-function truncateCompanyName(string $companyName, int $maxCharacters = 35): string {
-    if ($maxCharacters < 1) {
-        return '';
-    }
-    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
-        return mb_strlen($companyName, 'UTF-8') > $maxCharacters
-            ? mb_substr($companyName, 0, $maxCharacters, 'UTF-8') . '...'
-            : $companyName;
-    }
-
-    $characters = preg_split('//u', $companyName, -1, PREG_SPLIT_NO_EMPTY);
-    if ($characters === false) {
-        return strlen($companyName) > $maxCharacters
-            ? substr($companyName, 0, $maxCharacters) . '...'
-            : $companyName;
-    }
-    return count($characters) > $maxCharacters
-        ? implode('', array_slice($characters, 0, $maxCharacters)) . '...'
-        : $companyName;
-}
-
 function getAppBaseUrl(): string {
-    $baseUrl = $_ENV['APP_URL'] ?? $_SERVER['APP_URL'] ?? getenv('APP_URL');
-    if ($baseUrl === false || trim((string) $baseUrl) === '') {
-        require_once __DIR__ . '/vendor/autoload.php';
-        if (is_file(__DIR__ . '/.env')) {
-            Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
-        }
-        $baseUrl = $_ENV['APP_URL'] ?? $_SERVER['APP_URL'] ?? getenv('APP_URL');
-    }
-    if ($baseUrl === false || trim((string) $baseUrl) === '') {
+    $baseUrl = getenv('APP_URL');
+    if ($baseUrl === false || trim($baseUrl) === '') {
         $baseUrl = 'https://unmade-petite-carefully.ngrok-free.dev/ViecNhe';
     }
 
-    return rtrim(trim((string) $baseUrl), '/');
+    return rtrim(trim($baseUrl), '/');
 }
 
 function sendRegistrationSuccessEmail($recipientEmail, $accountType, $loginPath) {
@@ -147,63 +63,6 @@ function sendApplicationStatusEmail($recipientEmail, $jobTitle, $companyName, $s
     return sendEmail($recipientEmail, '', $subject, $message);
 }
 
-function getChangedJobFieldLabels(array $before, array $after, array $fieldLabels): array {
-    $changedLabels = [];
-    foreach ($fieldLabels as $field => $label) {
-        if ((string) ($before[$field] ?? '') !== (string) ($after[$field] ?? '')) {
-            $changedLabels[] = $label;
-        }
-    }
-    return $changedLabels;
-}
-
-function sendJobUpdateNotificationEmails(mysqli $conn, int $jobId, string $jobTitle, string $companyName, array $changedFieldLabels): int {
-    if ($changedFieldLabels === []) {
-        return 0;
-    }
-
-    $stmt = $conn->prepare('SELECT DISTINCT u.email, u.username FROM job_interest_count jic JOIN `user` u ON u.id = jic.jobseeker_id WHERE jic.job_id = ? AND u.user_type = \'jobseeker\'');
-    if (!$stmt) {
-        return 0;
-    }
-    $stmt->bind_param('i', $jobId);
-    if (!$stmt->execute()) {
-        $stmt->close();
-        return 0;
-    }
-    $recipients = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-
-    if ($recipients === []) {
-        return 0;
-    }
-
-    require_once __DIR__ . '/config/mail.php';
-    $subject = 'ViecNhe.vn thông báo bài đăng bạn quan tâm vừa được cập nhật';
-    $safeJobTitle = htmlspecialchars($jobTitle, ENT_QUOTES, 'UTF-8');
-    $safeCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
-    $jobUrl = 'https://viecnhe.io.vn/jobdetail.php?id=' . $jobId;
-    $safeJobUrl = htmlspecialchars($jobUrl, ENT_QUOTES, 'UTF-8');
-    $changedList = '<ul>';
-    foreach (array_unique($changedFieldLabels) as $label) {
-        $changedList .= '<li>' . htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8') . '</li>';
-    }
-    $changedList .= '</ul>';
-    $message = '<p>Bài đăng vị trí <strong>' . $safeJobTitle . '</strong> của công ty <strong>' . $safeCompanyName . '</strong> vừa được cập nhật ở các mục sau:</p>'
-        . $changedList
-        . '<p>Để biết thêm thông tin, hãy truy cập trang bài đăng: <a href="' . $safeJobUrl . '">' . $safeJobUrl . '</a></p>'
-        . '<p>Trân trọng,<br>Đội ngũ ViecNhe</p>';
-
-    $sentCount = 0;
-    foreach ($recipients as $recipient) {
-        $email = trim((string) ($recipient['email'] ?? ''));
-        if (filter_var($email, FILTER_VALIDATE_EMAIL) && sendEmail($email, (string) ($recipient['username'] ?? ''), $subject, $message)) {
-            $sentCount++;
-        }
-    }
-    return $sentCount;
-}
-
 function sendEmailChangeNotification($newEmail, $userType) {
     $newEmail = trim((string) $newEmail);
     if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
@@ -220,83 +79,6 @@ function sendEmailChangeNotification($newEmail, $userType) {
         . '<p>Trân trọng,<br>ViecNhe.vn</p>';
 
     return sendEmail($newEmail, '', $subject, $message);
-}
-
-function sendProminentCompanyPaymentConfirmation($conn, int $registrationId): bool {
-    $resetStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = ? AND status = 'paid' AND confirmation_email_status = 'sending' AND updated_at < NOW() - INTERVAL 10 MINUTE");
-    if ($resetStmt) {
-        $resetStmt->bind_param('i', $registrationId);
-        $resetStmt->execute();
-        $resetStmt->close();
-    }
-
-    $claimStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'sending' WHERE id = ? AND status = 'paid' AND confirmation_email_status = 'pending'");
-    if (!$claimStmt) {
-        return false;
-    }
-    $claimStmt->bind_param('i', $registrationId);
-    $claimed = $claimStmt->execute() && $claimStmt->affected_rows === 1;
-    $claimStmt->close();
-    if (!$claimed) {
-        return false;
-    }
-
-    $stmt = $conn->prepare('SELECT u.email, c.company_name, c.id AS company_id, pc.transaction_code, pc.amount, pc.paid_at FROM prominent_company pc JOIN company c ON c.id = pc.company_id JOIN user u ON u.id = pc.employer_id WHERE pc.id = ? AND pc.status = \'paid\' LIMIT 1');
-    if (!$stmt) {
-        $conn->query("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = " . $registrationId . " AND confirmation_email_status = 'sending'");
-        return false;
-    }
-    $stmt->bind_param('i', $registrationId);
-    $stmt->execute();
-    $registration = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-
-    $recipientEmail = trim((string) ($registration['email'] ?? ''));
-    if (!$registration || !filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
-        $resetStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = ? AND confirmation_email_status = 'sending'");
-        if ($resetStmt) {
-            $resetStmt->bind_param('i', $registrationId);
-            $resetStmt->execute();
-            $resetStmt->close();
-        }
-        return false;
-    }
-
-    $companyName = (string) $registration['company_name'];
-    $companyProfileUrl = getAppBaseUrl() . '/companyprofile.php?company_id=' . (int) $registration['company_id'];
-    $safeCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
-    $safeProfileUrl = htmlspecialchars($companyProfileUrl, ENT_QUOTES, 'UTF-8');
-    $paidAt = htmlspecialchars((string) $registration['paid_at'], ENT_QUOTES, 'UTF-8');
-    $transactionCode = htmlspecialchars((string) $registration['transaction_code'], ENT_QUOTES, 'UTF-8');
-    $amount = number_format((int) $registration['amount'], 0, ',', ',');
-    $subject = 'ViecNhe | Đăng ký công ty nổi bật thành công';
-    $message = '<div style="max-width:600px;margin:0 auto;padding:28px 24px;color:#20332e;font-family:Arial,sans-serif;line-height:1.65">'
-        . '<h1 style="margin:0 0 16px;font-size:24px">Đăng ký công ty nổi bật thành công</h1>'
-        . '<p>ViecNhe đã xác nhận thanh toán cho công ty <strong>' . $safeCompanyName . '</strong>.</p>'
-        . '<p><strong>Số tiền:</strong> ' . $amount . ' VND<br><strong>Mã giao dịch:</strong> ' . $transactionCode . '<br><strong>Thời gian thanh toán:</strong> ' . $paidAt . '</p>'
-        . '<p>Công ty đã được đưa vào danh sách công ty nổi bật và các bài đăng sẽ được ưu tiên theo thời điểm thanh toán.</p>'
-        . '<p><a href="' . $safeProfileUrl . '">Xem hồ sơ công ty</a></p>'
-        . '<p>Trân trọng,<br><strong>Đội ngũ ViecNhe</strong></p></div>';
-
-    $sent = false;
-    try {
-        require_once __DIR__ . '/config/mail.php';
-        $sent = sendEmail($recipientEmail, $companyName, $subject, $message);
-    } catch (Throwable $exception) {
-        error_log('Prominent company confirmation email error for registration ' . $registrationId . ': ' . $exception->getMessage());
-    }
-
-    if ($sent) {
-        $updateStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'sent', confirmation_email_sent_at = NOW() WHERE id = ? AND confirmation_email_status = 'sending'");
-    } else {
-        $updateStmt = $conn->prepare("UPDATE prominent_company SET confirmation_email_status = 'pending' WHERE id = ? AND confirmation_email_status = 'sending'");
-    }
-    if ($updateStmt) {
-        $updateStmt->bind_param('i', $registrationId);
-        $updateStmt->execute();
-        $updateStmt->close();
-    }
-    return $sent;
 }
 
 function sendPasswordResetOtp($recipientEmail, $otp) {
@@ -394,25 +176,13 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
         }
         $returnUrl = $baseUrl . '/public/success.html';
         $cancelUrl = $baseUrl . '/public/cancel.html';
-        $paymentRequest = [
+        $response = getJobPayOSClient()->paymentRequests->create([
             'orderCode' => $orderCode,
             'amount' => $amount,
             'description' => 'Dang tin ' . $orderCode,
             'returnUrl' => $returnUrl,
             'cancelUrl' => $cancelUrl,
-        ];
-        for ($attempt = 0; ; $attempt++) {
-            try {
-                $response = getJobPayOSClient()->paymentRequests->create($paymentRequest);
-                break;
-            } catch (Throwable $exception) {
-                $isDnsResolutionFailure = preg_match('/cURL error 6|Could not resolve|Name or service not known/i', $exception->getMessage()) === 1;
-                if (!$isDnsResolutionFailure || $attempt >= 2) {
-                    throw $exception;
-                }
-                usleep(250000 * ($attempt + 1));
-            }
-        }
+        ]);
         $stmt = $conn->prepare('UPDATE job_payments SET payment_link_id = ?, checkout_url = ? WHERE id = ?');
         $stmt->bind_param('ssi', $response->paymentLinkId, $response->checkoutUrl, $paymentId);
         if (!$stmt->execute()) {
@@ -431,155 +201,6 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
         $stmt->close();
         throw $exception;
     }
-}
-
-function createProminentCompanyPaymentCheckout($conn, int $employerId, int $companyId): array {
-    $amount = 69000;
-    $companyStmt = $conn->prepare('SELECT id FROM company WHERE id = ? AND employer_id = ? LIMIT 1');
-    if (!$companyStmt) {
-        throw new RuntimeException('Không thể xác minh công ty: ' . $conn->error);
-    }
-    $companyStmt->bind_param('ii', $companyId, $employerId);
-    $companyStmt->execute();
-    $company = $companyStmt->get_result()->fetch_assoc();
-    $companyStmt->close();
-    if (!$company) {
-        throw new InvalidArgumentException('Công ty đã chọn không hợp lệ.');
-    }
-
-    $paidStmt = $conn->prepare("SELECT id FROM prominent_company WHERE company_id = ? AND status = 'paid' LIMIT 1");
-    if (!$paidStmt) {
-        throw new RuntimeException('Không thể kiểm tra trạng thái công ty: ' . $conn->error);
-    }
-    $paidStmt->bind_param('i', $companyId);
-    $paidStmt->execute();
-    $alreadyPaid = (bool) $paidStmt->get_result()->fetch_assoc();
-    $paidStmt->close();
-    if ($alreadyPaid) {
-        throw new InvalidArgumentException('Prominent company is already registered.', 409);
-    }
-
-    $transactionCode = (string) random_int(100000, 999999999);
-    $stmt = $conn->prepare("INSERT INTO prominent_company (company_id, employer_id, transaction_code, amount, status) VALUES (?, ?, ?, ?, 'pending')");
-    if (!$stmt) {
-        throw new RuntimeException('Không thể lưu giao dịch: ' . $conn->error);
-    }
-    $stmt->bind_param('iisi', $companyId, $employerId, $transactionCode, $amount);
-    if (!$stmt->execute()) {
-        throw new RuntimeException('Không thể lưu giao dịch: ' . $stmt->error);
-    }
-    $paymentId = (int) $conn->insert_id;
-    $stmt->close();
-
-    try {
-        $config = require __DIR__ . '/config/payos.php';
-        $baseUrl = rtrim((string) ($config['public_url'] ?? ''), '/');
-        if ($baseUrl === '') {
-            throw new RuntimeException('Thiếu cấu hình APP_URL.');
-        }
-        $response = getJobPayOSClient()->paymentRequests->create([
-            'orderCode' => (int) $transactionCode,
-            'amount' => $amount,
-            'description' => 'Cong ty noi bat',
-            'returnUrl' => $baseUrl . '/dang_ky_cong_ty_nb_thanh_cong.php',
-            'cancelUrl' => $baseUrl . '/huy_dang_ky_cong_ty_nb.php',
-        ]);
-        $checkoutUrl = trim((string) ($response->checkoutUrl ?? ''));
-        if (!filter_var($checkoutUrl, FILTER_VALIDATE_URL)
-            || strtolower((string) parse_url($checkoutUrl, PHP_URL_SCHEME)) !== 'https') {
-            throw new RuntimeException('PayOS không trả về liên kết thanh toán hợp lệ.');
-        }
-        $updateStmt = $conn->prepare('UPDATE prominent_company SET payment_link_id = ?, checkout_url = ? WHERE id = ? AND status = \'pending\'');
-        if (!$updateStmt) {
-            throw new RuntimeException('Không thể lưu liên kết PayOS: ' . $conn->error);
-        }
-        $updateStmt->bind_param('ssi', $response->paymentLinkId, $checkoutUrl, $paymentId);
-        if (!$updateStmt->execute()) {
-            throw new RuntimeException('Không thể lưu liên kết PayOS: ' . $updateStmt->error);
-        }
-        $updateStmt->close();
-
-        return ['checkout_url' => $checkoutUrl];
-    } catch (Throwable $exception) {
-        $failedStmt = $conn->prepare("UPDATE prominent_company SET status = 'failed' WHERE id = ? AND status = 'pending'");
-        if ($failedStmt) {
-            $failedStmt->bind_param('i', $paymentId);
-            $failedStmt->execute();
-            $failedStmt->close();
-        }
-        throw $exception;
-    }
-}
-
-function reconcileProminentCompanyPayment($conn, int $transactionCode): string {
-    if ($transactionCode <= 0) {
-        return 'pending';
-    }
-    $code = (string) $transactionCode;
-    $stmt = $conn->prepare('SELECT id, amount, status FROM prominent_company WHERE transaction_code = ? LIMIT 1');
-    if (!$stmt) {
-        return 'pending';
-    }
-    $stmt->bind_param('s', $code);
-    $stmt->execute();
-    $registration = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-    if (!$registration) {
-        return 'pending';
-    }
-    if ($registration['status'] !== 'pending') {
-        if ($registration['status'] === 'paid') {
-            sendProminentCompanyPaymentConfirmation($conn, (int) $registration['id']);
-        }
-        return (string) $registration['status'];
-    }
-
-    try {
-        $paymentInfo = getJobPayOSClient()->paymentRequests->get($transactionCode);
-    } catch (Throwable $exception) {
-        error_log('PayOS prominent-company lookup failed: ' . $exception->getMessage());
-        return 'pending';
-    }
-    if ((int) $paymentInfo->orderCode !== $transactionCode || (int) $paymentInfo->amount !== (int) $registration['amount']) {
-        error_log('PayOS prominent-company order mismatch for ' . $transactionCode);
-        return 'pending';
-    }
-
-    $providerStatus = $paymentInfo->status->value ?? '';
-    if ($providerStatus === 'PAID'
-        && (int) $paymentInfo->amountPaid === (int) $registration['amount']
-        && (int) $paymentInfo->amountRemaining === 0) {
-        $rawResponse = json_encode($paymentInfo, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-        $paymentLinkId = (string) $paymentInfo->id;
-        $providerReference = (string) ($paymentInfo->transactions[0]->reference ?? '');
-        $updateStmt = $conn->prepare("UPDATE prominent_company SET status = 'paid', payment_link_id = ?, provider_reference = ?, raw_response = ?, paid_at = NOW() WHERE id = ? AND status = 'pending'");
-        if ($updateStmt) {
-            $updateStmt->bind_param('sssi', $paymentLinkId, $providerReference, $rawResponse, $registration['id']);
-            $updateStmt->execute();
-            $updateStmt->close();
-        }
-    } elseif (in_array($providerStatus, ['CANCELLED', 'EXPIRED', 'FAILED'], true)) {
-        $updateStmt = $conn->prepare("UPDATE prominent_company SET status = 'failed', raw_response = ? WHERE id = ? AND status = 'pending'");
-        if ($updateStmt) {
-            $rawResponse = json_encode($paymentInfo, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-            $updateStmt->bind_param('si', $rawResponse, $registration['id']);
-            $updateStmt->execute();
-            $updateStmt->close();
-        }
-    }
-
-    $statusStmt = $conn->prepare('SELECT status FROM prominent_company WHERE id = ? LIMIT 1');
-    if (!$statusStmt) {
-        return 'pending';
-    }
-    $statusStmt->bind_param('i', $registration['id']);
-    $statusStmt->execute();
-    $status = (string) ($statusStmt->get_result()->fetch_assoc()['status'] ?? 'pending');
-    $statusStmt->close();
-    if ($status === 'paid') {
-        sendProminentCompanyPaymentConfirmation($conn, (int) $registration['id']);
-    }
-    return $status;
 }
 
 function sendEmployerJobPaymentConfirmation($conn, int $paymentId): bool {

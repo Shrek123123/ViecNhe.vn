@@ -26,7 +26,8 @@ if ($action === 'search' || $action === 'results') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Việc Nhẹ.vn</title>
+    <meta name="description" content="Nền tảng tìm việc nhẹ, việc làm thêm uy tín tại Việt Nam...">
+    <title>Việc Nhẹ VN - Tìm việc làm nhanh, uy tín</title>
     <link rel="icon" type="image/svg+xml" href="image/favicon.svg">
 </head>
 

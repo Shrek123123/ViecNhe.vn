@@ -782,7 +782,7 @@ $savedJobIdsJson = json_encode($savedJobIds);
   <div class="container">
 
     <!-- Tiêu đề & mô tả -->
-    <div class="title"><?= $lang['job_search']; ?></div>
+    <h1 class="title"><?= $lang['job_search']; ?></h1>
     <div class="subtitle"><?= $lang['job_search_subtitle']; ?></div>
 
     <!-- Hộp tìm kiếm -->

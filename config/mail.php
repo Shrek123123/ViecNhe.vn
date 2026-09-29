@@ -7,21 +7,38 @@ require __DIR__ . '/../vendor/autoload.php';
 
 function sendEmail($to, $name, $subject, $body)
 {
+    $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+    $dotenv->safeLoad();
+
+    $getMailEnv = static function (string $key, string $default = ''): string {
+        return trim((string) ($_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?: $default));
+    };
+
+    $username = $getMailEnv('BREVO_SMTP_USERNAME');
+    $password = $getMailEnv('BREVO_SMTP_PASSWORD');
+    $fromEmail = $getMailEnv('BREVO_FROM_EMAIL');
+    $fromName = $getMailEnv('BREVO_FROM_NAME', 'Việc Nhẹ.vn');
+
+    if ($username === '' || $password === '' || $fromEmail === '') {
+        error_log('Brevo email configuration is incomplete. Set BREVO_SMTP_USERNAME, BREVO_SMTP_PASSWORD, and BREVO_FROM_EMAIL.');
+        return false;
+    }
+
     $mail = new PHPMailer(true);
     $mail->SMTPDebug = 0;
 
     try {
         $mail->isSMTP();
-        $mail->Host       = 'smtp-relay.brevo.com';
+        $mail->Host       = $getMailEnv('BREVO_SMTP_HOST', 'smtp-relay.brevo.com');
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'b9b315001@smtp-brevo.com';
-        $mail->Password   = 'xsmtpsib-021c23b3507e36adb8453d72fbd71ccf3793e6a876987dc1989008814d0477a7-JiM62EJd9DZMamel';
+        $mail->Username   = $username;
+        $mail->Password   = $password;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->Port       = (int) $getMailEnv('BREVO_SMTP_PORT', '587');
 
         $mail->CharSet = 'UTF-8';
 
-        $mail->setFrom('qudominh16@gmail.com', 'Việc Nhẹ.vn');
+        $mail->setFrom($fromEmail, $fromName);
         $mail->addAddress($to, $name);
 
         $mail->isHTML(true);
@@ -33,6 +50,7 @@ function sendEmail($to, $name, $subject, $body)
         return true;
 
     } catch (Exception $e) {
+        error_log('Brevo email delivery failed: ' . $e->getMessage() . ' ' . $mail->ErrorInfo);
         return false;
     }
 }

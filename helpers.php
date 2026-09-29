@@ -394,13 +394,25 @@ function createJobPaymentCheckout($conn, $employerId, $companyId, $duration, $am
         }
         $returnUrl = $baseUrl . '/public/success.html';
         $cancelUrl = $baseUrl . '/public/cancel.html';
-        $response = getJobPayOSClient()->paymentRequests->create([
+        $paymentRequest = [
             'orderCode' => $orderCode,
             'amount' => $amount,
             'description' => 'Dang tin ' . $orderCode,
             'returnUrl' => $returnUrl,
             'cancelUrl' => $cancelUrl,
-        ]);
+        ];
+        for ($attempt = 0; ; $attempt++) {
+            try {
+                $response = getJobPayOSClient()->paymentRequests->create($paymentRequest);
+                break;
+            } catch (Throwable $exception) {
+                $isDnsResolutionFailure = preg_match('/cURL error 6|Could not resolve|Name or service not known/i', $exception->getMessage()) === 1;
+                if (!$isDnsResolutionFailure || $attempt >= 2) {
+                    throw $exception;
+                }
+                usleep(250000 * ($attempt + 1));
+            }
+        }
         $stmt = $conn->prepare('UPDATE job_payments SET payment_link_id = ?, checkout_url = ? WHERE id = ?');
         $stmt->bind_param('ssi', $response->paymentLinkId, $response->checkoutUrl, $paymentId);
         if (!$stmt->execute()) {

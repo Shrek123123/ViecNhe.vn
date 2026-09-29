@@ -13,6 +13,6 @@ $output = shell_exec('cd /www/wwwroot/viecnhe.io.vn && git stash && git pull ori
 // Ghi kết quả ra log và in ra màn hình
 echo "<pre>";
 echo "=== WEBHOOK AUTO-DEPLOY SUCCESS ===\n\n";
-echo htmlspecialchars($output);
+echo htmlspecialchars((string)$output);
 echo "</pre>";
 ?>

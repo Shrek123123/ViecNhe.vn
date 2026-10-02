@@ -1,18 +1,18 @@
 <?php
-// Kiểm tra token bảo mật
+// Thay đổi chuỗi mật khẩu bí mật này khớp với Secret bạn cài trên GitHub Webhook
 $secret = 'matkhaucucmanh2026';
+
 if (!isset($_GET['token']) || $_GET['token'] !== $secret) {
     http_response_code(403);
     die("Access denied");
 }
 
-// KHÔNG dùng reset --hard nữa để bảo vệ file webhook.php và file .env (nếu có)
-// Ta dùng lệnh stash tạm những thay đổi lặt vặt (nếu có), rồi pull về bình thường
-$output = shell_exec('cd /www/wwwroot/viecnhe.io.vn && git stash && git pull origin main 2>&1');
+// Kéo dữ liệu mới nhất từ remote và ép reset hard về nhánh main
+$output = shell_exec('cd /www/wwwroot/viecnhe.io.vn && git fetch origin main && git reset --hard origin/main 2>&1');
 
-// Ghi kết quả ra log và in ra màn hình
+// Ghi kết quả ra log và in ra màn hình (đã fix lỗi deprecation null)
 echo "<pre>";
 echo "=== WEBHOOK AUTO-DEPLOY SUCCESS ===\n\n";
-echo htmlspecialchars((string)$output);
+echo htmlspecialchars($output ?? '');
 echo "</pre>";
 ?>

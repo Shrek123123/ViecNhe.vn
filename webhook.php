@@ -13,6 +13,6 @@ $output = shell_exec('cd /www/wwwroot/viecnhe.io.vn && git fetch origin main && 
 // Ghi kết quả ra log và in ra màn hình (đã fix lỗi deprecation null)
 echo "<pre>";
 echo "=== WEBHOOK AUTO-DEPLOY SUCCESS ===\n\n";
-echo htmlspecialchars($output ?? '');
+echo htmlspecialchars((string)$output);
 echo "</pre>";
 ?>

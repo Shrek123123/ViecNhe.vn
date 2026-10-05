@@ -272,6 +272,22 @@ if ($cover_letter_column && $cover_letter_column->num_rows === 0) {
     }
 }
 
+$application_columns = [
+    'allow_search' => 'ALTER TABLE application ADD COLUMN allow_search BOOLEAN DEFAULT FALSE',
+    'hidden_from_employer' => 'ALTER TABLE application ADD COLUMN hidden_from_employer BOOLEAN DEFAULT FALSE',
+    'numbered_of_fifth_application' => 'ALTER TABLE application ADD COLUMN numbered_of_fifth_application INT UNSIGNED DEFAULT 1'
+];
+foreach ($application_columns as $column_name => $alter_query) {
+    $column_result = $conn->query("SHOW COLUMNS FROM application LIKE '$column_name'");
+    if ($column_result && $column_result->num_rows === 0) {
+        if ($conn->query($alter_query) === TRUE) {
+            echo "Column application.$column_name added successfully <br>";
+        } else {
+            echo "Error adding application.$column_name: " . $conn->error . "<br>";
+        }
+    }
+}
+
 // Tạo bảng feedback
 $stmt = $conn->query("CREATE TABLE IF NOT EXISTS feedback (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

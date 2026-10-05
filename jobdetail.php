@@ -519,6 +519,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
                     submitButton.setAttribute('aria-busy', 'true');
                 }
                 const formData = new FormData(form);
+                const showApplyError = message => {
+                    let alert = form.querySelector('.apply-submit-alert');
+                    if (!alert) {
+                        alert = document.createElement('div');
+                        alert.className = 'alert alert-danger apply-submit-alert';
+                        alert.setAttribute('role', 'alert');
+                        form.querySelector('.modal-body').prepend(alert);
+                    }
+                    alert.textContent = message;
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.removeAttribute('aria-busy');
+                    }
+                };
 
                 fetch('applyform.php?id=' + encodeURIComponent(formData.get('job_id') || ''), {
                     method: 'POST',
@@ -530,6 +544,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
                         const message = data && (data.message || data.error)
                             ? (data.message || data.error)
                             : 'There was an error. Please try again.';
+                        if (!isSuccess) {
+                            showApplyError(message);
+                            return;
+                        }
                         const alertType = isSuccess ? 'success' : 'warning';
 
                         document.getElementById('applyFormContent').innerHTML = `
@@ -552,11 +570,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
                         }
                     })
                     .catch(() => {
-                        document.getElementById('applyFormContent').innerHTML = `
-                    <div class="modal-body text-center p-5">
-                        <div class="alert alert-danger">There was an error. Please try again.</div>
-                    </div>
-                `;
+                        showApplyError('Could not submit the application. Please try again.');
                     });
             }
         });

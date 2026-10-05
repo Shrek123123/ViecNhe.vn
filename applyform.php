@@ -34,7 +34,8 @@ if (!empty($_SESSION['jobseeker_id'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $respond = function ($payload) {
+    $respond = function ($payload, $status = 200) {
+        http_response_code($status);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
         exit();
@@ -96,17 +97,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $respond(['success' => false, 'error' => $lang['cover_letter_too_long'] ?? 'Cover letter must not exceed 5,000 characters.']);
     }
 
-    if (!isset($_FILES['cv_file']) || $_FILES['cv_file']['error'] !== UPLOAD_ERR_OK) {
-        $respond(['success' => false, 'error' => 'Please upload a valid CV file.']);
+    if (!isset($_FILES['cv_file'])) {
+        $content_length = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        $message = $content_length > 0
+            ? 'The CV could not be received. It may exceed the server upload limit.'
+            : 'Please upload a valid CV file.';
+        $respond(['success' => false, 'error' => $message], 400);
     }
 
-    $file_tmp = $_FILES['cv_file']['tmp_name'];
-    $file_name = basename($_FILES['cv_file']['name']);
-    $upload_dir = 'uploads/cv_file/';
-    $file_path = $upload_dir . $file_name;
+    $uploaded_file = $_FILES['cv_file'];
+    if ($uploaded_file['error'] !== UPLOAD_ERR_OK) {
+        $upload_errors = [
+            UPLOAD_ERR_INI_SIZE => 'The CV exceeds the server upload limit.',
+            UPLOAD_ERR_FORM_SIZE => 'The CV exceeds the form upload limit.',
+            UPLOAD_ERR_PARTIAL => 'The CV upload was incomplete. Please try again.',
+            UPLOAD_ERR_NO_FILE => 'Please upload a CV file.',
+            UPLOAD_ERR_NO_TMP_DIR => 'The server temporary upload directory is unavailable.',
+            UPLOAD_ERR_CANT_WRITE => 'The server could not write the uploaded CV.',
+            UPLOAD_ERR_EXTENSION => 'A server extension prevented the CV upload.'
+        ];
+        $respond([
+            'success' => false,
+            'error' => $upload_errors[$uploaded_file['error']] ?? 'An unknown CV upload error occurred.'
+        ], 400);
+    }
 
-    if (!move_uploaded_file($file_tmp, $file_path)) {
-        $respond(['success' => false, 'error' => 'Error uploading file. Please try again.']);
+    $original_file_name = basename($uploaded_file['name']);
+    $file_extension = strtolower(pathinfo($original_file_name, PATHINFO_EXTENSION));
+    if (!in_array($file_extension, ['pdf', 'doc', 'docx'], true)) {
+        $respond(['success' => false, 'error' => 'CV must be a PDF, DOC, or DOCX file.'], 400);
+    }
+    if ($uploaded_file['size'] > 5 * 1024 * 1024) {
+        $respond(['success' => false, 'error' => 'CV file size must not exceed 5 MB.'], 400);
+    }
+
+    $upload_dir = 'uploads/cv_file/';
+    if (!is_dir($upload_dir) && !mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
+        $respond(['success' => false, 'error' => 'The server could not create the CV upload directory.'], 500);
+    }
+
+    $stored_file_name = $jobseeker_id . '_' . $job_id . '_' . bin2hex(random_bytes(8)) . '.' . $file_extension;
+    $file_path = $upload_dir . $stored_file_name;
+
+    if (!move_uploaded_file($uploaded_file['tmp_name'], $file_path)) {
+        $respond(['success' => false, 'error' => 'The server could not save the CV. Please try again.'], 500);
     }
 
     $conn->begin_transaction();
@@ -120,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          FOR UPDATE'
     );
     if (!$latest_application_stmt) {
+        error_log('Application sequence query failed: ' . $conn->error);
         $conn->rollback();
         @unlink($file_path);
         $respond(['success' => false, 'error' => 'Unable to determine the application number. Please try again.']);
@@ -173,6 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'INSERT INTO application (job_id, jobseeker_id, fullname, email, phonenumber, cv_file, cover_letter, allow_search, status, numbered_of_fifth_application) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     if (!$stmt) {
+        error_log('Application insert preparation failed: ' . $conn->error);
         $conn->rollback();
         @unlink($file_path);
         $respond(['success' => false, 'error' => 'Error submitting application. Please try again.']);
@@ -195,6 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // UNIQUE(job_id, jobseeker_id) protects against two simultaneous requests.
     $is_duplicate_insert = $stmt->errno === 1062;
+    error_log('Application insert failed: ' . $stmt->error);
     $stmt->close();
     $conn->rollback();
     @unlink($file_path);

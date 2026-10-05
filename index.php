@@ -32,7 +32,6 @@ if ($action === 'search' || $action === 'results') {
 </head>
 
 <body>
-    <h2>TÔI BỊ GAY</h2>
     <?php
     include_once(__DIR__ . '/homepage/header.php');
     include_once(__DIR__ . '/homepage/body.php');
